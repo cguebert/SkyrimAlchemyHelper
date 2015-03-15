@@ -1,0 +1,30 @@
+Abecean Longfin
+Skyrim
+73F2E 5.2632 30
+3EB22 4.386 60
+90042 2.193 30
+3EB28 4.386 60
+Ancestor Moth Wing
+Dawnguard
+3A2C6 2.632 5
+3EB25 4.386 60
+73F2B 800 1
+3EB29 4.386 60
+Ash Creep Cluster
+Dragonborn
+3A2C6 2.632 5
+3EB3D 0 5
+3EAEA 4.386 60
+3EB26 4.386 60
+Ash Hopper Jelly
+Dragonborn
+3EB15 1.9 8
+3EB1F 2.193 60
+3EAEC 4.386 60
+73F2E 4.386 30
+Ashen Grass Pod
+Dragonborn
+3EAEA 4.386 60
+73F2F 4.386 30
+3EB21 2.193 60
+3EB22 4.386 60

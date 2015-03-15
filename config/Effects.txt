@@ -1,0 +1,32 @@
+Arcane Detachment
+73F2B
+Brawler
+3EB29
+Damage Stamina
+3A2C6
+Fortify Conjuration
+3EB25
+Fortify Destruction
+3EB26
+Fortify Light Armor
+3EB1F
+Fortify Restoration
+3EB28
+Fortify Sneak
+3EB22
+Guardian
+3EB21
+Invisibility
+3EB3D
+Resist Fire
+3EAEA
+Resist Shock
+3EAEC
+Restore Health
+3EB15
+Weakness to Frost
+73F2E
+Weakness to Poison
+90042
+Weakness to Shock
+73F2F
