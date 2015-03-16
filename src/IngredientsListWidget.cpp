@@ -1,6 +1,7 @@
 #include <QtWidgets>
 
 #include "IngredientsListWidget.h"
+#include "IngredientsListDelegate.h"
 #include "IngredientsListModel.h"
 
 IngredientsListWidget::IngredientsListWidget(QWidget* parent)
@@ -27,6 +28,9 @@ IngredientsListWidget::IngredientsListWidget(QWidget* parent)
 	tableView->horizontalHeader()->resizeSection(0, 250);
 	tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	vLayout->addWidget(tableView);
+
+	auto delegate = new IngredientsListDelegate(this);
+	tableView->setItemDelegate(delegate);
 
 	connect(tableView->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
 			this, SLOT(currentChanged(QModelIndex,QModelIndex)));

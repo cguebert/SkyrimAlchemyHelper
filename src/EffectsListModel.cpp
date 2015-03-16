@@ -19,19 +19,16 @@ int EffectsListModel::columnCount(const QModelIndex& /*parent*/) const
 
 QVariant EffectsListModel::data(const QModelIndex& index, int role) const
 {
-	switch(role)
+	if(role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		case Qt::DisplayRole:
+		const auto& effect = m_effectsList.effect(index.row());
+		switch (index.column())
 		{
-			const auto& effect = m_effectsList.effect(index.row());
-			switch (index.column())
-			{
-				case 0: return effect.name;
-				case 1: return QString::number(effect.id, 16).toUpper();
-				case 2: return effect.nbIngredients;
-			}
-			return QVariant();
+			case 0: return effect.name;
+			case 1: return QString::number(effect.id, 16).toUpper();
+			case 2: return effect.nbIngredients;
 		}
+		return QVariant();
 	}
 	return QVariant();
 }

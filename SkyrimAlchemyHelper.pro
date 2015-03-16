@@ -13,29 +13,31 @@ TEMPLATE = app
 
 
 SOURCES += \ 
-    src/EffectsList.cpp \
-    src/EffectsListModel.cpp \
-    src/EffectsListWidget.cpp \
-    src/IngredientsList.cpp \
-    src/IngredientsListModel.cpp \
-    src/IngredientsListWidget.cpp \
-    src/main.cpp \
-    src/PluginsList.cpp \
-    src/PluginsListModel.cpp \
-    src/PluginsListWidget.cpp \
-    src/SAHDialog.cpp
+	src/EffectsList.cpp \
+	src/EffectsListModel.cpp \
+	src/EffectsListWidget.cpp \
+	src/IngredientsList.cpp \
+	src/IngredientsListDelegate.cpp \
+	src/IngredientsListModel.cpp \
+	src/IngredientsListWidget.cpp \
+	src/main.cpp \
+	src/PluginsList.cpp \
+	src/PluginsListModel.cpp \
+	src/PluginsListWidget.cpp \
+	src/SAHDialog.cpp
 
 HEADERS  += \ 
-    src/EffectsList.h \
-    src/EffectsListModel.h \
-    src/EffectsListWidget.h \
-    src/IngredientsList.h \
-    src/IngredientsListModel.h \
-    src/IngredientsListWidget.h \
-    src/PluginsList.h \
-    src/PluginsListModel.h \
-    src/PluginsListWidget.h \
-    src/SAHDialog.h
+	src/EffectsList.h \
+	src/EffectsListModel.h \
+	src/EffectsListWidget.h \
+	src/IngredientsList.h \
+	src/IngredientsListDelegate.h \
+	src/IngredientsListModel.h \
+	src/IngredientsListWidget.h \
+	src/PluginsList.h \
+	src/PluginsListModel.h \
+	src/PluginsListWidget.h \
+	src/SAHDialog.h
 
 DISTFILES += \
     SAH.rc

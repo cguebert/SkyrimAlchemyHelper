@@ -26,6 +26,7 @@ QVariant PluginsListModel::data(const QModelIndex& index, int role) const
 	switch(role)
 	{
 		case Qt::DisplayRole:
+		case Qt::EditRole:
 		{
 			const auto& plugin = m_pluginsList.plugin(index.row());
 			switch (index.column())
