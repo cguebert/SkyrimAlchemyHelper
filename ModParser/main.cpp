@@ -1,233 +1,72 @@
 #include <iostream>
 #include <fstream>
-#include <string>
-#include <cstdint>
-#include <array>
-#include <vector>
 
-#include "Parser.h"
+#include "Ingredients.h"
+#include "Mod.h"
 
 using namespace std;
-
-using Type = array<char, 4>;
-
-Parser in;
-bool parsingIngredient = false;
-
-struct Ingredient
-{
-	std::string name;
-	uint32_t effectId[4], duration[4];
-	float magnitude[4];
-} ingredient;
-
-template <class T, int N>
-void print(const std::array<T, N>& array)
-{
-	for(const auto& a : array)
-		cout << a;
-	cout << endl;
-}
-
-template <class T, int N>
-void printHex(const std::array<T, N>& array)
-{
-	for(const auto& a : array)
-		cout << uppercase << hex << static_cast<int>(a);
-	cout << endl;
-}
-
-bool isType(const Type& type, const std::string& name)
-{
-	if(name.size() != 4)
-		return false;
-
-	for(int i=0; i<4; ++i)
-	{
-		if(type[i] != name[i])
-			return false;
-	}
-
-	return true;
-}
-
-void clearIngredient()
-{
-	ingredient.name.clear();
-	for(int i=0; i<4; ++i)
-	{
-		ingredient.effectId[i] = 0;
-		ingredient.magnitude[i] = 0;
-		ingredient.duration[i] = 0;
-	}
-}
-
-void parseGenericField()
-{
-	uint16_t dataSize;
-	in >> dataSize;
-
-	std::vector<uint8_t> data(dataSize);
-	in >> data;
-}
-
-void parseName()
-{
-	uint16_t dataSize;
-	in >> dataSize;
-
-	std::string& name = ingredient.name;
-	name.resize(dataSize);
-	in.stream().read(&name[0], dataSize);
-}
-
-void parseEffectID()
-{
-	uint16_t dataSize;
-	in >> dataSize;
-
-	uint32_t id;
-	in >> id;
-
-	for(int i=0; i<4; ++i)
-	{
-		if(!ingredient.effectId[i])
-		{
-			ingredient.effectId[i] = id;
-			break;
-		}
-	}
-}
-
-void parseEffectItem()
-{
-	uint16_t dataSize;
-	in >> dataSize;
-
-	uint32_t area;
-	int i = 0;
-	while(i<3 && ingredient.effectId[i+1])
-		++i;
-	in >> ingredient.magnitude[i] >> area
-			>> ingredient.duration[i];
-}
-
-void parseField()
-{
-	Type type{};
-	in >> type;
-//	print(type);
-
-	if(parsingIngredient)
-	{
-		if(isType(type, "FULL"))
-			parseName();
-		else if(isType(type, "EFID"))
-			parseEffectID();
-		else if(isType(type, "EFIT"))
-			parseEffectItem();
-		else
-			parseGenericField();
-	}
-	else
-		parseGenericField();
-}
-
-void parseGenericRecord()
-{
-	uint32_t dataSize, flags, id, revision;
-	uint16_t version, unknown;
-	in >> dataSize >> flags >> id >> revision >> version >> unknown;
-
-	auto start = in.tellg();
-	while(in.tellg() - start < dataSize)
-		parseField();
-}
-
-void parseRecord();
-
-void parseGroup()
-{
-	auto start = in.tellg() - 4;
-	Type label;
-	uint32_t groupSize, groupType;
-	uint16_t stamp, unknown, version, unknown2;
-	in >> groupSize >> label >> groupType >> stamp >>
-			unknown >> version >> unknown2;
-
-//	print(label);
-	if(isType(label, "INGR"))
-	{
-		while(in.tellg() - start < groupSize)
-			parseRecord();
-	}
-	else
-		in.seekg(start + groupSize);
-}
 
 float round(float v, int d)
 {
 	float p = pow(10.0f, d);
-	return round(v * p) / p;
+	return std::round(v * p) / p;
 }
 
-void parseIngredient()
+void exportConfig(const Config& config)
 {
-	parsingIngredient = true;
-	clearIngredient();
-	parseGenericRecord();
+	ofstream modsFile("Plugins.txt");
+	for (const auto& mod : config.modsList)
+		modsFile << mod << endl;
 
-	cout << ingredient.name << endl;
-	for(int i=0; i<4; ++i)
+	ofstream effectsFile("Effects.txt");
+	for (const auto& effect : config.magicalEffectsList)
 	{
-		cout << hex << uppercase << ingredient.effectId[i];
-		cout << "\t" << round(ingredient.magnitude[i], 6);
-		cout << dec << "\t" << ingredient.duration[i];
-		cout << endl;
-	}
-	parsingIngredient = true;
-}
-
-void parseRecord()
-{
-	Type type{};
-	in >> type;
-//	print(type);
-
-	if(in.stream().eof())
-		return;
-
-	if(isType(type, "GRUP"))
-		parseGroup();
-	else if(isType(type, "INGR"))
-		parseIngredient();
-	else
-		parseGenericRecord();
-}
-
-void parseMod(std::string fileName)
-{
-	ifstream stream;
-	stream.open(fileName, ios::binary | ios::in);
-	if(!stream.is_open())
-	{
-		cout << "Cannot open " << fileName << endl;
-		return;
+		effectsFile << effect.second << endl;
+		effectsFile << hex << uppercase << effect.first << dec << endl;
 	}
 
-	cout << "Parsing " << fileName << endl;
-	in.setStream(std::move(stream));
-
-	while(!in.stream().eof())
-		parseRecord();
+	ofstream ingredientsFile("Ingredients.txt");
+	for (const auto& ingr : config.ingredientsList.ingredients())
+	{
+		ingredientsFile << ingr.name << endl << ingr.modName << endl;
+		for (const auto& effect : ingr.effects)
+		{
+			ingredientsFile << hex << uppercase << effect.id << dec << " ";
+			ingredientsFile << round(effect.magnitude, 6) << " ";
+			ingredientsFile << effect.duration << endl;
+		}
+	}
 }
 
 int main(int argc, char** argv)
 {
-	if(argc < 2)
-		parseMod("data/test.esp");
+	Config config;
+
+	const std::string pluginsFileName = "F:/Jeux/SkyrimModOrganizer/profiles/Civil War/Plugins.txt";
+//	const std::string pluginsFileName = "C:/Users/Christophe/AppData/Local/Skyrim/Plugins.txt";
+	fstream pluginsList(pluginsFileName);
+	array<char, 256> pluginName{};
+	string dir = "F:/Jeux/Skyrim/Data/";
+	Mod::parse(dir + "Skyrim.esm", config);
+	while (pluginsList.getline(&pluginName[0], 256))
+	{
+		cout << pluginName.data() << endl;
+
+		Mod::parse(dir + pluginName.data(), config);
+	}
+
+/*	if(argc < 2)
+		Mod::parse("data/test.esp", config);
 	else
-		parseMod(argv[1]);
+		Mod::parse(argv[1], config);
+		*/
+//	Mod::parse("F:/Jeux/Skyrim/Data/Skyrim.esm", config);
+//	Mod::parse("F:/Jeux/SkyrimModOrganizer/mods/Patchus Maximus/PatchusMaximus.esp", config);
+
+	exportConfig(config);
+	
+	//"C:/Users/Christophe/AppData/Local/Skyrim/plugins.txt";
+	
 	return 0;
 }
 

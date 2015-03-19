@@ -7,7 +7,6 @@
 class Parser
 {
 public:
-
 	void setStream(std::ifstream&& stream) { m_in = std::move(stream); }
 
 	std::ifstream& stream() { return m_in; }
