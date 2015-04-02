@@ -20,6 +20,7 @@ EffectsListWidget::EffectsListWidget(QWidget* parent)
 	tableView->horizontalHeader()->resizeSection(0, 250);
 	tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	tableView->setSelectionMode(QAbstractItemView::SingleSelection);
+	tableView->hideColumn(1);
 	vLayout->addWidget(tableView);
 
 	connect(tableView->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),

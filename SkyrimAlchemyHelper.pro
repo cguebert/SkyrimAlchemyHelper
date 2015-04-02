@@ -24,6 +24,9 @@ SOURCES += \
 	src/PluginsList.cpp \
 	src/PluginsListModel.cpp \
 	src/PluginsListWidget.cpp \
+	src/PotionsList.cpp \
+	src/PotionsListModel.cpp \
+	src/PotionsListWidget.cpp \
 	src/SAHDialog.cpp
 
 HEADERS  += \ 
@@ -37,6 +40,9 @@ HEADERS  += \
 	src/PluginsList.h \
 	src/PluginsListModel.h \
 	src/PluginsListWidget.h \
+	src/PotionsList.h \
+	src/PotionsListModel.h \
+	src/PotionsListWidget.h \
 	src/SAHDialog.h
 
 DISTFILES += \

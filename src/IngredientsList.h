@@ -21,6 +21,7 @@ public:
 		Ingredient() : pluginId(0) {}
 		QString name;
 		int pluginId;
+		unsigned int ingId;
 		EffectData effects[4];
 	};
 

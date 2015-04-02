@@ -31,6 +31,9 @@ IngredientsList::IngredientsList()
 			QString pluginName = in.readLine();
 			ingredient.pluginId = plugins.find(pluginName);
 
+			QString ingredientId = in.readLine();
+			ingredient.ingId = ingredientId.toUInt(nullptr, 16);
+
 			if(ingredient.pluginId != -1)
 				plugins.incrementNbIngredients(ingredient.pluginId);
 
@@ -80,6 +83,7 @@ void IngredientsList::saveList()
 			if(ingredient.pluginId != -1)
 				out << plugins.plugin(ingredient.pluginId).name;
 			out << '\n';
+			out << QString::number(ingredient.ingId, 16).toUpper() << '\n';
 
 			for(int i = 0; i < 4; ++i)
 			{

@@ -5,6 +5,7 @@
 #include "EffectsListWidget.h"
 #include "IngredientsListWidget.h"
 #include "PluginsListWidget.h"
+#include "PotionsListWidget.h"
 
 #include "EffectsList.h"
 #include "IngredientsList.h"
@@ -26,6 +27,9 @@ SAHDialog::SAHDialog(QWidget *parent)
 
 	auto ingredientsWidget = new IngredientsListWidget;
 	m_tabWidget->addTab(ingredientsWidget, "Ingredients");
+
+	auto potionssWidget = new PotionsListWidget;
+	m_tabWidget->addTab(potionssWidget, "Potions");
 
 	QPushButton* okButton = new QPushButton(tr("Ok"), this);
 	connect(okButton, SIGNAL(clicked()), this, SLOT(accept()));

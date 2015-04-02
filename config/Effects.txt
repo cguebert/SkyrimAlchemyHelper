@@ -2,31 +2,113 @@ Arcane Detachment
 73F2B
 Brawler
 3EB29
+Corrode Armor
+73F23
+Cure Disease
+AE722
+Cure Poison
+109ADD
+Damage Health
+3EB42
+Damage Magicka
+3A2B6
 Damage Stamina
 3A2C6
+Exhaust
+73F2C
+Fear
+73F20
+Flare Undead
+73F27
+Fortify Alteration
+3EB24
+Fortify Barter
+3EB23
+Fortify Block
+3EB1C
+Fortify Carry Weight
+3EB01
 Fortify Conjuration
 3EB25
 Fortify Destruction
 3EB26
+Fortify Dexterity
+3EB20
+Fortify Health
+3EAF3
+Fortify Heavy Armor
+3EB1E
+Fortify Illusion
+3EB27
 Fortify Light Armor
 3EB1F
+Fortify Magicka
+3EAF8
+Fortify Marksman
+3EB1B
+Fortify One-handed
+3EB19
 Fortify Restoration
 3EB28
 Fortify Sneak
 3EB22
+Fortify Stamina
+3EAF9
+Fortify Two-handed
+3EB1A
+Frenzy
+73F29
+Frenzy
+FF9F8
 Guardian
 3EB21
 Invisibility
 3EB3D
+Lingering Damage Health
+10AA4A
+Lingering Damage Magicka
+10DE5F
+Lingering Damage Stamina
+10DE5E
+Paralysis
+73F30
+Ravage Health
+73F26
+Regenerate Health
+3EB06
+Regenerate Magicka
+3EB07
+Regenerate Stamina
+3EB08
 Resist Fire
 3EAEA
+Resist Frost
+3EAEB
+Resist Magic
+39E51
+Resist Poison
+90041
 Resist Shock
 3EAEC
 Restore Health
 3EB15
+Restore Magicka
+3EB17
+Restore Stamina
+3EB16
+Slow
+73F25
+Waterbreathing
+3AC2D
+Weakness to Fire
+73F2D
 Weakness to Frost
 73F2E
+Weakness to Magic
+73F51
 Weakness to Poison
 90042
 Weakness to Shock
 73F2F
+Weaponmaster
+3EB1D
