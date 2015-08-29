@@ -13,5 +13,5 @@ if(MSVC)
 endif()
 
 add_subdirectory("parser")
-#add_subdirectory("modParser")
+add_subdirectory("modParser")
 add_subdirectory("gui")

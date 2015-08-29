@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 	
 	exportConfig(config);
 
-	Save::parse("data/save.ess");
+//	Save::parse("data/save.ess");
 
 	system("Pause");
 	return 0;
