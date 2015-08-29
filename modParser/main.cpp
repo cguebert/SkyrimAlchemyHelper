@@ -49,7 +49,7 @@ void absolutePathTest(Config& config)
 void modOrganizerTest(Config& config)
 {
 	const std::string pluginsFileName = "F:/Jeux/SkyrimModOrganizer/profiles/Civil War/Plugins.txt";
-//	const std::string pluginsFileName = "C:/Users/Christophe/AppData/Local/Skyrim/Plugins.txt";
+//	const std::string pluginsFileName = "C:/Users/chris/AppData/Local/Skyrim/Plugins.txt";
 	fstream pluginsList(pluginsFileName);
 	array<char, 256> pluginName{};
 	string dir = "F:/Jeux/Skyrim/Data/";
@@ -57,7 +57,7 @@ void modOrganizerTest(Config& config)
 	{
 		if (pluginName[0] == '#')
 			continue;
-		cout << pluginName.data() << endl;
+	//	cout << pluginName.data() << endl;
 
 		Mod::parse(dir + pluginName.data(), config);
 	}
@@ -68,11 +68,9 @@ int main(int argc, char** argv)
 	Config config;
 
 //	absolutePathTest(config);
-//	modOrganizerTest(config);	
+	modOrganizerTest(config);	
 	
 	exportConfig(config);
-
-//	Save::parse("data/save.ess");
 
 	system("Pause");
 	return 0;

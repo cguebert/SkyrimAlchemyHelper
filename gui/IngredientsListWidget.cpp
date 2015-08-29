@@ -19,7 +19,7 @@ IngredientsListWidget::IngredientsListWidget(QWidget* parent)
 	tableView->sortByColumn(0, Qt::AscendingOrder);
 	tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	tableView->setSelectionMode(QAbstractItemView::SingleSelection);
-	tableView->hideColumn(1);
+//	tableView->hideColumn(1);
 	for(int i = 0; i < 4; ++i)
 	{
 		tableView->hideColumn(i * 3 + 3);

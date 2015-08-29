@@ -5,7 +5,7 @@
 #include "EffectsList.h"
 #include "PluginsList.h"
 
-const QString fileName = "config/ingredients.txt";
+const QString fileName = "data/ingredients.txt";
 
 IngredientsList& IngredientsList::GetInstance()
 {
@@ -15,10 +15,14 @@ IngredientsList& IngredientsList::GetInstance()
 
 IngredientsList::IngredientsList()
 {
+	loadList();
+}
+
+void IngredientsList::loadList()
+{
 	PluginsList& plugins = PluginsList::GetInstance();
 	EffectsList& effects = EffectsList::GetInstance();
 
-	// Load the file
 	QFile inputFile(fileName);
 	if (inputFile.open(QIODevice::ReadOnly))
 	{
@@ -34,29 +38,29 @@ IngredientsList::IngredientsList()
 			QString ingredientId = in.readLine();
 			ingredient.ingId = ingredientId.toUInt(nullptr, 16);
 
-			if(ingredient.pluginId != -1)
+			if (ingredient.pluginId != -1)
 				plugins.incrementNbIngredients(ingredient.pluginId);
 
 			bool validEffects = true;
-			for(int i = 0; i < 4; ++i)
+			for (int i = 0; i < 4; ++i)
 			{
 				EffectData& effectData = ingredient.effects[i];
 				QString line = in.readLine();
 				QStringList split = line.split(" ");
-				if(split.size() == 3)
+				if (split.size() == 3)
 				{
 					effectData.effectId = effects.find(split[0].toUInt(nullptr, 16));
 					effectData.magnitude = split[1].toFloat();
 					effectData.duration = split[2].toFloat();
 				}
 
-				if(effectData.effectId == -1)
+				if (effectData.effectId == -1)
 					validEffects = false;
 				else
 					effects.incrementNbIngredients(effectData.effectId);
 			}
 
-			if(!ingredient.name.isEmpty() && ingredient.pluginId != -1 && validEffects)
+			if (!ingredient.name.isEmpty() && ingredient.pluginId != -1 && validEffects)
 				m_ingredients.push_back(ingredient);
 		}
 		inputFile.close();

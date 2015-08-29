@@ -3,7 +3,7 @@
 
 #include "EffectsList.h"
 
-const QString fileName = "config/effects.txt";
+const QString fileName = "data/effects.txt";
 
 EffectsList& EffectsList::GetInstance()
 {
@@ -13,7 +13,11 @@ EffectsList& EffectsList::GetInstance()
 
 EffectsList::EffectsList()
 {
-	// Load the file
+	loadList();
+}
+
+void EffectsList::loadList()
+{
 	QFile inputFile(fileName);
 	if (inputFile.open(QIODevice::ReadOnly))
 	{
@@ -25,7 +29,7 @@ EffectsList::EffectsList()
 
 			QString line = in.readLine();
 			effect.id = line.toUInt(nullptr, 16);
-			if(!effect.name.isEmpty() && effect.id)
+			if (!effect.name.isEmpty() && effect.id)
 				m_effects.push_back(effect);
 		}
 		inputFile.close();

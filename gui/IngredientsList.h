@@ -34,6 +34,7 @@ public:
 	void removeIngredients(int first, int count = 1);
 	void addIngredient();
 
+	void loadList();
 	void saveList();
 
 protected:

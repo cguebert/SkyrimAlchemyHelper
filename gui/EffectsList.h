@@ -31,6 +31,7 @@ public:
 	void removeEffects(int first, int count = 1);
 	void addEffect();
 
+	void loadList();
 	void saveList();
 
 protected:

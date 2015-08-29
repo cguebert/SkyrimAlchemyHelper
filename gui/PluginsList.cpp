@@ -3,7 +3,7 @@
 
 #include "PluginsList.h"
 
-const QString fileName = "config/plugins.txt";
+const QString fileName = "data/plugins.txt";
 
 PluginsList& PluginsList::GetInstance()
 {
@@ -13,6 +13,11 @@ PluginsList& PluginsList::GetInstance()
 
 PluginsList::PluginsList()
 {
+	loadList();
+}
+
+void PluginsList::loadList()
+{
 	QFile inputFile(fileName);
 	if (inputFile.open(QIODevice::ReadOnly))
 	{
@@ -21,7 +26,7 @@ PluginsList::PluginsList()
 		{
 			Plugin plugin;
 			plugin.name = in.readLine();
-			if(!plugin.name.isEmpty())
+			if (!plugin.name.isEmpty())
 				m_plugins.push_back(plugin);
 		}
 		inputFile.close();

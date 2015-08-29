@@ -30,6 +30,7 @@ public:
 	void removePlugins(int first, int count = 1);
 	void addPlugin();
 
+	void loadList();
 	void saveList();
 
 protected:
