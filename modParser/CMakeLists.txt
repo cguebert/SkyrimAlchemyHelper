@@ -20,7 +20,7 @@ add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Applications")
 
-target_link_libraries(${PROJECT_NAME} "ParserLib")
+target_link_libraries(${PROJECT_NAME} "Parser")
 
 include_directories("../parser")
 
