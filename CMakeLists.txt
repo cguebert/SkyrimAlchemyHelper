@@ -14,4 +14,5 @@ endif()
 
 add_subdirectory("parser")
 add_subdirectory("modParser")
+add_subdirectory("saveParser")
 add_subdirectory("gui")
