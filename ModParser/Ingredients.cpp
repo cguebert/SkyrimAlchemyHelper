@@ -4,14 +4,12 @@
 bool Ingredients::setIngredient(const Ingredient& ingredient)
 {
 	auto it = std::find_if(m_ingredients.begin(), m_ingredients.end(), [&ingredient](const Ingredient& ing){
-		return ingredient.id == ing.id;
+		return ingredient.id == ing.id && ingredient.modName == ing.modName;
 	});
 
 	if (it != m_ingredients.end())
 	{
-		std::string modName = it->modName;
 		*it = ingredient;
-		it->modName.swap(modName); // Keep the original mod
 		return false; // false if modifying
 	}
 	else

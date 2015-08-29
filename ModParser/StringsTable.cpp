@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <sstream>
 #include <iostream>
-#include <algorithm>
 
 #include "StringsTable.h"
 
@@ -49,19 +48,20 @@ std::string StringsTable::readString()
 	std::vector<char> buf;
 
 	auto pos = in.tellg();
-	int size = 64;
+	int size = 64, prev = 0;
 	buf.resize(size);
 	in.stream().read(&buf.front(), size);
 
-	while (std::find(buf.begin(), buf.end(), 0) == buf.end())
+	while (std::find(buf.begin() + prev, buf.end(), 0) == buf.end())
 	{
-		in.seekg(pos);
+		prev = size;
+		buf.resize(size*2);
+		in.stream().read(&buf.front() + prev, size);
 		size *= 2;
-		buf.resize(size);
-		in.stream().read(&buf.front(), size);
 	}
 
 	auto end = std::find(buf.begin(), buf.end(), 0);
+	in.seekg(pos + (end - buf.begin()));
 	return string(buf.begin(), end);
 }
 
@@ -72,7 +72,7 @@ std::string StringsTable::get(uint32_t id)
 		return "";
 
 	in.seekg(it->second);
-	return readString();
+	return in.readZString();
 }
 
 void StringsTable::loadDirectory()

@@ -27,6 +27,9 @@ void Mod::parse(const std::string& fileName, Config& config)
 	Mod mod(fileName, config);
 	mod.doParse();
 
+	if (mod.m_nbEffAdded || mod.m_nbEffModified)
+		cout << mod.m_modName << ": Effects -> added=" << mod.m_nbEffAdded << ", modified=" << mod.m_nbEffModified << endl;
+
 	if (mod.m_nbIngrAdded || mod.m_nbIngrModified)
 	{
 		cout << mod.m_modName << ": Ingredients -> added=" << mod.m_nbIngrAdded << ", modified=" << mod.m_nbIngrModified << endl;
@@ -34,17 +37,14 @@ void Mod::parse(const std::string& fileName, Config& config)
 		if (mod.m_nbIngrAdded)
 			config.modsList.emplace_back(mod.m_modName);
 	}
-
-	if (mod.m_nbEffAdded || mod.m_nbEffModified)
-		cout << mod.m_modName << ": Effects -> added=" << mod.m_nbEffAdded << ", modified=" << mod.m_nbEffModified << endl;
 }
 
 Mod::Mod(const std::string& fileName, Config& config)
 	: m_modFileName(fileName)
+	, m_currentRecord(RecordType::None)
 	, m_config(config)
 {
-	ifstream stream;
-	stream.open(fileName, ios::binary | ios::in);
+	ifstream stream(fileName, ios::binary | ios::in);
 	if (!stream.is_open())
 	{
 		cout << "Cannot open " << fileName << endl;
@@ -54,7 +54,6 @@ Mod::Mod(const std::string& fileName, Config& config)
 	in.setStream(std::move(stream));
 
 	m_modName = getModName(fileName);
-	m_currentIngredient.modName = m_modName;
 }
 
 void Mod::doParse()
@@ -62,22 +61,6 @@ void Mod::doParse()
 	while (!in.eof())
 		parseRecord();
 	updateMagicalEffects(); // Get the names of the magical effects used in the ingredients
-}
-
-template <class T, int N>
-void print(const std::array<T, N>& array)
-{
-	for (const auto& a : array)
-		cout << a;
-	cout << endl;
-}
-
-template <class T, int N>
-void printHex(const std::array<T, N>& array)
-{
-	for (const auto& a : array)
-		cout << uppercase << hex << static_cast<int>(a);
-	cout << endl;
 }
 
 bool Mod::isType(const Type& type, const std::string& name)
@@ -98,6 +81,7 @@ void Mod::newIngredient()
 {
 	m_currentIngredient.id = 0;
 	m_currentIngredient.name.clear();
+	m_currentIngredient.modName.clear();
 	for (auto& effect : m_currentIngredient.effects)
 	{
 		effect.id = effect.duration = 0;
@@ -127,34 +111,35 @@ void Mod::parseRecord()
 
 void Mod::parseGenericRecord()
 {
-	uint32_t dataSize, flags, id, revision;
-	uint16_t version, unknown;
-	in >> dataSize >> flags >> id >> revision >> version >> unknown;
-
-	in.seekg(in.tellg() + dataSize);
+	uint32_t dataSize;
+	in >> dataSize;
+	in.jump(dataSize + 16);
 }
 
 void Mod::parsePluginInformation()
 {
-	uint32_t dataSize, flags, id, revision;
-	uint16_t version, unknown;
-	in >> dataSize >> flags >> id >> revision >> version >> unknown;
+	uint32_t dataSize, flags;
+	in >> dataSize >> flags;
+	in.jump(12);
 
-	m_useStringsTable = (flags & 128) != 0;
+	m_useStringsTable = (flags & 0x80) != 0;
 	if (m_useStringsTable)
 		m_stringsTable.load(m_modFileName);
 
-	in.seekg(in.tellg() + dataSize);
+	auto start = in.tellg();
+	m_currentRecord = RecordType::Plugin;
+	while (in.tellg() - start < dataSize)
+		parseField();
+	m_currentRecord = RecordType::None;
 }
 
 void Mod::parseGroup()
 {
 	auto start = in.tellg() - 4;
+	uint32_t groupSize;
 	Type label;
-	uint32_t groupSize, groupType;
-	uint16_t stamp, unknown, version, unknown2;
-	in >> groupSize >> label >> groupType >> stamp >>
-		unknown >> version >> unknown2;
+	in >> groupSize >> label;
+	in.jump(12);
 
 	if (isType(label, "INGR") || isType(label, "MGEF"))
 	{
@@ -167,32 +152,34 @@ void Mod::parseGroup()
 
 void Mod::parseIngredient()
 {
-	m_parsingIngredient = true;
 	newIngredient();
 
-	uint32_t dataSize, flags, revision;
-	uint16_t version, unknown;
-	in >> dataSize >> flags >> m_currentIngredient.id >> revision >> version >> unknown;
+	uint32_t dataSize, id;
+	in >> dataSize; in.jump(4);
+	in >> id; in.jump(8);
+
+	computeIngredientId(id);
 
 	auto start = in.tellg();
+	m_currentRecord = RecordType::Ingredient;
 	while (in.tellg() - start < dataSize)
 		parseField();
+	m_currentRecord = RecordType::None;
 
 	if (m_config.ingredientsList.setIngredient(m_currentIngredient))
 		++m_nbIngrAdded;
 	else
 		++m_nbIngrModified;
-	m_parsingIngredient = false;
 }
 
 void Mod::parseMagicalEffect()
 {
-	uint32_t dataSize, flags, revision, id;
-	uint16_t version, unknown;
-	in >> dataSize >> flags >> id >> revision >> version >> unknown;
+	uint32_t dataSize, id;
+	in >> dataSize; in.jump(4);
+	in >> id; in.jump(8);
 
 	auto offset = in.tellg();
-	in.seekg(offset + dataSize);
+	in.jump(dataSize);
 	m_magicalEffectsOffsets.emplace_back(id, offset);
 }
 
@@ -201,8 +188,16 @@ void Mod::parseField()
 	Type type{};
 	in >> type;
 
-	if (m_parsingIngredient)
+	switch (m_currentRecord)
 	{
+	case RecordType::Plugin:
+		if (isType(type, "MAST"))
+			parseMaster();
+		else
+			parseGenericField();
+		break;
+
+	case RecordType::Ingredient:
 		if (isType(type, "FULL"))
 			parseIngredientName();
 		else if (isType(type, "EFID"))
@@ -211,24 +206,38 @@ void Mod::parseField()
 			parseEffectItem();
 		else
 			parseGenericField();
-	}
-	else if (m_parsingMagicalEffect)
-	{
+		break;
+
+	case RecordType::MagicalEffect:
 		if (isType(type, "FULL"))
 			parseMagicalEffectName();
 		else
 			parseGenericField();
-	}
-	else
+		break;
+
+	default:
 		parseGenericField();
+	}
 }
 
 void Mod::parseGenericField()
 {
 	uint16_t dataSize;
 	in >> dataSize;
+	in.jump(dataSize);
+}
 
-	in.seekg(in.tellg() + dataSize);
+void Mod::parseMaster()
+{
+	uint16_t dataSize;
+	in >> dataSize;
+
+	std::string name;
+	name.resize(dataSize - 1); // Don't read null character in the string
+	in.stream().read(&name[0], dataSize - 1);
+	in.jump(1);
+
+	m_masters.push_back(name);
 }
 
 void Mod::parseIngredientName()
@@ -247,8 +256,7 @@ void Mod::parseIngredientName()
 		std::string& name = m_currentIngredient.name;
 		name.resize(dataSize-1); // Don't read null character in the string
 		in.stream().read(&name[0], dataSize-1);
-		uint8_t dummy; // read null character
-		in >> dummy;
+		in.jump(1);
 	}
 }
 
@@ -304,6 +312,20 @@ void Mod::parseEffectItem()
 	in >> m_currentIngredient.effects[i].magnitude >> area >> m_currentIngredient.effects[i].duration;
 }
 
+void Mod::computeIngredientId(uint32_t id)
+{
+	uint8_t modId = id >> 24;
+	m_currentIngredient.id = id & 0x00FFFFFF;
+
+	unsigned int nbMasters = m_masters.size();
+	if (modId == nbMasters) // Introduced by this mod
+		m_currentIngredient.modName = m_modName;
+	else if (modId < nbMasters)
+		m_currentIngredient.modName = m_masters[modId];
+	else
+		std::cerr << "Error: invalid modId " << hex << (int)modId << endl;
+}
+
 void Mod::updateMagicalEffects()
 {
 	if (m_magicalEffectsOffsets.empty())
@@ -337,7 +359,7 @@ void Mod::updateMagicalEffects()
 
 	// Get the name of each magical effect
 	MagicalEffectsList updatedEffects;
-	m_parsingMagicalEffect = true;
+	m_currentRecord = RecordType::MagicalEffect;
 	for (const auto& effect : effectsToUpdate)
 	{
 		in.seekg(effect.second);
@@ -350,7 +372,7 @@ void Mod::updateMagicalEffects()
 		if (!m_currentMagicalEffectName.empty())
 			updatedEffects.emplace_back(effect.first, m_currentMagicalEffectName);
 	}
-	m_parsingMagicalEffect = false;
+	m_currentRecord = RecordType::None;
 
 	// Merge the updated effects into the main list
 	MagicalEffectsList outputList;
