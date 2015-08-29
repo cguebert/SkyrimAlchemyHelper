@@ -15,7 +15,7 @@ public:
 	QSize sizeHint() const;
 
 public slots:
-	void saveConfig();
+	void editConfig();
 
 protected:
 	QTabWidget* m_tabWidget;

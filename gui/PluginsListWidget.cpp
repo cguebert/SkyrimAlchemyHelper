@@ -20,9 +20,10 @@ PluginsListWidget::PluginsListWidget(QWidget* parent) : QWidget(parent)
 	tableView->horizontalHeader()->resizeSection(0, 250);
 	tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	tableView->setSelectionMode(QAbstractItemView::SingleSelection);
+	tableView->hideColumn(1);
 	vLayout->addWidget(tableView);
 
-	connect(tableView->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+/*	connect(tableView->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
 			this, SLOT(currentChanged(QModelIndex,QModelIndex)));
 
 	m_addButton = new QPushButton(tr("Add"), this);
@@ -35,7 +36,7 @@ PluginsListWidget::PluginsListWidget(QWidget* parent) : QWidget(parent)
 	buttonsLayout->addWidget(m_removeButton);
 	buttonsLayout->addStretch();
 	vLayout->addLayout(buttonsLayout);
-
+*/
 	setLayout(vLayout);
 
 	m_view = tableView;

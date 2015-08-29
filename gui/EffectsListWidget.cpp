@@ -23,7 +23,7 @@ EffectsListWidget::EffectsListWidget(QWidget* parent)
 	tableView->hideColumn(1);
 	vLayout->addWidget(tableView);
 
-	connect(tableView->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+/*	connect(tableView->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
 			this, SLOT(currentChanged(QModelIndex,QModelIndex)));
 
 	m_addButton = new QPushButton(tr("Add"), this);
@@ -36,7 +36,7 @@ EffectsListWidget::EffectsListWidget(QWidget* parent)
 	buttonsLayout->addWidget(m_removeButton);
 	buttonsLayout->addStretch();
 	vLayout->addLayout(buttonsLayout);
-
+*/
 	setLayout(vLayout);
 
 	m_view = tableView;

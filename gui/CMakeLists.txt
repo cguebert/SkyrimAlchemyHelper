@@ -12,6 +12,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(HEADER_FILES
+	ConfigDialog.h
 	EffectsList.h
 	EffectsListModel.h
 	EffectsListWidget.h
@@ -29,6 +30,7 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
+	ConfigDialog.cpp
 	EffectsList.cpp
 	EffectsListModel.cpp
 	EffectsListWidget.cpp

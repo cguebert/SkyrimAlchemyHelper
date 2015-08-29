@@ -32,7 +32,7 @@ IngredientsListWidget::IngredientsListWidget(QWidget* parent)
 	auto delegate = new IngredientsListDelegate(this);
 	tableView->setItemDelegate(delegate);
 
-	connect(tableView->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
+/*	connect(tableView->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
 			this, SLOT(currentChanged(QModelIndex,QModelIndex)));
 
 	m_addButton = new QPushButton(tr("Add"), this);
@@ -45,7 +45,7 @@ IngredientsListWidget::IngredientsListWidget(QWidget* parent)
 	buttonsLayout->addWidget(m_removeButton);
 	buttonsLayout->addStretch();
 	vLayout->addLayout(buttonsLayout);
-
+*/
 	setLayout(vLayout);
 
 	m_view = tableView;
