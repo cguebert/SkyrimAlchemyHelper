@@ -8,6 +8,7 @@
 SAHDialog::SAHDialog(QWidget *parent)
 	: QDialog(parent)
 {
+	setWindowTitle("Skyrim Alchemy Helper");
 	QVBoxLayout* vLayout = new QVBoxLayout;
 
 	auto potionsWidget = new PotionsListWidget;
@@ -18,8 +19,8 @@ SAHDialog::SAHDialog(QWidget *parent)
 	QPushButton* configButton = new QPushButton(tr("Config"), this);
 	connect(configButton, SIGNAL(clicked()), this, SLOT(editConfig()));
 	QHBoxLayout* buttonsLayout = new QHBoxLayout;
-	buttonsLayout->addStretch();
 	buttonsLayout->addWidget(configButton);
+	buttonsLayout->addStretch();
 	buttonsLayout->addWidget(okButton);
 	vLayout->addLayout(buttonsLayout);
 

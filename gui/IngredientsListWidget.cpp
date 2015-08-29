@@ -1,7 +1,6 @@
 #include <QtWidgets>
 
 #include "IngredientsListWidget.h"
-#include "IngredientsListDelegate.h"
 #include "IngredientsListModel.h"
 
 IngredientsListWidget::IngredientsListWidget(QWidget* parent)
@@ -29,49 +28,8 @@ IngredientsListWidget::IngredientsListWidget(QWidget* parent)
 	tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	vLayout->addWidget(tableView);
 
-	auto delegate = new IngredientsListDelegate(this);
-	tableView->setItemDelegate(delegate);
-
-/*	connect(tableView->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
-			this, SLOT(currentChanged(QModelIndex,QModelIndex)));
-
-	m_addButton = new QPushButton(tr("Add"), this);
-	connect(m_addButton, SIGNAL(clicked()), this, SLOT(addRow()));
-	m_removeButton = new QPushButton(tr("Remove"), this);
-	m_removeButton->setEnabled(false);
-	connect(m_removeButton, SIGNAL(clicked()), this, SLOT(removeRow()));
-	QHBoxLayout* buttonsLayout = new QHBoxLayout;
-	buttonsLayout->addWidget(m_addButton);
-	buttonsLayout->addWidget(m_removeButton);
-	buttonsLayout->addStretch();
-	vLayout->addLayout(buttonsLayout);
-*/
 	setLayout(vLayout);
 
 	m_view = tableView;
 	m_model = proxyModel;
-}
-
-void IngredientsListWidget::currentChanged(const QModelIndex& current, const QModelIndex& /*previous*/)
-{
-	m_removeButton->setEnabled(current.isValid());
-}
-
-void IngredientsListWidget::addRow()
-{
-	int id = m_model->rowCount();
-	if(m_model->insertRows(id, 1))
-	{
-		auto index = m_model->sourceModel()->index(id, 0);
-		auto mapped = m_model->mapFromSource(index);
-		m_view->selectRow(mapped.row());
-		m_view->setFocus();
-	}
-}
-
-void IngredientsListWidget::removeRow()
-{
-	auto indexes = m_view->selectionModel()->selectedRows();
-	if(!indexes.empty())
-		m_model->removeRows(indexes.front().row(), 1);
 }

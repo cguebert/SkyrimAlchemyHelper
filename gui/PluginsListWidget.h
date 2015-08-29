@@ -13,17 +13,9 @@ class PluginsListWidget : public QWidget
 public:
 	explicit PluginsListWidget(QWidget* parent = nullptr);
 
-signals:
-
-public slots:
-	void currentChanged(const QModelIndex&, const QModelIndex&);
-	void addRow();
-	void removeRow();
-
 protected:
 	QTableView *m_view;
 	QSortFilterProxyModel *m_model;
-	QPushButton *m_addButton, *m_removeButton;
 };
 
 #endif // PLUGINSLISTWIDGET_H

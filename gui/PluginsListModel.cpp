@@ -50,31 +50,6 @@ QVariant PluginsListModel::data(const QModelIndex& index, int role) const
 	return QVariant();
 }
 
-bool PluginsListModel::setData(const QModelIndex& index, const QVariant& value, int role)
-{
-	if(index.column() == 0 && role == Qt::EditRole)
-	{
-		m_pluginsList.plugin(index.row()).name = value.toString();
-		return true;
-	}
-	if(index.column() == 1 && role == Qt::CheckStateRole)
-	{
-		bool active = value.toBool();
-		m_pluginsList.setActive(index.row(), active);
-		return true;
-	}
-	return false;
-}
-
-Qt::ItemFlags PluginsListModel::flags(const QModelIndex& index) const
-{
-	if(index.column() == 0)
-		return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
-	if(index.column() == 1)
-		return Qt::ItemIsUserCheckable | QAbstractTableModel::flags(index);
-	return QAbstractTableModel::flags(index);
-}
-
 QVariant PluginsListModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
@@ -87,21 +62,4 @@ QVariant PluginsListModel::headerData(int section, Qt::Orientation orientation, 
 		}
 	}
 	return QVariant();
-}
-
-bool PluginsListModel::removeRows(int row, int count, const QModelIndex& parent)
-{
-	beginRemoveRows(parent, row, row + count - 1);
-	m_pluginsList.removePlugins(row, count);
-	endRemoveRows();
-
-	return true;
-}
-
-bool PluginsListModel::insertRows(int row, int count, const QModelIndex& parent)
-{
-	beginInsertRows(parent, row, row + count - 1);
-	m_pluginsList.addPlugin();
-	endInsertRows();
-	return true;
 }

@@ -17,7 +17,6 @@ set(HEADER_FILES
 	EffectsListModel.h
 	EffectsListWidget.h
 	IngredientsList.h
-	IngredientsListDelegate.h
 	IngredientsListModel.h
 	IngredientsListWidget.h
 	PluginsList.h
@@ -35,7 +34,6 @@ set(SOURCE_FILES
 	EffectsListModel.cpp
 	EffectsListWidget.cpp
 	IngredientsList.cpp
-	IngredientsListDelegate.cpp
 	IngredientsListModel.cpp
 	IngredientsListWidget.cpp
 	main.cpp

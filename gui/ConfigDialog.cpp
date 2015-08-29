@@ -14,6 +14,7 @@
 ConfigDialog::ConfigDialog(QWidget *parent)
 	: QDialog(parent)
 {
+	setWindowTitle("Skyrim Alchemy Helper - Config");
 	QVBoxLayout* vLayout = new QVBoxLayout;
 
 	m_tabWidget = new QTabWidget;
