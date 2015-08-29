@@ -9,7 +9,18 @@ using namespace std;
 float round(float v, int d)
 {
 	float p = pow(10.0f, d);
-	return std::round(v * p) / p;
+	return round(v * p) / p;
+}
+
+std::pair<std::string, std::string> loadPaths()
+{
+	std::pair<std::string, string> result;
+	ifstream pathsFile("data/paths.txt");
+
+	std::getline(pathsFile, result.first);
+	std::getline(pathsFile, result.second);
+
+	return result;
 }
 
 void exportConfig(const Config& config)
@@ -39,27 +50,17 @@ void exportConfig(const Config& config)
 	}
 }
 
-void absolutePathTest(Config& config)
+void loadMods(Config& config, const string& modsListFile, const string& dataDir)
 {
-	Mod::parse("F:/Jeux/Skyrim/Data/Skyrim.esm", config);
-	Mod::parse("F:/Jeux/SkyrimModOrganizer/mods/83Willows 101BugsHD/83Willows_101BUGS_V4_LowRes.esp", config);
-	Mod::parse("F:/Jeux/SkyrimModOrganizer/mods/Patchus Maximus/PatchusMaximus.esp", config);
-}
-
-void modOrganizerTest(Config& config)
-{
-	const std::string pluginsFileName = "F:/Jeux/SkyrimModOrganizer/profiles/Civil War/Plugins.txt";
-//	const std::string pluginsFileName = "C:/Users/chris/AppData/Local/Skyrim/Plugins.txt";
-	fstream pluginsList(pluginsFileName);
-	array<char, 256> pluginName{};
-	string dir = "F:/Jeux/Skyrim/Data/";
-	while (pluginsList.getline(&pluginName[0], 256))
+	fstream modsList(modsListFile);
+	array<char, 256> modName{};
+	while (modsList.getline(&modName[0], 256))
 	{
-		if (pluginName[0] == '#')
+		if (modName[0] == '#')
 			continue;
-	//	cout << pluginName.data() << endl;
+	//	cout << modName.data() << endl;
 
-		Mod::parse(dir + pluginName.data(), config);
+		Mod::parse(dataDir + "/" + modName.data(), config);
 	}
 }
 
@@ -67,12 +68,14 @@ int main(int argc, char** argv)
 {
 	Config config;
 
-//	absolutePathTest(config);
-	modOrganizerTest(config);	
-	
+	auto paths = loadPaths();
+	if (paths.first.empty() || paths.second.empty())
+		return 1;
+
+	loadMods(config, paths.first, paths.second);
 	exportConfig(config);
 
-	system("Pause");
+//	system("Pause");
 	return 0;
 }
 
