@@ -28,11 +28,11 @@ void Mod::parse(const std::string& fileName, Config& config)
 	mod.doParse();
 
 	if (mod.m_nbEffAdded || mod.m_nbEffModified)
-		cout << mod.m_modName << ": Effects -> added=" << mod.m_nbEffAdded << ", modified=" << mod.m_nbEffModified << endl;
+		cout << mod.m_modName << ": Effects -> added: " << mod.m_nbEffAdded << ", modified: " << mod.m_nbEffModified << endl;
 
 	if (mod.m_nbIngrAdded || mod.m_nbIngrModified)
 	{
-		cout << mod.m_modName << ": Ingredients -> added=" << mod.m_nbIngrAdded << ", modified=" << mod.m_nbIngrModified << endl;
+		cout << mod.m_modName << ": Ingredients -> added: " << mod.m_nbIngrAdded << ", modified: " << mod.m_nbIngrModified << endl;
 
 		if (mod.m_nbIngrAdded)
 			config.modsList.emplace_back(mod.m_modName);
@@ -237,7 +237,7 @@ void Mod::parseMaster()
 	in.stream().read(&name[0], dataSize - 1);
 	in.jump(1);
 
-	m_masters.push_back(name);
+	m_masters.push_back(getModName(name));
 }
 
 void Mod::parseIngredientName()
