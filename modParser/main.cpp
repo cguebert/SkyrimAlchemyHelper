@@ -4,9 +4,6 @@
 #include "Ingredients.h"
 #include "Mod.h"
 
-#include "StringsTable.h"
-#include "BSAFile.h"
-
 using namespace std;
 
 float round(float v, int d)
@@ -81,4 +78,3 @@ int main(int argc, char** argv)
 //	system("Pause");
 	return 0;
 }
-

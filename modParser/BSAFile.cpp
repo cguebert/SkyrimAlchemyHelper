@@ -44,82 +44,55 @@ void BSAFile::load(const string& fileName)
 	in >> m_folders;
 }
 
-// From the code of BSAOpt
-uint32_t GenOBHashStr(string s)
+uint64_t stringHash(string s)
 {
 	uint32_t hash = 0;
-
-	for (size_t i = 0, len = s.length(); i < len; ++i) 
-	{
-		hash *= 0x1003F;
-		hash += (unsigned char)s[i];
-	}
-
+	for (auto c : s) 
+		hash = hash * 0x1003F + c;
 	return hash;
 }
 
-uint64_t GenOBHashPair(string fle, string ext) 
+uint64_t fileExtHash(string file, string ext)
 {
-	uint64_t hash = 0;
-	auto len = fle.length();
+	uint64_t hash1 = 0, hash2 = 0, hash3 = 0;
+	auto len = file.length();
 
 	if (len > 0) 
-	{
-		hash = (uint64_t)(
-			(((unsigned char)fle[len - 1]) * 0x1) +
-			((len > 2 ? (unsigned char)fle[len - 2] : (unsigned char)0) * 0x100) +
-			(len * 0x10000) +
-			(((unsigned char)fle[0]) * 0x1000000)
-			);
+		hash1 = file[len - 1] + (len > 2 ? (file[len - 2] << 8) : 0) + (len << 16) + (file[0] << 24);
 
-		if (len > 3)
-			hash += (uint64_t)(GenOBHashStr(fle.substr(1, len - 3)) * 0x100000000);
-	}
+	if (len > 3)
+		hash2 = stringHash(file.substr(1, len - 3));
 
 	if (ext.length() > 0) 
 	{
-		hash += (uint64_t)(GenOBHashStr(ext) * 0x100000000LL);
+		hash3 = stringHash(ext);
 
-		unsigned char i = 0;
-		if (ext == ".nif") i = 1;
-		if (ext == ".kf")  i = 2;
-		if (ext == ".dds") i = 3;
-		if (ext == ".wav") i = 4;
-
-		if (i != 0) 
-		{
-			unsigned char a = (unsigned char)(((i & 0xfc) << 5) + (unsigned char)((hash & 0xff000000) >> 24));
-			unsigned char b = (unsigned char)(((i & 0xfe) << 6) + (unsigned char)(hash & 0x000000ff));
-			unsigned char c = (unsigned char)((i << 7) + (unsigned char)((hash & 0x0000ff00) >> 8));
-
-			hash -= hash & 0xFF00FFFF;
-			hash += (unsigned int)((a << 24) + b + (c << 8));
-		}
+		if		(ext == ".kf")	hash1 |= 0x80;
+		else if (ext == ".nif") hash1 |= 0x8000;
+		else if (ext == ".dds") hash1 |= 0x8080;
+		else if (ext == ".wav") hash1 |= 0x80000000;
 	}
 
-	return hash;
+	hash2 = (hash2 + hash3) & 0xFFFFFFFF;
+	return (hash2 << 32) + hash1;
 }
 
-uint64_t GenOBHash(string path) 
+uint64_t pathHash(string path) 
 {
 	transform(path.begin(), path.end(), path.begin(), ::tolower);
 	replace(path.begin(), path.end(), '/', '\\');
 
-	string file;
-	string ext;
-
+	string file, ext;
 	auto pos = path.find_last_of(".");
 	if (pos != string::npos) 
 	{
 		ext = path.substr(pos);
 		file = path.substr(0, pos);
 	}
-	else {
-		ext = "";
+	else 
 		file = path;
-	}
 
-	return GenOBHashPair(file, ext);
+	return fileExtHash(file, ext);
 }
 
 template <typename T>
@@ -151,8 +124,8 @@ string BSAFile::extract(const string& path)
 	else
 		file = path;
 
-	auto dirHash = GenOBHash(dir);
-	auto fileHash = GenOBHash(file);
+	auto dirHash = pathHash(dir);
+	auto fileHash = pathHash(file);
 
 	return extractFile(dirHash, fileHash);
 }
