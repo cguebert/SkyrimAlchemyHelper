@@ -3,39 +3,48 @@
 #include <iostream>
 
 #include "StringsTable.h"
+#include "BSAFile.h"
 
 using namespace std;
 
-string StringsTable::getStringsFileName(const std::string& modFileName)
+pair<string, string> getDirAndFile(const std::string& modFileName)
 {
-	string dir;
+	pair<string, string> result;
 	auto p = modFileName.find_last_of("/\\");
 	if (p != string::npos)
 	{
-		dir = modFileName.substr(0, p);
+		result.first = modFileName.substr(0, p);
 		++p;
 	}
 	else
 		p = 0;
-	string fileName;
+
 	auto e = modFileName.find_last_of(".");
 	if (e != string::npos)
-		fileName = modFileName.substr(p, e - p);
+		result.second = modFileName.substr(p, e - p);
 	else
-		fileName = modFileName.substr(p);
+		result.second = modFileName.substr(p);
 
-	return dir + "/Strings/" + fileName + "_English.STRINGS";
+	return result;
 }
 
 void StringsTable::load(const std::string& modFileName)
 {
-	string fileName = getStringsFileName(modFileName);
+	auto df = getDirAndFile(modFileName);
+	string fileName = df.first + "/Strings/" + df.second + "_English.STRINGS";
 
 	ifstream stream;
 	stream.open(fileName, ios::binary | ios::in);
 	if (!stream.is_open())
 	{
 		cout << "Cannot open " << fileName << endl;
+		BSAFile bsa;
+		bsa.load(modFileName);
+		auto content = bsa.extract("Strings/" + df.second + "_English.STRINGS");
+
+	//	ofstream out(df.second + "_English.STRINGS", ios_base::binary);
+	//	out.write(&content[0], content.size());
+
 		return;
 	}
 

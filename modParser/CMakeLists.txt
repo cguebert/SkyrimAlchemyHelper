@@ -4,6 +4,7 @@ set(PROJECT_NAME "ModParser")
 project(${PROJECT_NAME})
 
 set(HEADER_FILES
+	BSAFile.h
 	Ingredients.h
 	Mod.h
 	StringsTable.h
@@ -11,6 +12,7 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
 	main.cpp
+	BSAFile.cpp
 	Ingredients.cpp
 	Mod.cpp
 	StringsTable.cpp

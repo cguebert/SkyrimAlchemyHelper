@@ -9,7 +9,6 @@ public:
 	std::string get(uint32_t id);
 
 protected:
-	std::string getStringsFileName(const std::string& modFileName);
 	void loadDirectory();
 	std::string readString();
 

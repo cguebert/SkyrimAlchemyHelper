@@ -4,6 +4,9 @@
 #include "Ingredients.h"
 #include "Mod.h"
 
+#include "StringsTable.h"
+#include "BSAFile.h"
+
 using namespace std;
 
 float round(float v, int d)
@@ -68,14 +71,19 @@ int main(int argc, char** argv)
 {
 	Config config;
 
-	auto paths = loadPaths();
+/*	auto paths = loadPaths();
 	if (paths.first.empty() || paths.second.empty())
 		return 1;
 
 	loadMods(config, paths.first, paths.second);
 	exportConfig(config);
+*/
+	StringsTable table;
+	table.load("F:/Jeux/Skyrim/Data/HearthFires.esm");
+//	BSAFile bsa;
+//	bsa.load("F:/Jeux/Skyrim/Data/HearthFires");
 
-//	system("Pause");
+	system("Pause");
 	return 0;
 }
 
