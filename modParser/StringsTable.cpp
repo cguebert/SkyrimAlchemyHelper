@@ -7,7 +7,7 @@
 
 using namespace std;
 
-pair<string, string> getDirAndFile(const std::string& modFileName)
+pair<string, string> getDirAndFile(const string& modFileName)
 {
 	pair<string, string> result;
 	auto p = modFileName.find_last_of("/\\");
@@ -28,7 +28,7 @@ pair<string, string> getDirAndFile(const std::string& modFileName)
 	return result;
 }
 
-void StringsTable::load(const std::string& modFileName)
+void StringsTable::load(const string& modFileName)
 {
 	auto df = getDirAndFile(modFileName);
 	string fileName = df.first + "/Strings/" + df.second + "_English.STRINGS";
@@ -37,31 +37,41 @@ void StringsTable::load(const std::string& modFileName)
 	stream.open(fileName, ios::binary | ios::in);
 	if (!stream.is_open())
 	{
-		cout << "Cannot open " << fileName << endl;
+		cerr << "Cannot open " << fileName << endl;
 		BSAFile bsa;
 		bsa.load(modFileName);
 		auto content = bsa.extract("Strings/" + df.second + "_English.STRINGS");
 
+		if (content.empty())
+		{
+			cerr << "Cannot extract the string table from the BSA file" << endl;
+			return;
+		}
+		else
+		{
+			istringstream ss(content);
+			in.setStream(move(ss));
+			cout << "Sucessfully extracted the string table from the BSA file" << endl;
+		}
+
 	//	ofstream out(df.second + "_English.STRINGS", ios_base::binary);
 	//	out.write(&content[0], content.size());
-
-		return;
 	}
-
-	in.setStream(std::move(stream));
+	else
+		in.setStream(move(stream));
 	loadDirectory();
 }
 
-std::string StringsTable::readString()
+string StringsTable::readString()
 {
-	std::vector<char> buf;
+	vector<char> buf;
 
 	auto pos = in.tellg();
 	int size = 64, prev = 0;
 	buf.resize(size);
 	in.stream().read(&buf.front(), size);
 
-	while (std::find(buf.begin() + prev, buf.end(), 0) == buf.end())
+	while (find(buf.begin() + prev, buf.end(), 0) == buf.end())
 	{
 		prev = size;
 		buf.resize(size*2);
@@ -69,14 +79,14 @@ std::string StringsTable::readString()
 		size *= 2;
 	}
 
-	auto end = std::find(buf.begin(), buf.end(), 0);
+	auto end = find(buf.begin(), buf.end(), 0);
 	in.seekg(pos + (end - buf.begin()));
 	return string(buf.begin(), end);
 }
 
-std::string StringsTable::get(uint32_t id)
+string StringsTable::get(uint32_t id)
 {
-	auto it = std::lower_bound(m_offsets.begin(), m_offsets.end(), id, StringEntryComp());
+	auto it = lower_bound(m_offsets.begin(), m_offsets.end(), id, StringEntryComp());
 	if (it == m_offsets.end() || it->first != id)
 		return "";
 
@@ -98,7 +108,7 @@ void StringsTable::loadDirectory()
 	}
 
 	// Sort the directory so we can use binary search
-	std::sort(m_offsets.begin(), m_offsets.end(), [](const StringEntry& lhs, const StringEntry& rhs){
+	sort(m_offsets.begin(), m_offsets.end(), [](const StringEntry& lhs, const StringEntry& rhs){
 		return lhs.first < rhs.first;
 	});
 }

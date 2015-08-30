@@ -21,12 +21,11 @@ string convertFileName(const string& fileName)
 void BSAFile::load(const string& fileName)
 {
 	auto bsaPath = convertFileName(fileName);
-	cout << bsaPath << endl;
 
 	ifstream stream(bsaPath, ios::binary | ios::in);
 	if (!stream.is_open())
 	{
-		cout << "Cannot open " << bsaPath << endl;
+		cerr << "Cannot open " << bsaPath << endl;
 		return;
 	}
 
@@ -36,8 +35,6 @@ void BSAFile::load(const string& fileName)
 
 	uint32_t nbFolders, nbFiles, foldersNameLen;
 	in >> m_flags >> nbFolders >> nbFiles >> foldersNameLen >> m_filesNameLen;
-	cout << hex << m_flags << endl;
-	cout << dec << nbFolders << " " << nbFiles << " " << foldersNameLen << " " << m_filesNameLen << endl;
 
 	m_archiveCompressed = (m_flags & BSA_ARCHIVE_COMPRESSED) != 0;
 
@@ -156,8 +153,6 @@ string BSAFile::extract(const string& path)
 
 	auto dirHash = GenOBHash(dir);
 	auto fileHash = GenOBHash(file);
-	cout << hex << swap_endian(dirHash) << endl;
-	cout << hex << swap_endian(fileHash) << endl;
 
 	return extractFile(dirHash, fileHash);
 }

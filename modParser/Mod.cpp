@@ -5,7 +5,7 @@
 
 using namespace std;
 
-std::string getModName(const std::string& modFileName)
+string getModName(const string& modFileName)
 {
 	auto p = modFileName.find_last_of("/\\");
 	if (p != string::npos)
@@ -22,7 +22,7 @@ std::string getModName(const std::string& modFileName)
 	return fileName;
 }
 
-void Mod::parse(const std::string& fileName, Config& config)
+void Mod::parse(const string& fileName, Config& config)
 {
 	Mod mod(fileName, config);
 	mod.doParse();
@@ -39,7 +39,7 @@ void Mod::parse(const std::string& fileName, Config& config)
 	}
 }
 
-Mod::Mod(const std::string& fileName, Config& config)
+Mod::Mod(const string& fileName, Config& config)
 	: m_modFileName(fileName)
 	, m_currentRecord(RecordType::None)
 	, m_config(config)
@@ -47,11 +47,11 @@ Mod::Mod(const std::string& fileName, Config& config)
 	ifstream stream(fileName, ios::binary | ios::in);
 	if (!stream.is_open())
 	{
-		cout << "Cannot open " << fileName << endl;
+		cerr << "Cannot open " << fileName << endl;
 		return;
 	}
 
-	in.setStream(std::move(stream));
+	in.setStream(move(stream));
 
 	m_modName = getModName(fileName);
 }
@@ -63,7 +63,7 @@ void Mod::doParse()
 	updateMagicalEffects(); // Get the names of the magical effects used in the ingredients
 }
 
-bool Mod::isType(const Type& type, const std::string& name)
+bool Mod::isType(const Type& type, const string& name)
 {
 	if (name.size() != 4)
 		return false;
@@ -232,7 +232,7 @@ void Mod::parseMaster()
 	uint16_t dataSize;
 	in >> dataSize;
 
-	std::string name;
+	string name;
 	name.resize(dataSize - 1); // Don't read null character in the string
 	in.stream().read(&name[0], dataSize - 1);
 	in.jump(1);
@@ -253,7 +253,7 @@ void Mod::parseIngredientName()
 	}
 	else
 	{
-		std::string& name = m_currentIngredient.name;
+		string& name = m_currentIngredient.name;
 		name.resize(dataSize-1); // Don't read null character in the string
 		in.stream().read(&name[0], dataSize-1);
 		in.jump(1);
@@ -323,7 +323,7 @@ void Mod::computeIngredientId(uint32_t id)
 	else if (modId < nbMasters)
 		m_currentIngredient.modName = m_masters[modId];
 	else
-		std::cerr << "Error: invalid modId " << hex << (int)modId << endl;
+		cerr << "Error: invalid modId " << hex << (int)modId << endl;
 }
 
 void Mod::updateMagicalEffects()
@@ -334,7 +334,7 @@ void Mod::updateMagicalEffects()
 	in.stream().clear();
 
 	// Compute the list of ids used by the ingredients
-	std::vector<uint32_t> effectsIds;
+	vector<uint32_t> effectsIds;
 	effectsIds.reserve(m_config.ingredientsList.ingredients().size() * 4);
 	for (const auto& ing : m_config.ingredientsList.ingredients())
 	{
@@ -343,19 +343,19 @@ void Mod::updateMagicalEffects()
 	}
 
 	// Sort the effects list used by the ingredients
-	std::sort(effectsIds.begin(), effectsIds.end());
-	auto last = std::unique(effectsIds.begin(), effectsIds.end());
+	sort(effectsIds.begin(), effectsIds.end());
+	auto last = unique(effectsIds.begin(), effectsIds.end());
 	effectsIds.erase(last, effectsIds.end());
 
 	// Sort the magical effects list of this mod
-	std::sort(m_magicalEffectsOffsets.begin(), m_magicalEffectsOffsets.end(), [](const MGEFEntry& lhs, const MGEFEntry& rhs){
+	sort(m_magicalEffectsOffsets.begin(), m_magicalEffectsOffsets.end(), [](const MGEFEntry& lhs, const MGEFEntry& rhs){
 		return lhs.first < rhs.first;
 	});
 
 	// Find the intersection of the 2 lists
-	std::vector<MGEFEntry> effectsToUpdate;
-	std::set_intersection(m_magicalEffectsOffsets.begin(), m_magicalEffectsOffsets.end(),
-		effectsIds.begin(), effectsIds.end(), std::back_inserter(effectsToUpdate), MGEFEntryComp());
+	vector<MGEFEntry> effectsToUpdate;
+	set_intersection(m_magicalEffectsOffsets.begin(), m_magicalEffectsOffsets.end(),
+		effectsIds.begin(), effectsIds.end(), back_inserter(effectsToUpdate), MGEFEntryComp());
 
 	// Get the name of each magical effect
 	MagicalEffectsList updatedEffects;
@@ -376,9 +376,9 @@ void Mod::updateMagicalEffects()
 
 	// Merge the updated effects into the main list
 	MagicalEffectsList outputList;
-	std::set_union(updatedEffects.begin(), updatedEffects.end(),
+	set_union(updatedEffects.begin(), updatedEffects.end(),
 		m_config.magicalEffectsList.begin(), m_config.magicalEffectsList.end(), 
-		std::back_inserter(outputList), [](const MagicalEffect& lhs, const MagicalEffect& rhs){
+		back_inserter(outputList), [](const MagicalEffect& lhs, const MagicalEffect& rhs){
 		return lhs.first < rhs.first;
 	});
 

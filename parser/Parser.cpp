@@ -35,7 +35,7 @@ std::string Parser::readBString()
 	read(size);
 	string text;
 	text.resize(size);
-	m_in.read(&text[0], size);
+	m_in->read(&text[0], size);
 	return text;
 }
 
@@ -45,8 +45,8 @@ std::string Parser::readBZString()
 	read(size);
 	string text;
 	text.resize(size);
-	m_in.read(&text[0], size);
-	m_in.seekg(1, ios::cur);
+	m_in->read(&text[0], size);
+	m_in->seekg(1, ios::cur);
 	return text;
 }
 
@@ -56,7 +56,7 @@ std::string Parser::readWString()
 	read(size);
 	string text;
 	text.resize(size);
-	m_in.read(&text[0], size);
+	m_in->read(&text[0], size);
 	return text;
 }
 
@@ -66,8 +66,8 @@ std::string Parser::readWZString()
 	read(size);
 	string text;
 	text.resize(size);
-	m_in.read(&text[0], size);
-	m_in.seekg(1, ios::cur);
+	m_in->read(&text[0], size);
+	m_in->seekg(1, ios::cur);
 	return text;
 }
 
@@ -75,22 +75,22 @@ std::string Parser::readZString()
 {
 	vector<char> buf;
 
-	auto pos = m_in.tellg();
+	auto pos = m_in->tellg();
 	int size = 64, prev = 0;
 	buf.resize(size);
-	m_in.read(&buf.front(), size);
+	m_in->read(&buf.front(), size);
 
 	while (find(buf.begin() + prev, buf.end(), 0) == buf.end())
 	{
 		prev = size;
 		buf.resize(size * 2);
-		m_in.read(&buf.front() + prev, size);
+		m_in->read(&buf.front() + prev, size);
 		size *= 2;
 	}
 
 	auto end = find(buf.begin(), buf.end(), 0);
 	streamoff delta = end - buf.begin();
-	m_in.seekg(pos + delta);
+	m_in->seekg(pos + delta);
 	return string(buf.begin(), end);
 }
 
@@ -98,6 +98,6 @@ std::string Parser::readString(int size)
 {
 	string text;
 	text.resize(size);
-	m_in.read(&text[0], size);
+	m_in->read(&text[0], size);
 	return text;
 }
