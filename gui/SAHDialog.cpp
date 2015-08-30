@@ -14,7 +14,7 @@ SAHDialog::SAHDialog(QWidget *parent)
 	auto potionsWidget = new PotionsListWidget;
 	vLayout->addWidget(potionsWidget);
 
-	QPushButton* okButton = new QPushButton(tr("Ok"), this);
+	QPushButton* okButton = new QPushButton(tr("Exit"), this);
 	connect(okButton, SIGNAL(clicked()), this, SLOT(accept()));
 	QPushButton* configButton = new QPushButton(tr("Config"), this);
 	connect(configButton, SIGNAL(clicked()), this, SLOT(editConfig()));

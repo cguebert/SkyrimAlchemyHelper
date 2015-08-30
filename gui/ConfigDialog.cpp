@@ -1,15 +1,10 @@
 #include <QtWidgets>
 
 #include "ConfigDialog.h"
-
+#include "ConfigPane.h"
 #include "EffectsListWidget.h"
 #include "IngredientsListWidget.h"
 #include "PluginsListWidget.h"
-#include "PotionsListWidget.h"
-
-#include "EffectsList.h"
-#include "IngredientsList.h"
-#include "PluginsList.h"
 
 ConfigDialog::ConfigDialog(QWidget *parent)
 	: QDialog(parent)
@@ -19,6 +14,9 @@ ConfigDialog::ConfigDialog(QWidget *parent)
 
 	m_tabWidget = new QTabWidget;
 	vLayout->addWidget(m_tabWidget);
+
+	auto configWidget = new ConfigPane;
+	m_tabWidget->addTab(configWidget, "General");
 
 	auto pluginsWidget = new PluginsListWidget;
 	m_tabWidget->addTab(pluginsWidget, "Plugins");
