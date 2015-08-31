@@ -46,3 +46,13 @@ QVariant EffectsListModel::headerData(int section, Qt::Orientation orientation, 
 	}
 	return QVariant();
 }
+
+void EffectsListModel::beginReset()
+{
+	beginResetModel();
+}
+
+void EffectsListModel::endReset()
+{
+	endResetModel();
+}

@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <sstream>
-#include <thread>
 
 #include "ConfigPane.h"
 #include "EffectsList.h"
@@ -58,8 +57,11 @@ ConfigPane::ConfigPane(QWidget *parent, bool firstLaunch)
 	connect(parseModsButton, SIGNAL(clicked()), this, SLOT(parseMods()));
 	auto defaultConfigButton = new QPushButton(tr("Default configuration"));
 	connect(defaultConfigButton, SIGNAL(clicked()), this, SLOT(defaultConfig()));
+	auto reloadListsButton = new QPushButton(tr("Reload lists"));
+	connect(reloadListsButton, SIGNAL(clicked()), this, SLOT(updateLists()));
 	buttonsLayout->addWidget(parseModsButton);
 	buttonsLayout->addWidget(defaultConfigButton);
+	buttonsLayout->addWidget(reloadListsButton);
 	buttonsLayout->addStretch();
 	gridLayout->addLayout(buttonsLayout, 5, 0, 1, 3);
 
@@ -70,6 +72,10 @@ ConfigPane::ConfigPane(QWidget *parent, bool firstLaunch)
 	setLayout(gridLayout);
 
 	loadConfig();
+
+	m_timer = new QTimer(this);
+	m_timer->setSingleShot(true);
+	connect(m_timer, SIGNAL(timeout()), this, SLOT(updateLists()));
 }
 
 void ConfigPane::loadConfig()
@@ -319,15 +325,7 @@ void ConfigPane::parseMods()
 		return;
 	}
 
-//	std::this_thread::sleep_for(std::chrono::seconds(3));
-
-	emit startModsParse();
-
-	PluginsList::GetInstance().loadList();
-	EffectsList::GetInstance().loadList();
-	IngredientsList::GetInstance().loadList();
-
-	emit endModsParse();
+	m_timer->start(3000); // Files can still be locked for now, I have found that waiting 3 seconds is enough for me
 }
 
 void ConfigPane::editDataPath()
@@ -362,4 +360,15 @@ void ConfigPane::useModOrganizerChanged(int state)
 {
 	m_modOrganizerPathEdit->setEnabled(state == Qt::Checked);
 	m_modOrganizerPathButton->setEnabled(state == Qt::Checked);
+}
+
+void ConfigPane::updateLists()
+{
+	emit startModsParse();
+
+	PluginsList::GetInstance().loadList();
+	EffectsList::GetInstance().loadList();
+	IngredientsList::GetInstance().loadList();
+
+	emit endModsParse();
 }

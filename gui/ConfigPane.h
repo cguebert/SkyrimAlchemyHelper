@@ -6,6 +6,7 @@
 class QCheckBox;
 class QLineEdit;
 class QPushButton;
+class QTimer;
 
 class ConfigPane : public QWidget
 {
@@ -25,6 +26,7 @@ public slots:
 	void useModOrganizerChanged(int);
 	void parseMods();
 	void defaultConfig();
+	void updateLists();
 
 signals:
 	void startModsParse();
@@ -41,6 +43,7 @@ protected:
 		*m_modOrganizerPathEdit;
 	QCheckBox *m_useModOrganizerCheckBox;
 	QPushButton *m_modOrganizerPathButton;
+	QTimer *m_timer;
 };
 
 #endif // CONFIGPANE_H

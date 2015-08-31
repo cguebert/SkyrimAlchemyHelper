@@ -89,3 +89,13 @@ QVariant IngredientsListModel::headerData(int section, Qt::Orientation orientati
 	}
 	return QVariant();
 }
+
+void IngredientsListModel::beginReset()
+{
+	beginResetModel();
+}
+
+void IngredientsListModel::endReset()
+{
+	endResetModel();
+}

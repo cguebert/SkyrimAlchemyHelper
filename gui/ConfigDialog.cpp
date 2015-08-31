@@ -40,7 +40,12 @@ ConfigDialog::ConfigDialog(QWidget *parent, bool firstLaunch)
 	setLayout(vLayout);
 
 	connect(m_configPane, SIGNAL(startModsParse()), pluginsWidget, SLOT(beginReset()));
+	connect(m_configPane, SIGNAL(startModsParse()), effectsWidget, SLOT(beginReset()));
+	connect(m_configPane, SIGNAL(startModsParse()), ingredientsWidget, SLOT(beginReset()));
+
 	connect(m_configPane, SIGNAL(endModsParse()), pluginsWidget, SLOT(endReset()));
+	connect(m_configPane, SIGNAL(endModsParse()), effectsWidget, SLOT(endReset()));
+	connect(m_configPane, SIGNAL(endModsParse()), ingredientsWidget, SLOT(endReset()));
 }
 
 QSize ConfigDialog::sizeHint() const

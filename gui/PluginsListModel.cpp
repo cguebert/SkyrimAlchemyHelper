@@ -63,3 +63,13 @@ QVariant PluginsListModel::headerData(int section, Qt::Orientation orientation, 
 	}
 	return QVariant();
 }
+
+void PluginsListModel::beginReset()
+{
+	beginResetModel();
+}
+
+void PluginsListModel::endReset()
+{
+	endResetModel();
+}

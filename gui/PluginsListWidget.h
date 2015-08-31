@@ -3,8 +3,8 @@
 
 #include <QWidget>
 
+class PluginsListModel;
 class QPushButton;
-class QSortFilterProxyModel;
 class QTableView;
 
 class PluginsListWidget : public QWidget
@@ -13,9 +13,13 @@ class PluginsListWidget : public QWidget
 public:
 	explicit PluginsListWidget(QWidget* parent = nullptr);
 
+public slots:
+	void beginReset();
+	void endReset();
+
 protected:
 	QTableView *m_view;
-	QSortFilterProxyModel *m_model;
+	PluginsListModel *m_model;
 };
 
 #endif // PLUGINSLISTWIDGET_H

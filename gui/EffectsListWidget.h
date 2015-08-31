@@ -3,8 +3,8 @@
 
 #include <QWidget>
 
+class EffectsListModel;
 class QPushButton;
-class QSortFilterProxyModel;
 class QTableView;
 
 class EffectsListWidget : public QWidget
@@ -13,9 +13,13 @@ class EffectsListWidget : public QWidget
 public:
 	explicit EffectsListWidget(QWidget* parent = nullptr);
 
+public slots:
+	void beginReset();
+	void endReset();
+
 protected:
 	QTableView *m_view;
-	QSortFilterProxyModel *m_model;
+	EffectsListModel *m_model;
 };
 
 #endif // EFFECTSLISTWIDGET_H

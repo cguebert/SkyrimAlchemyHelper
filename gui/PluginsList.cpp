@@ -3,6 +3,8 @@
 
 #include "PluginsList.h"
 
+#include <fstream>
+
 const QString fileName = "data/plugins.txt";
 
 PluginsList& PluginsList::GetInstance()

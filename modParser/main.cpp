@@ -30,6 +30,8 @@ void exportConfig(const Config& config)
 		modsFile << mod << endl;
 	modsFile.close();
 
+	ifstream modsIn("data/Plugins.txt");
+
 	ofstream effectsFile("data/Effects.txt");
 	for (const auto& effect : config.magicalEffectsList)
 	{

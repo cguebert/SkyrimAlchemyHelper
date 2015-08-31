@@ -8,28 +8,35 @@ IngredientsListWidget::IngredientsListWidget(QWidget* parent)
 {
 	QVBoxLayout* vLayout = new QVBoxLayout;
 
-	auto tableView = new QTableView(this);
-	tableView->setSortingEnabled(true);
-	auto sourceModel = new IngredientsListModel(this);
+	auto m_view = new QTableView(this);
+	m_view->setSortingEnabled(true);
+	m_model = new IngredientsListModel(this);
 	auto proxyModel = new QSortFilterProxyModel(this);
-	proxyModel->setSourceModel(sourceModel);
+	proxyModel->setSourceModel(m_model);
 	proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);
-	tableView->setModel(proxyModel);
-	tableView->sortByColumn(0, Qt::AscendingOrder);
-	tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
-	tableView->setSelectionMode(QAbstractItemView::SingleSelection);
-//	tableView->hideColumn(1);
+	m_view->setModel(proxyModel);
+	m_view->sortByColumn(0, Qt::AscendingOrder);
+	m_view->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_view->setSelectionMode(QAbstractItemView::SingleSelection);
+//	m_view->hideColumn(1);
 	for(int i = 0; i < 4; ++i)
 	{
-		tableView->hideColumn(i * 3 + 3);
-		tableView->hideColumn(i * 3 + 4);
+		m_view->hideColumn(i * 3 + 3);
+		m_view->hideColumn(i * 3 + 4);
 	}
-	tableView->horizontalHeader()->resizeSection(0, 250);
-	tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
-	vLayout->addWidget(tableView);
+	m_view->horizontalHeader()->resizeSection(0, 250);
+	m_view->setSelectionBehavior(QAbstractItemView::SelectRows);
+	vLayout->addWidget(m_view);
 
 	setLayout(vLayout);
+}
 
-	m_view = tableView;
-	m_model = proxyModel;
+void IngredientsListWidget::beginReset()
+{
+	m_model->beginReset();
+}
+
+void IngredientsListWidget::endReset()
+{
+	m_model->endReset();
 }
