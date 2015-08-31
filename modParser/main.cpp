@@ -12,17 +12,6 @@ float round(float v, int d)
 	return round(v * p) / p;
 }
 
-std::pair<std::string, std::string> loadPaths()
-{
-	std::pair<std::string, string> result;
-	ifstream pathsFile("data/paths.txt");
-
-	std::getline(pathsFile, result.first);
-	std::getline(pathsFile, result.second);
-
-	return result;
-}
-
 void exportConfig(const Config& config)
 {
 	ofstream modsFile("data/Plugins.txt");
@@ -55,29 +44,19 @@ void exportConfig(const Config& config)
 	ingredientsFile.close();
 }
 
-void loadMods(Config& config, const string& modsListFile, const string& dataDir)
+void loadMods(Config& config)
 {
-	fstream modsList(modsListFile);
-	array<char, 256> modName{};
-	while (modsList.getline(&modName[0], 256))
-	{
-		if (modName[0] == '#')
-			continue;
-	//	cout << modName.data() << endl;
-
-		Mod::parse(dataDir + "/" + modName.data(), config);
-	}
+	ifstream pathsFile("data/paths.txt");
+	string modPath;
+	while (getline(pathsFile, modPath))
+		Mod::parse(modPath, config);
 }
 
 int main(int argc, char** argv)
 {
 	Config config;
 
-	auto paths = loadPaths();
-	if (paths.first.empty() || paths.second.empty())
-		return 1;
-
-	loadMods(config, paths.first, paths.second);
+	loadMods(config);
 	exportConfig(config);
 
 //	system("Pause");

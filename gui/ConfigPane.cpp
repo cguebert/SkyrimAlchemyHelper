@@ -289,19 +289,37 @@ bool ConfigPane::prepareParsing()
 		dataDir.cd("data");
 	}
 
-	QFile file(dataDir.absolutePath() + "/paths.txt");
-	if (!file.open(QIODevice::WriteOnly))
+	std::string pathsFilePath = dataDir.absolutePath().toStdString() + "/paths.txt";
+	std::ofstream outFile(pathsFilePath);
+	if (!outFile.is_open())
 	{
 		QMessageBox::warning(this, tr("Access error"), tr("Cannot write to data/paths.txt"));
 		return false;
 	}
 
+	std::string dataDirPath = m_dataFolderEdit->text().toStdString();
+	std::string pluginsListPath = m_pluginsListPathEdit->text().toStdString();
+	
+	// Add "Skyrim.esm" if not using Mod Organizer
+	if (m_useModOrganizerCheckBox->checkState() != Qt::Checked)
+	{
+		std::string inList = loadFile(pluginsListPath);
+		std::transform(inList.begin(), inList.end(), inList.begin(), ::tolower);
+		if (inList.find("skyrim.esm") == std::string::npos)
+			outFile << dataDirPath + "/Skyrim.esm" << std::endl;
+	}
+
+	std::ifstream inFile(pluginsListPath);
+	std::string modName;
+	while (std::getline(inFile, modName))
+	{
+		if (modName[0] == '#')
+			continue;
+
+		outFile << dataDirPath + "/" + modName << std::endl;
+	}
+
 	QDir::setCurrent(appDir);
-
-	QTextStream stream(&file);
-	stream << m_pluginsListPathEdit->text() << "\n"
-		<< m_dataFolderEdit->text() << "\n";
-
 	return true;
 }
 
