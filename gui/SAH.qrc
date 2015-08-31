@@ -1,5 +1,8 @@
 <RCC>
     <qresource prefix="/">
-		<file>icons/halloween250.ico</file>
+		<file>icons/Add.png</file>
+		<file>icons/Cocktail.png</file>
+		<file>icons/Delete.png</file>
+		<file>icons/Remove.png</file>
     </qresource>
 </RCC>
