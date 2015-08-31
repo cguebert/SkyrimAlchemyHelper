@@ -28,6 +28,7 @@ void exportConfig(const Config& config)
 	ofstream modsFile("data/Plugins.txt");
 	for (const auto& mod : config.modsList)
 		modsFile << mod << endl;
+	modsFile.close();
 
 	ofstream effectsFile("data/Effects.txt");
 	for (const auto& effect : config.magicalEffectsList)
@@ -35,6 +36,7 @@ void exportConfig(const Config& config)
 		effectsFile << effect.second << endl;
 		effectsFile << hex << uppercase << effect.first << dec << endl;
 	}
+	effectsFile.close();
 
 	ofstream ingredientsFile("data/Ingredients.txt");
 	for (const auto& ingr : config.ingredientsList.ingredients())
@@ -48,6 +50,7 @@ void exportConfig(const Config& config)
 			ingredientsFile << effect.duration << endl;
 		}
 	}
+	ingredientsFile.close();
 }
 
 void loadMods(Config& config, const string& modsListFile, const string& dataDir)
@@ -76,5 +79,10 @@ int main(int argc, char** argv)
 	exportConfig(config);
 
 //	system("Pause");
-	return 0;
+
+	// Returns 0 only if the 3 lists are not empty
+	return (config.modsList.empty() 
+		|| config.magicalEffectsList.empty() 
+		|| config.ingredientsList.ingredients().empty())
+		? 1 : 0;
 }

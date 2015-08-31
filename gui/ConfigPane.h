@@ -32,6 +32,7 @@ signals:
 
 protected:
 	void loadConfig();
+	bool prepareParsing();
 
 	bool m_firstLaunch;
 	QLineEdit *m_dataFolderEdit,

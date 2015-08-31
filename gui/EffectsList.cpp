@@ -18,6 +18,8 @@ EffectsList::EffectsList()
 
 void EffectsList::loadList()
 {
+	m_effects.clear();
+
 	QFile inputFile(fileName);
 	if (inputFile.open(QIODevice::ReadOnly))
 	{

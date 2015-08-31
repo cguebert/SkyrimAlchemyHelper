@@ -38,6 +38,9 @@ ConfigDialog::ConfigDialog(QWidget *parent, bool firstLaunch)
 	vLayout->addLayout(buttonsLayout);
 
 	setLayout(vLayout);
+
+	connect(m_configPane, SIGNAL(startModsParse()), pluginsWidget, SLOT(beginReset()));
+	connect(m_configPane, SIGNAL(endModsParse()), pluginsWidget, SLOT(endReset()));
 }
 
 QSize ConfigDialog::sizeHint() const

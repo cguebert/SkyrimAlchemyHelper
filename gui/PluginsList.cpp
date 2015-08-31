@@ -18,6 +18,8 @@ PluginsList::PluginsList()
 
 void PluginsList::loadList()
 {
+	m_plugins.clear();
+
 	QFile inputFile(fileName);
 	if (inputFile.open(QIODevice::ReadOnly))
 	{

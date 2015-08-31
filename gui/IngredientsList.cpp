@@ -20,6 +20,8 @@ IngredientsList::IngredientsList()
 
 void IngredientsList::loadList()
 {
+	m_ingredients.clear();
+
 	PluginsList& plugins = PluginsList::GetInstance();
 	EffectsList& effects = EffectsList::GetInstance();
 

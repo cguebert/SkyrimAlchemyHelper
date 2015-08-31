@@ -2,8 +2,12 @@
 
 #include <fstream>
 #include <sstream>
+#include <thread>
 
 #include "ConfigPane.h"
+#include "EffectsList.h"
+#include "IngredientsList.h"
+#include "PluginsList.h"
 
 ConfigPane::ConfigPane(QWidget *parent, bool firstLaunch)
 	: QWidget(parent)
@@ -88,6 +92,17 @@ void ConfigPane::loadConfig()
 	m_modOrganizerPathEdit->setText(settings.value("modOrganizerPath").toString());
 }
 
+std::string loadFile(const std::string& fileName)
+{
+	std::ifstream file(fileName);
+	if (!file.is_open())
+		return "";
+	std::stringstream stream;
+	stream << file.rdbuf();
+	file.close();
+	return stream.str();
+}
+
 void replaceAll(std::string& text, const std::string& from, const std::string& to)
 {
 	size_t lenFrom = from.size(), lenTo = to.size();
@@ -115,14 +130,9 @@ void ConfigPane::defaultConfig()
 		else
 		{
 			//   Parse "config.vdf"
-			std::ifstream file(steamFolder.toStdString() + "/config/config.vdf");
-			if (file.is_open())
+			auto content = loadFile(steamFolder.toStdString() + "/config/config.vdf");
+			if (!content.empty())
 			{
-				std::stringstream stream;
-				stream << file.rdbuf();
-				file.close();
-				std::string content = stream.str();
-
 				//   Get additionnal steam games folders
 				size_t pos = 0;
 				while (true)
@@ -221,6 +231,27 @@ void ConfigPane::defaultConfig()
 
 bool ConfigPane::testConfig()
 {
+	if (!QFileInfo::exists(m_dataFolderEdit->text() + "/Skyrim.esm"))
+		return false;
+
+	if (!QFileInfo::exists(m_pluginsListPathEdit->text()))
+		return false;
+
+	QStringList filters;
+	filters.push_back("*.ess");
+	QDir saveDir(m_savesFolderEdit->text());
+	if (saveDir.entryList(filters).empty())
+		return false;
+
+	if (m_useModOrganizerCheckBox->checkState() == Qt::Checked)
+	{
+		QFileInfo info(m_modOrganizerPathEdit->text());
+		if (!info.exists())
+			return false;
+		if (!info.isExecutable())
+			return false;
+	}
+
 	return true;
 }
 
@@ -235,9 +266,66 @@ void ConfigPane::saveConfig()
 	settings.setValue("modOrganizerPath", m_modOrganizerPathEdit->text());
 }
 
+bool ConfigPane::prepareParsing()
+{
+	QString appDir = QCoreApplication::applicationDirPath();
+
+	// Prepare the "data/paths.txt" file
+	QDir dataDir(appDir);
+	if (!dataDir.cd("data"))
+	{
+		if (!dataDir.mkdir("data"))
+		{
+			QMessageBox::warning(this, tr("Access error"), tr("Cannot create the data folder"));
+			return false;
+		}
+
+		dataDir.cd("data");
+	}
+
+	QFile file(dataDir.absolutePath() + "/paths.txt");
+	if (!file.open(QIODevice::WriteOnly))
+	{
+		QMessageBox::warning(this, tr("Access error"), tr("Cannot write to data/paths.txt"));
+		return false;
+	}
+
+	QDir::setCurrent(appDir);
+
+	QTextStream stream(&file);
+	stream << m_pluginsListPathEdit->text() << "\n"
+		<< m_dataFolderEdit->text() << "\n";
+
+	return true;
+}
+
 void ConfigPane::parseMods()
 {
+	if (!prepareParsing())
+		return;
+
+	QString modParserPath = QCoreApplication::applicationDirPath() +"/ModParser.exe";
+	int result = 0;
+
+	QString modOrganizerPath = m_modOrganizerPathEdit->text();
+	if (m_useModOrganizerCheckBox->checkState() == Qt::Checked && !modOrganizerPath.isEmpty() && QFileInfo::exists(modOrganizerPath))
+		result = QProcess::execute(modOrganizerPath + " " + modParserPath);
+	else
+		result = QProcess::execute(modParserPath);
+
+	if (result)
+	{
+		QMessageBox::warning(this, tr("Error in parsing"), tr("There was an error trying to extract ingredients from the plugins"));
+		return;
+	}
+
+//	std::this_thread::sleep_for(std::chrono::seconds(3));
+
 	emit startModsParse();
+
+	PluginsList::GetInstance().loadList();
+	EffectsList::GetInstance().loadList();
+	IngredientsList::GetInstance().loadList();
 
 	emit endModsParse();
 }
