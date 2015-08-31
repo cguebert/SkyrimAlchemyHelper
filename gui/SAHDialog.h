@@ -14,10 +14,16 @@ public:
 
 	QSize sizeHint() const;
 
+signals:
+	void dialogShown();
+
 public slots:
 	void editConfig();
+	void afterLaunch();
 
 protected:
+	void showEvent(QShowEvent* event);
+
 	QTabWidget* m_tabWidget;
 };
 

@@ -3,6 +3,7 @@
 
 #include <QDialog>
 
+class ConfigPane;
 class QTabWidget;
 
 class ConfigDialog : public QDialog
@@ -10,16 +11,16 @@ class ConfigDialog : public QDialog
 	Q_OBJECT
 
 public:
-	ConfigDialog(QWidget *parent = 0);
+	ConfigDialog(QWidget *parent = 0, bool firstLaunch = false);
 
 	QSize sizeHint() const;
 
 public slots:
-	void saveConfig();
-	void parseMods();
+	void onOk();
 
 protected:
 	QTabWidget* m_tabWidget;
+	ConfigPane* m_configPane;
 };
 
 #endif // CONFIGDIALOG_H

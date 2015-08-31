@@ -3,9 +3,10 @@
 
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
-	SAHDialog w;
-	w.show();
+	QApplication app(argc, argv);
+	app.setOrganizationName("Christophe Guebert");
+	app.setApplicationName("SkyrimAlchemyHelper");
 
-	return a.exec();
+	SAHDialog dlg;
+	return dlg.exec();
 }

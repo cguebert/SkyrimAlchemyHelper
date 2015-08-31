@@ -25,6 +25,8 @@ SAHDialog::SAHDialog(QWidget *parent)
 	vLayout->addLayout(buttonsLayout);
 
 	setLayout(vLayout);
+
+	connect(this, SIGNAL(dialogShown()), this, SLOT(afterLaunch()), Qt::QueuedConnection);
 }
 
 QSize SAHDialog::sizeHint() const
@@ -36,4 +38,22 @@ void SAHDialog::editConfig()
 {
 	ConfigDialog dlg(this);
 	dlg.exec();
+}
+
+void SAHDialog::afterLaunch()
+{
+	QSettings settings;
+	if (!settings.contains("useModOrganizer"))
+	{
+		QMessageBox::information(this, tr("First launch"), tr("Please verify the configuration"));
+		ConfigDialog dlg(this, true);
+		dlg.exec();
+	}
+}
+
+void SAHDialog::showEvent(QShowEvent* event) 
+{
+	QDialog::showEvent(event);
+
+	emit dialogShown();
 }
