@@ -11,23 +11,13 @@ void IngredientsSelector::updateList()
 {
 	const auto& ingredients = IngredientsList::instance().ingredients();
 
-	ItemList list;
+	QStringList list;
 	for (const auto& ingredient : ingredients)
-		list.emplace_back(ingredient.ingId, ingredient.name);
-	setItems(std::move(list));
+		list << ingredient.name;
+	setItems(list);
 }
 
-bool IngredientsSelector::setFilterContains(int32_t id)
-{
-	return false;
-}
-
-bool IngredientsSelector::setFilterDoesNotContain(int32_t id)
-{
-	return false;
-}
-
-bool IngredientsSelector::removeFilter(int32_t id)
+bool IngredientsSelector::filterAction(FilterActionType action, int id)
 {
 	return false;
 }

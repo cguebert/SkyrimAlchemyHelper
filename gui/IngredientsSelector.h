@@ -12,8 +12,6 @@ public slots:
 	void updateList();
 
 protected:
-	bool setFilterContains(int32_t id) override;
-	bool setFilterDoesNotContain(int32_t id) override;
-	bool removeFilter(int32_t id) override;
+	bool filterAction(FilterActionType action, int id) override;
 };
 

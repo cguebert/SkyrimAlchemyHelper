@@ -7,27 +7,27 @@
 
 class QVBoxLayout;
 
+enum class FilterActionType
+{ addFilterContains, addFilterDoesNotContain, RemoveFilter };
+
 class SelectorWidget : public QWidget
 {
 	Q_OBJECT
 public:
 	explicit SelectorWidget(QWidget* parent = nullptr);
 
-	using ItemPair = std::pair<int32_t, QString>;
-	using ItemList = std::vector<ItemPair>;
-
-	void setItems(ItemList&& list);
+	void setItems(QStringList items);
 
 public slots:
-	void setFilterContains();
-	void setFilterDoesNotContain();
+	void addFilterContains();
+	void addFilterDoesNotContain();
 	void removeFilter();
 
 protected:
-	virtual bool setFilterContains(int32_t id) = 0;
-	virtual bool setFilterDoesNotContain(int32_t id) = 0;
-	virtual bool removeFilter(int32_t id) = 0;
+	virtual bool filterAction(FilterActionType actionType, int id) = 0;
 
-	ItemList m_items;
+	void parseFilterAction(FilterActionType actionType);
+
+	QStringList m_items;
 };
 

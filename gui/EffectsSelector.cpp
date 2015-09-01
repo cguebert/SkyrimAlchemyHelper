@@ -11,23 +11,13 @@ void EffectsSelector::updateList()
 {
 	const auto& effects = EffectsList::instance().effects();
 
-	ItemList list;
+	QStringList list;
 	for (const auto& effect : effects)
-		list.emplace_back(effect.id, effect.name);
-	setItems(std::move(list));
+		list << effect.name;
+	setItems(list);
 }
 
-bool EffectsSelector::setFilterContains(int32_t id)
-{
-	return false;
-}
-
-bool EffectsSelector::setFilterDoesNotContain(int32_t id)
-{
-	return false;
-}
-
-bool EffectsSelector::removeFilter(int32_t id)
+bool EffectsSelector::filterAction(FilterActionType action, int id)
 {
 	return false;
 }
