@@ -5,7 +5,7 @@
 
 PluginsListModel::PluginsListModel(QObject* parent)
 	: QAbstractTableModel(parent)
-	, m_pluginsList(PluginsList::GetInstance())
+	, m_pluginsList(PluginsList::instance())
 {
 
 }

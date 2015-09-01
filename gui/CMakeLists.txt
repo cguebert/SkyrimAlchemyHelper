@@ -17,9 +17,11 @@ set(HEADER_FILES
 	EffectsList.h
 	EffectsListModel.h
 	EffectsListWidget.h
+	EffectsSelector.h
 	IngredientsList.h
 	IngredientsListModel.h
 	IngredientsListWidget.h
+	IngredientsSelector.h
 	MainWindow.h
 	PluginsList.h
 	PluginsListModel.h
@@ -27,6 +29,7 @@ set(HEADER_FILES
 	PotionsList.h
 	PotionsListModel.h
 	PotionsListWidget.h
+	SelectorWidget.h
 )
 
 set(SOURCE_FILES
@@ -36,9 +39,11 @@ set(SOURCE_FILES
 	EffectsList.cpp
 	EffectsListModel.cpp
 	EffectsListWidget.cpp
+	EffectsSelector.cpp
 	IngredientsList.cpp
 	IngredientsListModel.cpp
 	IngredientsListWidget.cpp
+	IngredientsSelector.cpp
 	MainWindow.cpp
 	PluginsList.cpp
 	PluginsListModel.cpp
@@ -46,6 +51,7 @@ set(SOURCE_FILES
 	PotionsList.cpp
 	PotionsListModel.cpp
 	PotionsListWidget.cpp
+	SelectorWidget.cpp
 )
 
 set(RESSOURCE_FILES SAH.qrc SAH.rc)

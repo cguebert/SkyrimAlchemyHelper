@@ -3,7 +3,7 @@
 
 PotionsListModel::PotionsListModel(QObject* parent)
 	: QAbstractTableModel(parent)
-	, m_potionsList(PotionsList::GetInstance())
+	, m_potionsList(PotionsList::instance())
 {
 }
 

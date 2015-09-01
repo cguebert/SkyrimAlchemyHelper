@@ -7,7 +7,7 @@
 class PotionsList
 {
 public:
-	static PotionsList& GetInstance();
+	static PotionsList& instance();
 
 protected:
 	PotionsList();

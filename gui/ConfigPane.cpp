@@ -384,9 +384,9 @@ void ConfigPane::updateLists()
 {
 	emit startModsParse();
 
-	PluginsList::GetInstance().loadList();
-	EffectsList::GetInstance().loadList();
-	IngredientsList::GetInstance().loadList();
+	PluginsList::instance().loadList();
+	EffectsList::instance().loadList();
+	IngredientsList::instance().loadList();
 
 	emit endModsParse();
 }

@@ -5,9 +5,9 @@
 
 IngredientsListModel::IngredientsListModel(QObject* parent)
 	: QAbstractTableModel(parent)
-	, m_ingredientsList(IngredientsList::GetInstance())
-	, m_effectsList(EffectsList::GetInstance())
-	, m_pluginsList(PluginsList::GetInstance())
+	, m_ingredientsList(IngredientsList::instance())
+	, m_effectsList(EffectsList::instance())
+	, m_pluginsList(PluginsList::instance())
 {
 }
 

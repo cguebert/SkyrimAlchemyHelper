@@ -7,7 +7,7 @@
 class IngredientsList
 {
 public:
-	static IngredientsList& GetInstance();
+	static IngredientsList& instance();
 
 	struct EffectData
 	{

@@ -7,7 +7,7 @@
 
 const QString fileName = "data/ingredients.txt";
 
-IngredientsList& IngredientsList::GetInstance()
+IngredientsList& IngredientsList::instance()
 {
 	static IngredientsList ingredients;
 	return ingredients;
@@ -22,8 +22,8 @@ void IngredientsList::loadList()
 {
 	m_ingredients.clear();
 
-	PluginsList& plugins = PluginsList::GetInstance();
-	EffectsList& effects = EffectsList::GetInstance();
+	PluginsList& plugins = PluginsList::instance();
+	EffectsList& effects = EffectsList::instance();
 
 	QFile inputFile(fileName);
 	if (inputFile.open(QIODevice::ReadOnly))
@@ -76,8 +76,8 @@ void IngredientsList::loadList()
 
 void IngredientsList::saveList()
 {
-	PluginsList& plugins = PluginsList::GetInstance();
-	EffectsList& effects = EffectsList::GetInstance();
+	PluginsList& plugins = PluginsList::instance();
+	EffectsList& effects = EffectsList::instance();
 
 	QFile outputFile(fileName);
 	if(outputFile.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -114,7 +114,7 @@ int IngredientsList::find(QString name) const
 
 void IngredientsList::removeIngredients(int first, int count)
 {
-	static EffectsList& effects = EffectsList::GetInstance();
+	static EffectsList& effects = EffectsList::instance();
 	for(int i = first, nb = m_ingredients.size(); i < nb && i < first + count; ++i)
 	{
 		for(int j = 0; j < 4; ++j)

@@ -3,7 +3,7 @@
 
 #include "PotionsList.h"
 
-PotionsList& PotionsList::GetInstance()
+PotionsList& PotionsList::instance()
 {
 	static PotionsList potions;
 	return potions;

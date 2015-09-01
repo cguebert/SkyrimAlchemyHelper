@@ -7,7 +7,7 @@
 class PluginsList
 {
 public:
-	static PluginsList& GetInstance();
+	static PluginsList& instance();
 
 	struct Plugin
 	{

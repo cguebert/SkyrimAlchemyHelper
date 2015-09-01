@@ -5,7 +5,7 @@
 
 const QString fileName = "data/effects.txt";
 
-EffectsList& EffectsList::GetInstance()
+EffectsList& EffectsList::instance()
 {
 	static EffectsList effects;
 	return effects;

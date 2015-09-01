@@ -3,7 +3,7 @@
 
 EffectsListModel::EffectsListModel(QObject* parent)
 	: QAbstractTableModel(parent)
-	, m_effectsList(EffectsList::GetInstance())
+	, m_effectsList(EffectsList::instance())
 {
 }
 

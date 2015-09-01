@@ -7,7 +7,7 @@
 class EffectsList
 {
 public:
-	static EffectsList& GetInstance();
+	static EffectsList& instance();
 
 	struct Effect
 	{
