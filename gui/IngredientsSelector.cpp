@@ -19,5 +19,6 @@ void IngredientsSelector::updateList()
 
 bool IngredientsSelector::filterAction(FilterActionType action, int id)
 {
+	emit ingredientFilterAction(action, id);
 	return false;
 }

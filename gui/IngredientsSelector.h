@@ -8,6 +8,9 @@ class IngredientsSelector : public SelectorWidget
 public:
 	explicit IngredientsSelector(QWidget* parent = nullptr);
 
+signals:
+	void ingredientFilterAction(FilterActionType action, int id);
+
 public slots:
 	void updateList();
 

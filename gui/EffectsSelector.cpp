@@ -19,5 +19,6 @@ void EffectsSelector::updateList()
 
 bool EffectsSelector::filterAction(FilterActionType action, int id)
 {
-	return false;
+	emit effectFilterAction(action, id);
+	return true;
 }

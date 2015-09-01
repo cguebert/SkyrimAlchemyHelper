@@ -42,7 +42,7 @@ void SelectorWidget::setItems(QStringList items)
 		addFilterContainsButton->setMaximumSize(buttonSize, buttonSize);
 		addFilterContainsButton->setFlat(true);
 		connect(addFilterContainsButton, SIGNAL(clicked(bool)), addFilterContainsAction, SLOT(trigger()));
-		connect(addFilterContainsAction, SIGNAL(triggered(bool)), this, SLOT(addFilterContains()));
+		connect(addFilterContainsAction, SIGNAL(triggered(bool)), this, SLOT(modifyFilter()));
 		boxLayout->addWidget(addFilterContainsButton);
 
 		auto addFilterDoesNotContainAction = new QAction(boxLayout);
@@ -51,7 +51,7 @@ void SelectorWidget::setItems(QStringList items)
 		addFilterDoesNotContainButton->setMaximumSize(buttonSize, buttonSize);
 		addFilterDoesNotContainButton->setFlat(true);
 		connect(addFilterDoesNotContainButton, SIGNAL(clicked(bool)), addFilterDoesNotContainAction, SLOT(trigger()));
-		connect(addFilterDoesNotContainAction, SIGNAL(triggered(bool)), this, SLOT(addFilterDoesNotContain()));
+		connect(addFilterDoesNotContainAction, SIGNAL(triggered(bool)), this, SLOT(modifyFilter()));
 		boxLayout->addWidget(addFilterDoesNotContainButton);
 
 	/*	auto removeFilterAction = new QAction(boxLayout);
@@ -60,7 +60,7 @@ void SelectorWidget::setItems(QStringList items)
 		removeFilterButton->setMaximumSize(buttonSize, buttonSize);
 		removeFilterButton->setFlat(true);
 		connect(removeFilterButton, SIGNAL(clicked(bool)), removeFilterAction, SLOT(trigger()));
-		connect(removeFilterAction, SIGNAL(triggered(bool)), this, SLOT(addFilterContains()));
+		connect(removeFilterAction, SIGNAL(triggered(bool)), this, SLOT(modifyFilter()));
 		boxLayout->addWidget(removeFilterButton);
 		*/
 		auto label = new QLabel(item);
@@ -71,29 +71,19 @@ void SelectorWidget::setItems(QStringList items)
 	}
 }
 
-void SelectorWidget::parseFilterAction(FilterActionType actionType)
+void SelectorWidget::modifyFilter()
 {
 	QAction* action = qobject_cast<QAction*>(sender());
 	if (action)
 	{
 		bool ok = false;
-		int id = action->data().toInt(&ok);
+		int val = action->data().toInt(&ok);
 		if (ok)
-			filterAction(actionType, id);
+		{
+			int typeVal = val >> 16;
+			auto type = static_cast<FilterActionType>(typeVal);
+			int id = val & 0xFFFF;
+			filterAction(type, id);
+		}
 	}
-}
-
-void SelectorWidget::addFilterContains()
-{
-	parseFilterAction(FilterActionType::addFilterContains);
-}
-
-void SelectorWidget::addFilterDoesNotContain()
-{
-	parseFilterAction(FilterActionType::addFilterDoesNotContain);
-}
-
-void SelectorWidget::removeFilter()
-{
-	parseFilterAction(FilterActionType::RemoveFilter);
 }

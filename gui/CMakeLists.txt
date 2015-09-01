@@ -18,6 +18,8 @@ set(HEADER_FILES
 	EffectsListModel.h
 	EffectsListWidget.h
 	EffectsSelector.h
+	FiltersWidget.h
+	FlowLayout.h
 	IngredientsList.h
 	IngredientsListModel.h
 	IngredientsListWidget.h
@@ -40,6 +42,8 @@ set(SOURCE_FILES
 	EffectsListModel.cpp
 	EffectsListWidget.cpp
 	EffectsSelector.cpp
+	FiltersWidget.cpp
+	FlowLayout.cpp
 	IngredientsList.cpp
 	IngredientsListModel.cpp
 	IngredientsListWidget.cpp

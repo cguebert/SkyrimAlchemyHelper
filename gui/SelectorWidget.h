@@ -5,10 +5,9 @@
 #include <vector>
 #include <cstdint>
 
-class QVBoxLayout;
+#include "FiltersWidget.h"
 
-enum class FilterActionType
-{ addFilterContains, addFilterDoesNotContain, RemoveFilter };
+class QVBoxLayout;
 
 class SelectorWidget : public QWidget
 {
@@ -19,14 +18,10 @@ public:
 	void setItems(QStringList items);
 
 public slots:
-	void addFilterContains();
-	void addFilterDoesNotContain();
-	void removeFilter();
+	void modifyFilter();
 
 protected:
 	virtual bool filterAction(FilterActionType actionType, int id) = 0;
-
-	void parseFilterAction(FilterActionType actionType);
 
 	QStringList m_items;
 };

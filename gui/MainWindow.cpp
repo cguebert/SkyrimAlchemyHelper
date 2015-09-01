@@ -4,6 +4,7 @@
 #include "ConfigDialog.h"
 
 #include "EffectsSelector.h"
+#include "FiltersWidget.h"
 #include "IngredientsSelector.h"
 #include "PotionsListWidget.h"
 
@@ -11,6 +12,20 @@ MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
 	setWindowTitle("Skyrim Alchemy Helper");
+
+	setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
+	setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
+	setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
+	setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+	setTabPosition(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea, QTabWidget::North);
+
+	m_filtersWidget = new FiltersWidget(this);
+	auto filtersDock = new QDockWidget(tr("Filters"));
+	filtersDock->setObjectName("FiltersDock");
+	filtersDock->setWidget(m_filtersWidget);
+	filtersDock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
+	filtersDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+	addDockWidget(Qt::TopDockWidgetArea, filtersDock);
 
 	auto ingredientsScrollArea = new QScrollArea(this);
 	ingredientsScrollArea->setFrameStyle(QFrame::NoFrame);
@@ -37,10 +52,9 @@ MainWindow::MainWindow(QWidget *parent)
 	addDockWidget(Qt::LeftDockWidgetArea, effectsDock);
 	tabifyDockWidget(effectsDock, ingredientsDock);
 
-	setTabPosition(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea, QTabWidget::North);
-
 	QWidget* mainWidget = new QWidget(this);
 	QVBoxLayout* vLayout = new QVBoxLayout;
+	vLayout->setContentsMargins(0, 0, 0, 0);
 
 	auto potionsWidget = new PotionsListWidget;
 	vLayout->addWidget(potionsWidget);
@@ -59,6 +73,9 @@ MainWindow::MainWindow(QWidget *parent)
 	setCentralWidget(mainWidget);
 
 	connect(this, SIGNAL(mainWindowShown()), this, SLOT(afterLaunch()), Qt::QueuedConnection);
+
+	connect(m_ingredientsSelector, SIGNAL(ingredientFilterAction(FilterActionType, int)), m_filtersWidget, SLOT(ingredientFilterAction(FilterActionType, int)));
+	connect(m_effectsSelector, SIGNAL(effectFilterAction(FilterActionType, int)), m_filtersWidget, SLOT(effectFilterAction(FilterActionType, int)));
 
 	readSettings();
 }
@@ -89,6 +106,7 @@ void MainWindow::editConfig()
 
 	m_effectsSelector->updateList();
 	m_ingredientsSelector->updateList();
+	m_filtersWidget->clear();
 }
 
 void MainWindow::afterLaunch()

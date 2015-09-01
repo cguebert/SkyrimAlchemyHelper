@@ -8,6 +8,9 @@ class EffectsSelector : public SelectorWidget
 public:
 	explicit EffectsSelector(QWidget* parent = nullptr);
 
+signals:
+	void effectFilterAction(FilterActionType action, int id);
+
 public slots:
 	void updateList();
 
