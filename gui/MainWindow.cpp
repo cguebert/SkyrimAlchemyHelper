@@ -1,21 +1,23 @@
 #include <QtWidgets>
 
-#include "SAHDialog.h"
+#include "MainWindow.h"
 #include "ConfigDialog.h"
 
 #include "PotionsListWidget.h"
 
-SAHDialog::SAHDialog(QWidget *parent)
-	: QDialog(parent)
+MainWindow::MainWindow(QWidget *parent)
+	: QMainWindow(parent)
 {
 	setWindowTitle("Skyrim Alchemy Helper");
+
+	QWidget* mainWidget = new QWidget(this);
 	QVBoxLayout* vLayout = new QVBoxLayout;
 
 	auto potionsWidget = new PotionsListWidget;
 	vLayout->addWidget(potionsWidget);
 
 	QPushButton* okButton = new QPushButton(tr("Exit"), this);
-	connect(okButton, SIGNAL(clicked()), this, SLOT(accept()));
+	connect(okButton, SIGNAL(clicked()), this, SLOT(close()));
 	QPushButton* configButton = new QPushButton(tr("Config"), this);
 	connect(configButton, SIGNAL(clicked()), this, SLOT(editConfig()));
 	QHBoxLayout* buttonsLayout = new QHBoxLayout;
@@ -24,23 +26,24 @@ SAHDialog::SAHDialog(QWidget *parent)
 	buttonsLayout->addWidget(okButton);
 	vLayout->addLayout(buttonsLayout);
 
-	setLayout(vLayout);
+	mainWidget->setLayout(vLayout);
+	setCentralWidget(mainWidget);
 
-	connect(this, SIGNAL(dialogShown()), this, SLOT(afterLaunch()), Qt::QueuedConnection);
+	connect(this, SIGNAL(mainWindowShown()), this, SLOT(afterLaunch()), Qt::QueuedConnection);
 }
 
-QSize SAHDialog::sizeHint() const
+QSize MainWindow::sizeHint() const
 {
 	return QSize(800, 600);
 }
 
-void SAHDialog::editConfig()
+void MainWindow::editConfig()
 {
 	ConfigDialog dlg(this);
 	dlg.exec();
 }
 
-void SAHDialog::afterLaunch()
+void MainWindow::afterLaunch()
 {
 	QSettings settings;
 	if (!settings.contains("useModOrganizer"))
@@ -51,9 +54,9 @@ void SAHDialog::afterLaunch()
 	}
 }
 
-void SAHDialog::showEvent(QShowEvent* event) 
+void MainWindow::showEvent(QShowEvent* event)
 {
-	QDialog::showEvent(event);
+	QMainWindow::showEvent(event);
 
-	emit dialogShown();
+	emit mainWindowShown();
 }

@@ -1,4 +1,4 @@
-#include "SAHDialog.h"
+#include "MainWindow.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
@@ -7,6 +7,8 @@ int main(int argc, char *argv[])
 	app.setOrganizationName("Christophe Guebert");
 	app.setApplicationName("SkyrimAlchemyHelper");
 
-	SAHDialog dlg;
-	return dlg.exec();
+	MainWindow window;
+	window.show();
+
+	return app.exec();
 }

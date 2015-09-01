@@ -20,16 +20,17 @@ set(HEADER_FILES
 	IngredientsList.h
 	IngredientsListModel.h
 	IngredientsListWidget.h
+	MainWindow.h
 	PluginsList.h
 	PluginsListModel.h
 	PluginsListWidget.h
 	PotionsList.h
 	PotionsListModel.h
 	PotionsListWidget.h
-	SAHDialog.h
 )
 
 set(SOURCE_FILES
+	main.cpp
 	ConfigDialog.cpp
 	ConfigPane.cpp
 	EffectsList.cpp
@@ -38,14 +39,13 @@ set(SOURCE_FILES
 	IngredientsList.cpp
 	IngredientsListModel.cpp
 	IngredientsListWidget.cpp
-	main.cpp
+	MainWindow.cpp
 	PluginsList.cpp
 	PluginsListModel.cpp
 	PluginsListWidget.cpp
 	PotionsList.cpp
 	PotionsListModel.cpp
 	PotionsListWidget.cpp
-	SAHDialog.cpp
 )
 
 set(RESSOURCE_FILES SAH.qrc SAH.rc)
