@@ -15,7 +15,6 @@ public slots:
 	void refreshList();
 
 protected:
-
 };
 
 #endif // POTIONSLISTWIDGET_H

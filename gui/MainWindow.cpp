@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
 	setTabPosition(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea, QTabWidget::North);
 
 	auto filtersScrollArea = new QScrollArea(this);
-	filtersScrollArea->setFrameStyle(QFrame::NoFrame);
+//	filtersScrollArea->setFrameStyle(QFrame::NoFrame);
 	filtersScrollArea->setWidgetResizable(true);
 	m_filtersWidget = new FiltersWidget(this);
 	filtersScrollArea->setWidget(m_filtersWidget);
@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
 	addDockWidget(Qt::TopDockWidgetArea, filtersDock);
 
 	auto ingredientsScrollArea = new QScrollArea(this);
-	ingredientsScrollArea->setFrameStyle(QFrame::NoFrame);
+//	ingredientsScrollArea->setFrameStyle(QFrame::NoFrame);
 	ingredientsScrollArea->setWidgetResizable(true);
 	m_ingredientsSelector = new IngredientsSelector(this);
 	ingredientsScrollArea->setWidget(m_ingredientsSelector);
@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
 	addDockWidget(Qt::LeftDockWidgetArea, ingredientsDock);
 
 	auto effectsScrollArea = new QScrollArea(this);
-	effectsScrollArea->setFrameStyle(QFrame::NoFrame);
+//	effectsScrollArea->setFrameStyle(QFrame::NoFrame);
 	effectsScrollArea->setWidgetResizable(true);
 	m_effectsSelector = new EffectsSelector(this);
 	effectsScrollArea->setWidget(m_effectsSelector);
@@ -59,15 +59,21 @@ MainWindow::MainWindow(QWidget *parent)
 
 	QWidget* mainWidget = new QWidget(this);
 	QVBoxLayout* vLayout = new QVBoxLayout;
+	vLayout->setContentsMargins(0, 0, 0, 0);
 
+	auto potionsScrollArea = new QScrollArea(this);
 	auto potionsWidget = new PotionsListWidget;
-	vLayout->addWidget(potionsWidget);
+	potionsScrollArea->setWidget(potionsWidget);
+	potionsScrollArea->setFrameStyle(QFrame::NoFrame);
+	potionsScrollArea->setWidgetResizable(true);
+	vLayout->addWidget(potionsScrollArea);
 
 	QPushButton* okButton = new QPushButton(tr("Exit"), this);
 	connect(okButton, SIGNAL(clicked()), this, SLOT(close()));
 	QPushButton* configButton = new QPushButton(tr("Config"), this);
 	connect(configButton, SIGNAL(clicked()), this, SLOT(editConfig()));
 	QHBoxLayout* buttonsLayout = new QHBoxLayout;
+	buttonsLayout->setContentsMargins(5, 5, 5, 5);
 	buttonsLayout->addWidget(configButton);
 	buttonsLayout->addStretch();
 	buttonsLayout->addWidget(okButton);
