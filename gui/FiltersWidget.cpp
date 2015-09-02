@@ -23,7 +23,14 @@ FiltersWidget::FiltersWidget(QWidget* parent)
 void FiltersWidget::clear()
 {
 	while (auto child = m_flowLayout->takeAt(0))
+	{
+		auto w = child->widget();
+		if (w) delete w;
 		delete child;
+	}
+
+	m_effects.clear();
+	m_ingredients.clear();
 }
 
 bool FiltersWidget::updateExisting(std::vector<FilterItem>& list, FilterActionType action, int id)

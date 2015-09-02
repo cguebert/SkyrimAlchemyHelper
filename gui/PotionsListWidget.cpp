@@ -43,7 +43,7 @@ void PotionsListWidget::refreshList()
 			auto ingLabel = new QLabel(ingredients[potion.ingredients[ingId]].name);
 			ingredientsLayout->addWidget(ingLabel);
 		}
-		ingredientsLayout->addStretch();
+	//	ingredientsLayout->addStretch();
 		potionLayout->addLayout(ingredientsLayout);
 
 		auto effectsLayout = new QVBoxLayout;
@@ -53,7 +53,7 @@ void PotionsListWidget::refreshList()
 			auto effLabel = new QLabel(effects[potion.effects[effId]].name);
 			effectsLayout->addWidget(effLabel);
 		}
-		effectsLayout->addStretch();
+	//	effectsLayout->addStretch();
 		potionLayout->addLayout(effectsLayout);
 
 		vLayout->addWidget(potionWidget);

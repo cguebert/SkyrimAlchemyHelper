@@ -62,6 +62,10 @@ void IngredientsList::loadList()
 					effects.incrementNbIngredients(effectData.effectId);
 			}
 
+			std::sort(std::begin(ingredient.effects), std::end(ingredient.effects), [](const EffectData& lhs, const EffectData& rhs){
+				return lhs.effectId < rhs.effectId;
+			});
+
 			if (!ingredient.name.isEmpty() && ingredient.pluginId != -1 && validEffects)
 				m_ingredients.push_back(ingredient);
 		}
