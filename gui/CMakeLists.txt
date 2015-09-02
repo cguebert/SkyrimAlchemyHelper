@@ -4,7 +4,6 @@ set(PROJECT_NAME "SkyrimAlchemyHelper")
 project(${PROJECT_NAME})
 
 set(QT_BASE_DIR "" CACHE PATH "Qt5 install prefix") # C:/Qt/5/msvc2015/
-set(QT_SUFFIX "54" CACHE STRING "Qt libs suffix") # 54 for Qt 5.4
 list(APPEND CMAKE_PREFIX_PATH ${QT_BASE_DIR})
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -71,8 +70,6 @@ install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${TARGET_DIR})
 
 # Install Qt files
 set(QT_LIBS Qt5Core Qt5Gui Qt5Widgets)
-set(QT_ADDITIONAL_LIBS icudt icuin icuuc)
-
 set(qtLibsRelease)
 set(qtLibsDebug)
 
@@ -81,13 +78,20 @@ foreach(libName ${QT_LIBS})
 	list(APPEND qtLibsDebug		"${QT_BASE_DIR}/bin/${libName}d.dll")
 endforeach(libName)
 
-foreach(libName ${QT_ADDITIONAL_LIBS})
-	list(APPEND qtLibsRelease	"${QT_BASE_DIR}/bin/${libName}${QT_SUFFIX}.dll")
-	list(APPEND qtLibsDebug		"${QT_BASE_DIR}/bin/${libName}${QT_SUFFIX}.dll")
-endforeach(libName)
-
 install(FILES ${qtLibsRelease} CONFIGURATIONS Release RelWithDebInfo DESTINATION ${TARGET_DIR})
 install(FILES ${qtLibsDebug} CONFIGURATIONS Debug DESTINATION ${TARGET_DIR})
 
-install(FILES "${QT_BASE_DIR}/plugins/platforms/qwindows.dll" CONFIGURATIONS Release RelWithDebInfo DESTINATION "${TARGET_DIR}/plugins/platforms")
-install(FILES "${QT_BASE_DIR}/plugins/platforms/qwindowsd.dll" CONFIGURATIONS Debug DESTINATION "${TARGET_DIR}/plugins/platforms")
+set(QT_PLUGINS qdds qgif qicns qico qjp2 qjpeg qmng qsvg qtga qtiff qwbmp qwebp)
+set(qtPluginsRelease)
+set(qtPluginsDebug)
+
+foreach(libName ${QT_PLUGINS})
+	list(APPEND qtPluginsRelease	"${QT_BASE_DIR}/plugins/imageformats/${libName}.dll")
+	list(APPEND qtPluginsDebug		"${QT_BASE_DIR}/plugins/imageformats/${libName}d.dll")
+endforeach(libName)
+
+install(FILES ${qtPluginsRelease} CONFIGURATIONS Release RelWithDebInfo DESTINATION "${TARGET_DIR}/imageformats")
+install(FILES ${qtPluginsDebug} CONFIGURATIONS Debug DESTINATION "${TARGET_DIR}/imageformats")
+
+install(FILES "${QT_BASE_DIR}/plugins/platforms/qwindows.dll" CONFIGURATIONS Release RelWithDebInfo DESTINATION "${TARGET_DIR}/platforms")
+install(FILES "${QT_BASE_DIR}/plugins/platforms/qwindowsd.dll" CONFIGURATIONS Debug DESTINATION "${TARGET_DIR}/platforms")
