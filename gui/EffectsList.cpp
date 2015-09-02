@@ -30,8 +30,8 @@ void EffectsList::loadList()
 			effect.name = in.readLine();
 
 			QString line = in.readLine();
-			effect.id = line.toUInt(nullptr, 16);
-			if (!effect.name.isEmpty() && effect.id)
+			effect.code = line.toUInt(nullptr, 16);
+			if (!effect.name.isEmpty() && effect.code)
 				m_effects.push_back(effect);
 		}
 		inputFile.close();
@@ -52,15 +52,15 @@ void EffectsList::saveList()
 		for(const Effect& effect : m_effects)
 		{
 			out << effect.name << '\n';
-			out << QString::number(effect.id, 16).toUpper() << '\n';
+			out << QString::number(effect.code, 16).toUpper() << '\n';
 		}
 	}
 }
 
-int EffectsList::find(quint32 id) const
+int EffectsList::find(quint32 code) const
 {
-	auto it = std::find_if(m_effects.begin(), m_effects.end(), [id](const Effect& effect){
-		return effect.id == id;
+	auto it = std::find_if(m_effects.begin(), m_effects.end(), [code](const Effect& effect){
+		return effect.code == code;
 	});
 	if(it != m_effects.end())
 		return it - m_effects.begin();

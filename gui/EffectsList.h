@@ -11,14 +11,13 @@ public:
 
 	struct Effect
 	{
-		Effect() : id(0), nbIngredients(0) {}
 		QString name;
-		quint32 id;
-		int nbIngredients;
+		quint32 code = 0;
+		int nbIngredients = 0;
 	};
 
 	int size() const;
-	int find(quint32 id) const; // -1 if not found
+	int find(quint32 code) const; // -1 if not found
 	int find(QString name) const; // -1 if not found
 	const QVector<Effect>& effects() const;
 	Effect& effect(int index); // Will launch an exception if index is invalid

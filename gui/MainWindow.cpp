@@ -7,6 +7,7 @@
 #include "FiltersWidget.h"
 #include "IngredientsSelector.h"
 #include "PotionsListWidget.h"
+#include "PotionsList.h"
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -19,10 +20,14 @@ MainWindow::MainWindow(QWidget *parent)
 	setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 	setTabPosition(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea, QTabWidget::North);
 
+	auto filtersScrollArea = new QScrollArea(this);
+	filtersScrollArea->setFrameStyle(QFrame::NoFrame);
+	filtersScrollArea->setWidgetResizable(true);
 	m_filtersWidget = new FiltersWidget(this);
+	filtersScrollArea->setWidget(m_filtersWidget);
 	auto filtersDock = new QDockWidget(tr("Filters"));
 	filtersDock->setObjectName("FiltersDock");
-	filtersDock->setWidget(m_filtersWidget);
+	filtersDock->setWidget(filtersScrollArea);
 	filtersDock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	filtersDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
 	addDockWidget(Qt::TopDockWidgetArea, filtersDock);
@@ -54,7 +59,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 	QWidget* mainWidget = new QWidget(this);
 	QVBoxLayout* vLayout = new QVBoxLayout;
-	vLayout->setContentsMargins(0, 0, 0, 0);
 
 	auto potionsWidget = new PotionsListWidget;
 	vLayout->addWidget(potionsWidget);
@@ -107,6 +111,7 @@ void MainWindow::editConfig()
 	m_effectsSelector->updateList();
 	m_ingredientsSelector->updateList();
 	m_filtersWidget->clear();
+	PotionsList::instance().recomputeList();
 }
 
 void MainWindow::afterLaunch()

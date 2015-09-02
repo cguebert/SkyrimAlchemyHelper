@@ -29,7 +29,6 @@ set(HEADER_FILES
 	PluginsListModel.h
 	PluginsListWidget.h
 	PotionsList.h
-	PotionsListModel.h
 	PotionsListWidget.h
 	SelectorWidget.h
 )
@@ -53,7 +52,6 @@ set(SOURCE_FILES
 	PluginsListModel.cpp
 	PluginsListWidget.cpp
 	PotionsList.cpp
-	PotionsListModel.cpp
 	PotionsListWidget.cpp
 	SelectorWidget.cpp
 )

@@ -25,7 +25,7 @@ QVariant EffectsListModel::data(const QModelIndex& index, int role) const
 		switch (index.column())
 		{
 			case 0: return effect.name;
-			case 1: return QString::number(effect.id, 16).toUpper();
+			case 1: return QString::number(effect.code, 16).toUpper();
 			case 2: return effect.nbIngredients;
 		}
 		return QVariant();

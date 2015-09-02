@@ -5,6 +5,7 @@
 
 #include "EffectsList.h"
 #include "IngredientsList.h"
+#include "PotionsList.h"
 
 FiltersWidget::FiltersWidget(QWidget* parent)
 	: QWidget(parent)
@@ -25,15 +26,15 @@ void FiltersWidget::clear()
 		delete child;
 }
 
-bool FiltersWidget::updateExisting(std::vector<ItemTuple>& list, FilterActionType action, int id)
+bool FiltersWidget::updateExisting(std::vector<FilterItem>& list, FilterActionType action, int id)
 {
-	auto it = std::find_if(list.begin(), list.end(), [id](const ItemTuple& t){
-		return std::get<1>(t) == id;
+	auto it = std::find_if(list.begin(), list.end(), [id](const FilterItem& item){
+		return item.id == id;
 	});
 	if (it != list.end())
 	{
-		auto oldAction = std::get<0>(*it);
-		auto widget = std::get<2>(*it);
+		auto oldAction = it->actionType;
+		auto widget = it->widget;
 		switch (action)
 		{
 		case FilterActionType::addFilterContains:
@@ -57,6 +58,7 @@ bool FiltersWidget::updateExisting(std::vector<ItemTuple>& list, FilterActionTyp
 		case FilterActionType::RemoveFilter:
 			list.erase(it);
 			removeWidget(widget);
+			updatePotionsListFilters();
 			return false;
 		}
 	}
@@ -95,6 +97,8 @@ void FiltersWidget::effectFilterAction(FilterActionType action, int id)
 	m_flowLayout->addWidget(boxWidget);
 
 	m_effects.emplace_back(action, id, boxWidget);
+
+	updatePotionsListFilters();
 }
 
 void FiltersWidget::ingredientFilterAction(FilterActionType action, int id)
@@ -128,6 +132,8 @@ void FiltersWidget::ingredientFilterAction(FilterActionType action, int id)
 	m_flowLayout->addWidget(boxWidget);
 
 	m_ingredients.emplace_back(action, id, boxWidget);
+
+	updatePotionsListFilters();
 }
 
 void FiltersWidget::removeWidget(QWidget* widget)
@@ -157,11 +163,15 @@ void FiltersWidget::removeEffect()
 		int id = action->data().toInt(&ok);
 		if (ok)
 		{
-			auto it = std::find_if(m_effects.begin(), m_effects.end(), [id](const ItemTuple& t){
-				return std::get<1>(t) == id;
+			auto it = std::find_if(m_effects.begin(), m_effects.end(), [id](const FilterItem& item){
+				return item.id == id;
 			});
 			if (it != m_effects.end())
-				removeWidget(std::get<2>(*it));
+			{
+				removeWidget(it->widget);
+				m_effects.erase(it);
+				updatePotionsListFilters();
+			}
 		}
 	}
 }
@@ -175,11 +185,33 @@ void FiltersWidget::removeIngredient()
 		int id = action->data().toInt(&ok);
 		if (ok)
 		{
-			auto it = std::find_if(m_ingredients.begin(), m_ingredients.end(), [id](const ItemTuple& t){
-				return std::get<1>(t) == id;
+			auto it = std::find_if(m_ingredients.begin(), m_ingredients.end(), [id](const FilterItem& item){
+				return item.id == id;
 			});
 			if (it != m_ingredients.end())
-				removeWidget(std::get<2>(*it));
+			{
+				removeWidget(it->widget);
+				m_ingredients.erase(it);
+				updatePotionsListFilters();
+			}
 		}
 	}
+}
+
+void FiltersWidget::updatePotionsListFilters()
+{
+	PotionsList::Filters filters;
+	for (const auto& ing : m_ingredients)
+	{
+		bool contains = (ing.actionType == FilterActionType::addFilterContains);
+		filters.emplace_back(contains, true, ing.id);
+	}
+
+	for (const auto& effect : m_effects)
+	{
+		bool contains = (effect.actionType == FilterActionType::addFilterContains);
+		filters.emplace_back(contains, false, effect.id);
+	}
+
+	PotionsList::instance().setFilters(filters);
 }

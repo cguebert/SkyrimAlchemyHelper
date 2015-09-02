@@ -11,10 +11,9 @@ public:
 
 	struct Plugin
 	{
-		Plugin() : active(true), nbIngredients(0) {}
 		QString name;
-		bool active;
-		int nbIngredients;
+		bool active = true;
+		int nbIngredients = 0;
 	};
 
 	int size() const;

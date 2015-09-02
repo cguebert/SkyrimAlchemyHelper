@@ -24,12 +24,20 @@ public slots:
 	void removeIngredient();
 
 protected:
-	using ItemTuple = std::tuple<FilterActionType, int, QWidget*>;
+	struct FilterItem
+	{
+		FilterItem() {}
+		FilterItem(FilterActionType a, int i, QWidget* w) : actionType(a), id(i), widget(w) {}
 
-	bool updateExisting(std::vector<ItemTuple>& list, FilterActionType action, int id);
+		FilterActionType actionType;
+		int id;
+		QWidget* widget;
+	};
+
+	bool updateExisting(std::vector<FilterItem>& list, FilterActionType action, int id);
 	void removeWidget(QWidget* widget);
+	void updatePotionsListFilters();
 
 	FlowLayout *m_flowLayout;
-	using ItemTuple = std::tuple<FilterActionType, int, QWidget*>;
-	std::vector<ItemTuple> m_effects, m_ingredients;
+	std::vector<FilterItem> m_effects, m_ingredients;
 };

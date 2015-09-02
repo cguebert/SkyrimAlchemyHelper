@@ -38,7 +38,7 @@ void IngredientsList::loadList()
 			ingredient.pluginId = plugins.find(pluginName);
 
 			QString ingredientId = in.readLine();
-			ingredient.ingId = ingredientId.toUInt(nullptr, 16);
+			ingredient.code = ingredientId.toUInt(nullptr, 16);
 
 			if (ingredient.pluginId != -1)
 				plugins.incrementNbIngredients(ingredient.pluginId);
@@ -89,17 +89,27 @@ void IngredientsList::saveList()
 			if(ingredient.pluginId != -1)
 				out << plugins.plugin(ingredient.pluginId).name;
 			out << '\n';
-			out << QString::number(ingredient.ingId, 16).toUpper() << '\n';
+			out << QString::number(ingredient.code, 16).toUpper() << '\n';
 
 			for(int i = 0; i < 4; ++i)
 			{
 				const EffectData& effectData = ingredient.effects[i];
 				const EffectsList::Effect& effect = effects.effect(effectData.effectId);
-				out << QString::number(effect.id, 16).toUpper() << ' ';
+				out << QString::number(effect.code, 16).toUpper() << ' ';
 				out << effectData.magnitude << ' ' << effectData.duration << '\n';
 			}
 		}
 	}
+}
+
+int IngredientsList::find(quint32 code) const
+{
+	auto it = std::find_if(m_ingredients.begin(), m_ingredients.end(), [code](const Ingredient& ingredient){
+		return ingredient.code == code;
+	});
+	if (it != m_ingredients.end())
+		return it - m_ingredients.begin();
+	return -1;
 }
 
 int IngredientsList::find(QString name) const

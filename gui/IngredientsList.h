@@ -9,23 +9,24 @@ class IngredientsList
 public:
 	static IngredientsList& instance();
 
+	static const int nbEffectsPerIngredient = 4;
+
 	struct EffectData
 	{
-		EffectData() : effectId(-1), magnitude(0), duration(0) {}
-		int effectId;
-		float magnitude, duration;
+		int effectId = -1;
+		float magnitude = 0, duration = 0;
 	};
 
 	struct Ingredient
 	{
-		Ingredient() : pluginId(0) {}
 		QString name;
-		int pluginId;
-		unsigned int ingId;
-		EffectData effects[4];
+		int pluginId = 0;
+		quint32 code = 0;
+		EffectData effects[nbEffectsPerIngredient];
 	};
 
 	int size() const;
+	int find(quint32 code) const; // -1 if not found
 	int find(QString name) const; // -1 if not found
 	const QVector<Ingredient>& ingredients() const;
 	Ingredient& ingredient(int index); // Will launch an exception if index is invalid

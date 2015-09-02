@@ -1,9 +1,9 @@
 #ifndef POTIONSLISTWIDGET_H
 #define POTIONSLISTWIDGET_H
 
-#include <QWidget>
+#include <QFrame>
 
-class PotionsListWidget : public QWidget
+class PotionsListWidget : public QFrame
 {
 	Q_OBJECT
 public:
@@ -12,6 +12,10 @@ public:
 signals:
 
 public slots:
+	void refreshList();
+
+protected:
+
 };
 
 #endif // POTIONSLISTWIDGET_H
