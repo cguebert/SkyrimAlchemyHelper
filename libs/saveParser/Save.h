@@ -1,16 +1,22 @@
 #pragma once
 
-#include "Parser.h"
+#include <parser/Parser.h>
 
-using Inventory = std::vector < std::pair< std::string, int> > ;
+using Inventory = std::vector < std::pair< std::string, int> >;
+
+struct SaveScreenshot
+{
+	uint32_t width, height;
+	std::vector<uint8_t> data;
+};
 
 class Save
 {
 public:
-	static void parse(const std::string& fileName);
+	bool parse(const std::string& fileName);
+	SaveScreenshot screenshot() const;
 	
 protected:
-	Save(const std::string& fileName);
 	void doParse();
 
 	void parseHeader();
@@ -27,5 +33,6 @@ protected:
 		m_unknownTable3Offset;
 	std::vector<uint32_t> m_formIDArray;
 	std::vector<std::string> m_plugins;
+	SaveScreenshot m_screenshot;
 };
 

@@ -24,6 +24,4 @@ set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Applications")
 
 target_link_libraries(${PROJECT_NAME} "Parser")
 
-include_directories("../parser")
-
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${TARGET_DIR})

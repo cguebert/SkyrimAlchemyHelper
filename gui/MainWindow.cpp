@@ -2,6 +2,7 @@
 
 #include "MainWindow.h"
 #include "ConfigDialog.h"
+#include "SaveDialog.h"
 
 #include "EffectsSelector.h"
 #include "FiltersWidget.h"
@@ -72,9 +73,12 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(okButton, SIGNAL(clicked()), this, SLOT(close()));
 	QPushButton* configButton = new QPushButton(tr("Config"), this);
 	connect(configButton, SIGNAL(clicked()), this, SLOT(editConfig()));
+	QPushButton* saveButton = new QPushButton(tr("Save"), this);
+	connect(saveButton, SIGNAL(clicked()), this, SLOT(gameSaveInformation()));
 	QHBoxLayout* buttonsLayout = new QHBoxLayout;
 	buttonsLayout->setContentsMargins(5, 5, 5, 5);
 	buttonsLayout->addWidget(configButton);
+	buttonsLayout->addWidget(saveButton);
 	buttonsLayout->addStretch();
 	buttonsLayout->addWidget(okButton);
 	vLayout->addLayout(buttonsLayout);
@@ -145,4 +149,10 @@ void MainWindow::closeEvent(QCloseEvent* event)
 {
 	writeSettings();
 	event->accept();
+}
+
+void MainWindow::gameSaveInformation()
+{
+	SaveDialog dlg(this);
+	dlg.exec();
 }

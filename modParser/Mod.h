@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Parser.h"
+#include <parser/Parser.h>
 #include "Ingredients.h"
 #include "StringsTable.h"
 

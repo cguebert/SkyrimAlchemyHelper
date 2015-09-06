@@ -21,6 +21,7 @@ signals:
 public slots:
 	void editConfig();
 	void afterLaunch();
+	void gameSaveInformation();
 
 protected:
 	void showEvent(QShowEvent* event);

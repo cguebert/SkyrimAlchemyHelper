@@ -6,9 +6,10 @@ project(${PROJECT_NAME})
 set(QT_BASE_DIR "" CACHE PATH "Qt5 install prefix") # C:/Qt/5/msvc2015/
 list(APPEND CMAKE_PREFIX_PATH ${QT_BASE_DIR})
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
+
+add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 
 set(HEADER_FILES
 	ConfigDialog.h
@@ -19,6 +20,7 @@ set(HEADER_FILES
 	EffectsSelector.h
 	FiltersWidget.h
 	FlowLayout.h
+	GameSave.h
 	IngredientsList.h
 	IngredientsListModel.h
 	IngredientsListWidget.h
@@ -29,6 +31,7 @@ set(HEADER_FILES
 	PluginsListWidget.h
 	PotionsList.h
 	PotionsListWidget.h
+	SaveDialog.h
 	SelectorWidget.h
 )
 
@@ -42,6 +45,7 @@ set(SOURCE_FILES
 	EffectsSelector.cpp
 	FiltersWidget.cpp
 	FlowLayout.cpp
+	GameSave.cpp
 	IngredientsList.cpp
 	IngredientsListModel.cpp
 	IngredientsListWidget.cpp
@@ -52,6 +56,7 @@ set(SOURCE_FILES
 	PluginsListWidget.cpp
 	PotionsList.cpp
 	PotionsListWidget.cpp
+	SaveDialog.cpp
 	SelectorWidget.cpp
 )
 
@@ -64,7 +69,7 @@ add_executable(${PROJECT_NAME} WIN32 ${HEADER_FILES} ${SOURCE_FILES} ${RESSOURCE
 
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Applications")
 
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets SaveParser)
 
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${TARGET_DIR})
 

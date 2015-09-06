@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Parser.h"
+#include <parser/parser.h>
 
 class BSAFile
 {

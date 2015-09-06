@@ -8,29 +8,26 @@
 
 using namespace std;
 
-void Save::parse(const std::string& fileName)
-{
-	Save save(fileName);
-	save.doParse();
-}
-
-Save::Save(const std::string& fileName)
+bool Save::parse(const std::string& fileName)
 {
 	ifstream stream(fileName, ios::binary | ios::in);
 	if (!stream.is_open())
 	{
 		cout << "Cannot open " << fileName << endl;
-		return;
+		return false;
 	}
 
 	in.setStream(std::move(stream));
+
+	doParse();
+	return true;
 }
 
 void Save::doParse()
 {
 	parseHeader();
-	parseFormIDArray();
-	parseChangeForms();
+//	parseFormIDArray();
+//	parseChangeForms();
 }
 
 void Save::parseHeader()
@@ -50,9 +47,9 @@ void Save::parseHeader()
 	in >> stringSize; in.jump(stringSize); // playerRaceEditorId
 
 	in.jump(18); // playerSex + playerCurExp + playerLvlUpExp + filetime
-	uint32_t shotWidth, shotHeight;
-	in >> shotWidth >> shotHeight;
-	in.jump(3 * shotWidth * shotHeight);
+	in >> m_screenshot.width >> m_screenshot.height;
+	m_screenshot.data.resize(3 * m_screenshot.width * m_screenshot.height);
+	in >> m_screenshot.data;
 
 	cout << playerName << endl;
 	cout << playerLocation << endl;
@@ -242,4 +239,9 @@ uint32_t Save::getFormID(const RefID& refID)
 		cerr << "Error in parsing form ID: type is 3?" << endl;
 		return 0;
 	}
+}
+
+SaveScreenshot Save::screenshot() const
+{
+	return m_screenshot;
 }
