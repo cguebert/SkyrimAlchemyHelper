@@ -4,17 +4,26 @@
 
 using Inventory = std::vector < std::pair< std::string, int> >;
 
-struct SaveScreenshot
-{
-	uint32_t width, height;
-	std::vector<uint8_t> data;
-};
-
 class Save
 {
 public:
 	bool parse(const std::string& fileName);
-	SaveScreenshot screenshot() const;
+
+	struct Screenshot
+	{
+		uint32_t width, height;
+		std::vector<uint8_t> data;
+	};
+	const Screenshot& screenshot() const;
+
+	struct Ingredient
+	{
+		std::string mod;
+		uint32_t id;
+	};
+	using KnownIngredient = std::pair<Ingredient, std::array<bool, 4>>;
+	using KnownIngredients = std::vector<KnownIngredient>;
+	const KnownIngredients& knownIngredients() const;
 	
 protected:
 	void doParse();
@@ -33,6 +42,7 @@ protected:
 		m_unknownTable3Offset;
 	std::vector<uint32_t> m_formIDArray;
 	std::vector<std::string> m_plugins;
-	SaveScreenshot m_screenshot;
+	Screenshot m_screenshot;
+	KnownIngredients m_knownIngredients;
 };
 

@@ -1,8 +1,10 @@
 #pragma once
 
 #include <QString>
-#include <QVector>
 #include <QPixmap>
+
+#include <array>
+#include <vector>
 
 class GameSave
 {
@@ -12,21 +14,29 @@ public:
 	void loadMostRecentSave();
 
 	void load(QString fileName);
-	bool loaded();
+	bool isLoaded() const;
 
-	QPixmap screenshot();
+	QPixmap screenshot() const;
+
+	using KnownIngredient = std::pair<int, std::array<bool, 4>>;
+	using KnownIngredients = std::vector<KnownIngredient>;
+	const KnownIngredients& knownIngredients() const;
 
 protected:
 	GameSave();
 
-	bool m_loaded = false;
+	bool m_isLoaded = false;
 	QPixmap m_screenshot;
+	KnownIngredients m_knownIngredients;
 };
 
 //****************************************************************************//
 
-inline bool GameSave::loaded()
-{ return m_loaded; }
+inline bool GameSave::isLoaded() const
+{ return m_isLoaded; }
 
-inline QPixmap GameSave::screenshot()
+inline QPixmap GameSave::screenshot() const
 { return m_screenshot; }
+
+inline const GameSave::KnownIngredients& GameSave::knownIngredients() const
+{ return m_knownIngredients; }

@@ -27,8 +27,7 @@ public:
 	};
 
 	int size() const;
-	int find(quint32 code) const; // -1 if not found
-	int find(QString name) const; // -1 if not found
+	int find(int pluginId, quint32 code) const; // -1 if not found
 	const QVector<Ingredient>& ingredients() const;
 	Ingredient& ingredient(int index); // Will launch an exception if index is invalid
 	const Ingredient& ingredient(int index) const; // Will launch an exception if index is invalid

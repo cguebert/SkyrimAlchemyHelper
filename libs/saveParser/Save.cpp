@@ -26,8 +26,25 @@ bool Save::parse(const std::string& fileName)
 void Save::doParse()
 {
 	parseHeader();
-//	parseFormIDArray();
-//	parseChangeForms();
+	parseFormIDArray();
+	parseChangeForms();
+}
+
+string getModName(const string& modFileName)
+{
+	auto p = modFileName.find_last_of("/\\");
+	if (p != string::npos)
+		++p;
+	else
+		p = 0;
+	string fileName;
+	auto e = modFileName.find_last_of(".");
+	if (e != string::npos)
+		fileName = modFileName.substr(p, e - p);
+	else
+		fileName = modFileName.substr(p);
+
+	return fileName;
 }
 
 void Save::parseHeader()
@@ -63,7 +80,7 @@ void Save::parseHeader()
 	uint8_t nbPlugins;
 	in >> nbPlugins;
 	for (int i = 0; i < nbPlugins; ++i)
-		m_plugins.push_back(in.readWString());
+		m_plugins.push_back(getModName(in.readWString()));
 
 	in >> m_formIDArrayCountOffset >> m_unknownTable3Offset >> m_globalDataTable1Offset
 		>> m_globalDataTable2Offset >> m_changeFormsOffset >> globalDataTable3Offset
@@ -79,9 +96,6 @@ bool isPresent(const vector<unsigned char>& buffer, const vector<unsigned char>&
 void Save::parseChangeForms()
 {
 	in.seekg(m_changeFormsOffset);
-
-	ofstream ingredientsRefIDs("data/IngrRefIDs.txt");
-	ofstream knownIngredients("data/Known_Ingredients.txt");
 
 	for (uint32_t i = 0; i < m_changeFormCount; ++i)
 	{
@@ -136,23 +150,21 @@ void Save::parseChangeForms()
 			if (length1 == 4 && !length2)
 			{
 				uint32_t formID = getFormID(refID);
-				ingredientsRefIDs << hex << uppercase << setfill('0') << setw(8) << formID 
-					<< " " << setw(2) << (int)refID[0] 
-					<< setw(2) << (int)refID[1]
-					<< setw(2) << (int)refID[2] << endl;
-
 				uint8_t modID = formID >> 24;
 				uint32_t ingID = formID & 0x00FFFFFF;
-				knownIngredients << hex << uppercase << setfill('0') << setw(8) << ingID << endl;
-				knownIngredients << m_plugins[modID] << endl;
+
+				KnownIngredient ing;
+				ing.first.mod = m_plugins[modID];
+				ing.first.id = ingID;
 
 				uint8_t data;
 				in >> data;
 				in.jump(3);
 
 				for (int j = 0; j < 4; ++j)
-					knownIngredients << ((data & (1 << j)) != 0) << " ";
-				knownIngredients << endl;
+					ing.second[j] = ((data & (1 << j)) != 0);
+				
+				m_knownIngredients.push_back(ing);
 			}
 			else
 				in.jump(length1);
@@ -186,7 +198,7 @@ void Save::parseChangeForms()
 					in >> decompressedData;
 				}
 
-				if ((formID & 0xFF000000) == 0x2B000000 && decompressedData.size() > 250)
+/*				if ((formID & 0xFF000000) == 0x2B000000 && decompressedData.size() > 250)
 			//	if (isPresent(decompressedData, { 0x43, 0xAD, 0x5B }) && isPresent(decompressedData, { 0x43, 0xAD, 0x60 }))
 				{
 					cout << "Found container: i " << i << " formType " << (int)formType << " formID ";
@@ -199,7 +211,7 @@ void Save::parseChangeForms()
 					ofstream out(ss.str(), ios::binary | ios::out);
 					out.write(reinterpret_cast<char*>(decompressedData.data()), decompressedData.size());
 				}
-			}
+*/			}
 		}
 		else
 			in.jump(length1);
@@ -241,7 +253,12 @@ uint32_t Save::getFormID(const RefID& refID)
 	}
 }
 
-SaveScreenshot Save::screenshot() const
+const Save::Screenshot& Save::screenshot() const
 {
 	return m_screenshot;
+}
+
+const Save::KnownIngredients& Save::knownIngredients() const
+{
+	return m_knownIngredients;
 }

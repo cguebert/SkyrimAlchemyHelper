@@ -111,22 +111,12 @@ void IngredientsList::saveList()
 	}
 }
 
-int IngredientsList::find(quint32 code) const
+int IngredientsList::find(int pluginId, quint32 code) const
 {
-	auto it = find_if(m_ingredients.begin(), m_ingredients.end(), [code](const Ingredient& ingredient){
-		return ingredient.code == code;
+	auto it = find_if(m_ingredients.begin(), m_ingredients.end(), [pluginId, code](const Ingredient& ingredient){
+		return ingredient.pluginId == pluginId && ingredient.code == code;
 	});
 	if (it != m_ingredients.end())
-		return it - m_ingredients.begin();
-	return -1;
-}
-
-int IngredientsList::find(QString name) const
-{
-	auto it = find_if(m_ingredients.begin(), m_ingredients.end(), [&name](const Ingredient& ingredient){
-		return !ingredient.name.compare(name, Qt::CaseInsensitive);
-	});
-	if(it != m_ingredients.end())
 		return it - m_ingredients.begin();
 	return -1;
 }
