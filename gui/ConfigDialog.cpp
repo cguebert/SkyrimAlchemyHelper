@@ -53,6 +53,11 @@ QSize ConfigDialog::sizeHint() const
 	return QSize(700, 500);
 }
 
+bool ConfigDialog::areListsModified() const
+{
+	return m_configPane->areListsModified();
+}
+
 void ConfigDialog::onOk()
 {
 	if (m_configPane->testConfig())

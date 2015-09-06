@@ -16,7 +16,8 @@ public:
 	ConfigPane(QWidget* parent = 0, bool firstLaunch = false);
 
 	bool testConfig(); // Returns false if there is a problem with the current configuration
-	void saveConfig(); 
+	void saveConfig();
+	bool areListsModified();
 
 public slots:
 	void editDataPath();
@@ -44,6 +45,7 @@ protected:
 	QCheckBox *m_useModOrganizerCheckBox;
 	QPushButton *m_modOrganizerPathButton;
 	QTimer *m_timer;
+	bool m_listsModified = false;
 };
 
 #endif // CONFIGPANE_H

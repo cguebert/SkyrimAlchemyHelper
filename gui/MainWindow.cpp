@@ -114,10 +114,13 @@ void MainWindow::editConfig()
 	ConfigDialog dlg(this);
 	dlg.exec();
 
-	m_effectsSelector->updateList();
-	m_ingredientsSelector->updateList();
-	m_filtersWidget->clear();
-	PotionsList::instance().recomputeList();
+	if (dlg.areListsModified())
+	{
+		m_effectsSelector->updateList();
+		m_ingredientsSelector->updateList();
+		m_filtersWidget->clear();
+		PotionsList::instance().recomputeList();
+	}
 }
 
 void MainWindow::afterLaunch()

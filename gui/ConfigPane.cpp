@@ -389,4 +389,11 @@ void ConfigPane::updateLists()
 	IngredientsList::instance().loadList();
 
 	emit endModsParse();
+
+	m_listsModified = true;
+}
+
+bool ConfigPane::areListsModified()
+{
+	return m_listsModified;
 }
