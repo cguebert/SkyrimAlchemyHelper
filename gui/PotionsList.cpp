@@ -55,10 +55,10 @@ void PotionsList::recomputeList()
 			int nbEffects = 0;
 			for (int i = 0; i < IngredientsList::nbEffectsPerIngredient; ++i)
 			{
-				auto effect1 = ing1.effects[i].effectId;
+				auto effect1 = ing1.sortedEffects[i].effectId;
 				for (int j = 0; j < IngredientsList::nbEffectsPerIngredient; ++j)
 				{
-					if (effect1 == ing2.effects[j].effectId)
+					if (effect1 == ing2.sortedEffects[j].effectId)
 						potion.effects[nbEffects++] = effect1;
 				}
 			}

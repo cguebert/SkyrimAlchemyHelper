@@ -22,7 +22,8 @@ public:
 		QString name;
 		int pluginId = 0;
 		quint32 code = 0;
-		EffectData effects[nbEffectsPerIngredient];
+		EffectData effects[nbEffectsPerIngredient],
+			sortedEffects[nbEffectsPerIngredient];
 	};
 
 	int size() const;

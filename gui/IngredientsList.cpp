@@ -5,6 +5,8 @@
 #include "EffectsList.h"
 #include "PluginsList.h"
 
+using namespace std;
+
 const QString fileName = "data/ingredients.txt";
 
 IngredientsList& IngredientsList::instance()
@@ -62,7 +64,10 @@ void IngredientsList::loadList()
 					effects.incrementNbIngredients(effectData.effectId);
 			}
 
-			std::sort(std::begin(ingredient.effects), std::end(ingredient.effects), [](const EffectData& lhs, const EffectData& rhs){
+			// Sort the effects for an easier computation of potions,
+			//  but keep the original ones as they are for the known ingredients loaded for each save
+			copy(begin(ingredient.effects), end(ingredient.effects), begin(ingredient.sortedEffects));
+			sort(begin(ingredient.sortedEffects), end(ingredient.sortedEffects), [](const EffectData& lhs, const EffectData& rhs){
 				return lhs.effectId < rhs.effectId;
 			});
 
@@ -73,7 +78,7 @@ void IngredientsList::loadList()
 	}
 
 	// Sort the list by name
-	std::sort(m_ingredients.begin(), m_ingredients.end(), [](const Ingredient& lhs, const Ingredient& rhs){
+	sort(m_ingredients.begin(), m_ingredients.end(), [](const Ingredient& lhs, const Ingredient& rhs){
 		return lhs.name < rhs.name;
 	});
 }
@@ -108,7 +113,7 @@ void IngredientsList::saveList()
 
 int IngredientsList::find(quint32 code) const
 {
-	auto it = std::find_if(m_ingredients.begin(), m_ingredients.end(), [code](const Ingredient& ingredient){
+	auto it = find_if(m_ingredients.begin(), m_ingredients.end(), [code](const Ingredient& ingredient){
 		return ingredient.code == code;
 	});
 	if (it != m_ingredients.end())
@@ -118,7 +123,7 @@ int IngredientsList::find(quint32 code) const
 
 int IngredientsList::find(QString name) const
 {
-	auto it = std::find_if(m_ingredients.begin(), m_ingredients.end(), [&name](const Ingredient& ingredient){
+	auto it = find_if(m_ingredients.begin(), m_ingredients.end(), [&name](const Ingredient& ingredient){
 		return !ingredient.name.compare(name, Qt::CaseInsensitive);
 	});
 	if(it != m_ingredients.end())

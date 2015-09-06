@@ -33,32 +33,32 @@ QVariant IngredientsListModel::data(const QModelIndex& index, int role) const
 			return ingredient.pluginId == -1 ? "" : m_pluginsList.plugin(ingredient.pluginId).name;
 		case 2:
 		{
-			const auto id = ingredient.effects[0].effectId;
+			const auto id = ingredient.sortedEffects[0].effectId;
 			return id == -1 ? "" : m_effectsList.effect(id).name;
 		}
-		case 3: return ingredient.effects[0].magnitude;
-		case 4: return ingredient.effects[0].duration;
+		case 3: return ingredient.sortedEffects[0].magnitude;
+		case 4: return ingredient.sortedEffects[0].duration;
 		case 5:
 		{
-			const auto id = ingredient.effects[1].effectId;
+			const auto id = ingredient.sortedEffects[1].effectId;
 			return id == -1 ? "" : m_effectsList.effect(id).name;
 		}
-		case 6: return ingredient.effects[1].magnitude;
-		case 7: return ingredient.effects[1].duration;
+		case 6: return ingredient.sortedEffects[1].magnitude;
+		case 7: return ingredient.sortedEffects[1].duration;
 		case 8:
 		{
-			const auto id = ingredient.effects[2].effectId;
+			const auto id = ingredient.sortedEffects[2].effectId;
 			return id == -1 ? "" : m_effectsList.effect(id).name;
 		}
-		case 9: return ingredient.effects[2].magnitude;
-		case 10: return ingredient.effects[2].duration;
+		case 9: return ingredient.sortedEffects[2].magnitude;
+		case 10: return ingredient.sortedEffects[2].duration;
 		case 11:
 		{
-			const auto id = ingredient.effects[3].effectId;
+			const auto id = ingredient.sortedEffects[3].effectId;
 			return id == -1 ? "" : m_effectsList.effect(id).name;
 		}
-		case 12: return ingredient.effects[3].magnitude;
-		case 13: return ingredient.effects[3].duration;
+		case 12: return ingredient.sortedEffects[3].magnitude;
+		case 13: return ingredient.sortedEffects[3].duration;
 		}
 		return QVariant();
 	}
