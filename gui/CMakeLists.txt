@@ -12,6 +12,7 @@ set(CMAKE_AUTORCC ON)
 add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 
 set(HEADER_FILES
+	Config.h
 	ConfigDialog.h
 	ConfigPane.h
 	EffectsList.h
@@ -37,6 +38,7 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
 	main.cpp
+	Config.cpp
 	ConfigDialog.cpp
 	ConfigPane.cpp
 	EffectsList.cpp

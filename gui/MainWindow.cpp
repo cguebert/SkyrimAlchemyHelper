@@ -4,6 +4,7 @@
 #include "ConfigDialog.h"
 #include "SaveDialog.h"
 
+#include "Config.h"
 #include "EffectsSelector.h"
 #include "FiltersWidget.h"
 #include "IngredientsSelector.h"
@@ -104,6 +105,8 @@ void MainWindow::readSettings()
 	QSettings settings;
 	restoreGeometry(settings.value("geometry").toByteArray());
 	restoreState(settings.value("state").toByteArray());
+
+	Config::instance().load();
 }
 
 void MainWindow::writeSettings()
@@ -111,6 +114,8 @@ void MainWindow::writeSettings()
 	QSettings settings;
 	settings.setValue("geometry", saveGeometry());
 	settings.setValue("state", saveState());
+
+	Config::instance().save();
 }
 
 void MainWindow::editConfig()

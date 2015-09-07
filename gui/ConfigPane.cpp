@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "ConfigPane.h"
+#include "Config.h"
 #include "EffectsList.h"
 #include "IngredientsList.h"
 #include "PluginsList.h"
@@ -80,22 +81,21 @@ ConfigPane::ConfigPane(QWidget *parent, bool firstLaunch)
 
 void ConfigPane::loadConfig()
 {
-	QSettings settings;
-	if (!settings.contains("useModOrganizer"))
+	auto& config = Config::instance();
+	if (config.empty())
 	{
 		defaultConfig();
 		return;
 	}
 
-	bool useModOrganizer = settings.value("useModOrganizer").toBool();
-	m_useModOrganizerCheckBox->setCheckState(useModOrganizer ? Qt::Checked : Qt::Unchecked);
-	m_modOrganizerPathEdit->setEnabled(useModOrganizer);
-	m_modOrganizerPathButton->setEnabled(useModOrganizer);
+	m_useModOrganizerCheckBox->setCheckState(config.useModOrganizer ? Qt::Checked : Qt::Unchecked);
+	m_modOrganizerPathEdit->setEnabled(config.useModOrganizer);
+	m_modOrganizerPathButton->setEnabled(config.useModOrganizer);
 
-	m_dataFolderEdit->setText(settings.value("skyrimDataFolder").toString());
-	m_pluginsListPathEdit->setText(settings.value("pluginsListFile").toString());
-	m_savesFolderEdit->setText(settings.value("savesFolder").toString());
-	m_modOrganizerPathEdit->setText(settings.value("modOrganizerPath").toString());
+	m_dataFolderEdit->setText(config.dataFolder);
+	m_pluginsListPathEdit->setText(config.pluginsListPath);
+	m_savesFolderEdit->setText(config.savesFolder);
+	m_modOrganizerPathEdit->setText(config.modOrganizerPath);
 }
 
 std::string loadFile(const std::string& fileName)
@@ -263,13 +263,12 @@ bool ConfigPane::testConfig()
 
 void ConfigPane::saveConfig()
 {
-	QSettings settings;
-	settings.setValue("useModOrganizer", m_useModOrganizerCheckBox->checkState() == Qt::Checked);
-
-	settings.setValue("skyrimDataFolder", m_dataFolderEdit->text());
-	settings.setValue("pluginsListFile", m_pluginsListPathEdit->text());
-	settings.setValue("savesFolder", m_savesFolderEdit->text());
-	settings.setValue("modOrganizerPath", m_modOrganizerPathEdit->text());
+	auto& config = Config::instance();
+	config.useModOrganizer = m_useModOrganizerCheckBox->checkState() == Qt::Checked;
+	config.dataFolder = m_dataFolderEdit->text();
+	config.pluginsListPath = m_pluginsListPathEdit->text();
+	config.savesFolder = m_savesFolderEdit->text();
+	config.modOrganizerPath = m_modOrganizerPathEdit->text();
 }
 
 bool ConfigPane::prepareParsing()
