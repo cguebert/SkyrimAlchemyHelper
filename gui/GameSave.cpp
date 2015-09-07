@@ -19,12 +19,34 @@ GameSave::GameSave()
 	loadSaveFromConfig();
 }
 
+int getIngredientId(const Save::Ingredient& ing)
+{
+	auto pluginId = PluginsList::instance().find(ing.mod.c_str());
+	if (pluginId == -1)
+		return -1;
+	return IngredientsList::instance().find(pluginId, ing.id);
+}
+
 void GameSave::load(QString fileName)
 {
 	m_screenshot = QPixmap();
 	m_knownIngredients.clear();
+	m_inventory.clear();
+
+	const auto& plugins = PluginsList::instance();
+	const auto& ingredients = IngredientsList::instance();
+
+	Save::Ingredients possibleIngredients;
+	for (const auto& ing : ingredients.ingredients())
+	{
+		Save::Ingredient pIng;
+		pIng.mod = plugins.plugin(ing.pluginId).name.toStdString();
+		pIng.id = ing.code;
+		possibleIngredients.push_back(pIng);
+	}
 
 	Save save;
+	save.setPossibleIngredients(possibleIngredients);
 	m_isLoaded = save.parse(fileName.toStdString());
 	if (!m_isLoaded)
 		return;
@@ -41,18 +63,23 @@ void GameSave::load(QString fileName)
 	m_header.saveNumber = header.saveNumber;
 
 	// Convert known ingredients
-	const auto& plugins = PluginsList::instance();
-	const auto& ingredients = IngredientsList::instance();
-	for (auto ing : save.knownIngredients())
+	for (const auto& ing : save.knownIngredients())
 	{
-		auto pluginId = plugins.find(ing.first.mod.c_str());
-		if (pluginId == -1)
-			continue;
-		auto ingId = ingredients.find(pluginId, ing.first.id);
+		auto ingId = getIngredientId(ing.first);
 		if (ingId == -1)
 			continue;
 
 		m_knownIngredients.emplace_back(ingId, ing.second);
+	}
+
+	// Convert inventory
+	for (const auto& ing : save.inventory())
+	{
+		auto ingId = getIngredientId(ing.first);
+		if (ingId == -1)
+			continue;
+
+		m_inventory.emplace_back(ingId, ing.second);
 	}
 }
 

@@ -2,8 +2,6 @@
 
 #include <parser/Parser.h>
 
-using Inventory = std::vector < std::pair< std::string, int> >;
-
 class Save
 {
 public:
@@ -26,28 +24,59 @@ public:
 		std::string mod;
 		uint32_t id;
 	};
+	using Ingredients = std::vector<Ingredient>;
+
 	using KnownIngredient = std::pair<Ingredient, std::array<bool, 4>>;
 	using KnownIngredients = std::vector<KnownIngredient>;
 	const KnownIngredients& knownIngredients() const;
+
+	void setPossibleIngredients(const Ingredients& ingredients);
+
+	using InventoryItem = std::pair<Ingredient, int>;
+	using Inventory = std::vector<InventoryItem>;
+	const Inventory& inventory() const;
 	
 protected:
 	void doParse();
+	void computeIngredientsRefIDs();
 
 	void parseHeader();
 	void parseChangeForms();
 	void parseFormIDArray();
 
-	using RefID = std::array < uint8_t, 3 > ;
+	using RefID = std::array < uint8_t, 3 >;
+	class ChangeForm
+	{
+	public:
+		ChangeForm(Parser& parser);
+
+		void ignore(); // Jump over the data
+		void loadData(); // Decompress the data for use
+
+		RefID refID;
+		uint32_t formID = 0, changeFlags = 0;
+		uint8_t formType= 0;
+		std::vector<unsigned char> data;
+
+	protected:
+		Parser& in;
+		uint32_t length1, length2;
+	};
+
+	void parseKnownIngredient(const ChangeForm& form);
+	void parsePlayer(const ChangeForm& form);
+
 	uint32_t getFormID(const RefID& refID);
+	RefID getRefID(uint32_t formID);
 
 	Parser in;
-	uint32_t m_formIDArrayCountOffset, m_changeFormCount, m_changeFormsOffset,
-		m_globalDataTable1Count, m_globalDataTable2Count, m_globalDataTable3Count,
-		m_globalDataTable1Offset, m_globalDataTable2Offset, globalDataTable3Offset,
-		m_unknownTable3Offset;
+	uint32_t m_formIDArrayCountOffset, m_changeFormCount, m_changeFormsOffset;
 	std::vector<uint32_t> m_formIDArray;
 	std::vector<std::string> m_plugins;
 	Header m_header;
+	Ingredients m_possibleIngredients;
+	std::vector<RefID> m_ingredientsRefID;
 	KnownIngredients m_knownIngredients;
+	Inventory m_inventory;
 };
 

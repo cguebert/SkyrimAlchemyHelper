@@ -12,14 +12,7 @@ string getModName(const string& modFileName)
 		++p;
 	else
 		p = 0;
-	string fileName;
-	auto e = modFileName.find_last_of(".");
-	if (e != string::npos)
-		fileName = modFileName.substr(p, e - p);
-	else
-		fileName = modFileName.substr(p);
-
-	return fileName;
+	return modFileName.substr(p);
 }
 
 void Mod::parse(const string& fileName, Config& config)
