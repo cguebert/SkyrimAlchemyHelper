@@ -1,6 +1,10 @@
 #include "GameSave.h"
 
 #include <saveParser/Save.h>
+#include <QDir>
+#include <QFileInfo>
+
+#include "Config.h"
 #include "IngredientsList.h"
 #include "PluginsList.h"
 
@@ -12,7 +16,7 @@ GameSave& GameSave::instance()
 
 GameSave::GameSave()
 {
-	loadMostRecentSave();
+	loadSaveFromConfig();
 }
 
 void GameSave::load(QString fileName)
@@ -46,7 +50,24 @@ void GameSave::load(QString fileName)
 	}
 }
 
-void GameSave::loadMostRecentSave()
+void GameSave::loadSaveFromConfig()
 {
-	load("../Saves/quicksave.ess");
+	auto& config = Config::instance();
+	if (config.savesFolder.isEmpty())
+		return;
+
+	if (!config.loadMostRecentSave && !config.selectedSaveName.isEmpty() && QFileInfo::exists(config.selectedSaveName))
+	{
+		load(config.selectedSaveName);
+		return;
+	}
+
+	QDir dir(config.savesFolder);
+	QStringList filters;
+	filters << "*.ess";
+	auto saves = dir.entryInfoList(filters, QDir::Files, QDir::Time);
+	if (saves.empty())
+		return;
+
+	load(saves.first().absoluteFilePath());
 }

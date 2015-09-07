@@ -11,7 +11,7 @@ class GameSave
 public:
 	static GameSave& instance();
 
-	void loadMostRecentSave();
+	void loadSaveFromConfig();
 
 	void load(QString fileName);
 	bool isLoaded() const;

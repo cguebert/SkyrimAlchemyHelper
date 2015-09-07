@@ -82,7 +82,7 @@ ConfigPane::ConfigPane(QWidget *parent, bool firstLaunch)
 void ConfigPane::loadConfig()
 {
 	auto& config = Config::instance();
-	if (config.empty())
+	if (config.isEmpty())
 	{
 		defaultConfig();
 		return;
