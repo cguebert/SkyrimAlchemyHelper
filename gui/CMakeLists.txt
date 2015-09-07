@@ -16,19 +16,16 @@ set(HEADER_FILES
 	ConfigDialog.h
 	ConfigPane.h
 	EffectsList.h
-	EffectsListModel.h
 	EffectsListWidget.h
 	EffectsSelector.h
 	FiltersWidget.h
 	FlowLayout.h
 	GameSave.h
 	IngredientsList.h
-	IngredientsListModel.h
 	IngredientsListWidget.h
 	IngredientsSelector.h
 	MainWindow.h
 	PluginsList.h
-	PluginsListModel.h
 	PluginsListWidget.h
 	PotionsList.h
 	PotionsListWidget.h
@@ -42,19 +39,16 @@ set(SOURCE_FILES
 	ConfigDialog.cpp
 	ConfigPane.cpp
 	EffectsList.cpp
-	EffectsListModel.cpp
 	EffectsListWidget.cpp
 	EffectsSelector.cpp
 	FiltersWidget.cpp
 	FlowLayout.cpp
 	GameSave.cpp
 	IngredientsList.cpp
-	IngredientsListModel.cpp
 	IngredientsListWidget.cpp
 	IngredientsSelector.cpp
 	MainWindow.cpp
 	PluginsList.cpp
-	PluginsListModel.cpp
 	PluginsListWidget.cpp
 	PotionsList.cpp
 	PotionsListWidget.cpp
