@@ -9,12 +9,17 @@ class Save
 public:
 	bool parse(const std::string& fileName);
 
-	struct Screenshot
+	struct Header
 	{
-		uint32_t width, height;
-		std::vector<uint8_t> data;
+		uint32_t saveNumber = 0;
+
+		uint32_t ssWidth = 0, ssHeight = 0;
+		std::vector<uint8_t> ssData;
+
+		std::string playerName, playerLocation;
+		uint32_t playerLevel = 0;
 	};
-	const Screenshot& screenshot() const;
+	const Header& header() const;
 
 	struct Ingredient
 	{
@@ -42,7 +47,7 @@ protected:
 		m_unknownTable3Offset;
 	std::vector<uint32_t> m_formIDArray;
 	std::vector<std::string> m_plugins;
-	Screenshot m_screenshot;
+	Header m_header;
 	KnownIngredients m_knownIngredients;
 };
 

@@ -30,9 +30,15 @@ void GameSave::load(QString fileName)
 		return;
 
 	// Convert screenshot
-	auto screenshot = save.screenshot();
-	auto img = QImage(screenshot.data.data(), screenshot.width, screenshot.height, QImage::Format_RGB888);
+	auto header = save.header();
+	auto img = QImage(header.ssData.data(), header.ssWidth, header.ssHeight, QImage::Format_RGB888);
 	m_screenshot.convertFromImage(img);
+
+	// Copy the header
+	m_header.playerLocation = header.playerLocation.c_str();
+	m_header.playerName = header.playerName.c_str();
+	m_header.playerLevel = header.playerLevel;
+	m_header.saveNumber = header.saveNumber;
 
 	// Convert known ingredients
 	const auto& plugins = PluginsList::instance();

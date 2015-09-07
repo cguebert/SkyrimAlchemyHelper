@@ -10,30 +10,8 @@ SaveDialog::SaveDialog(QWidget *parent)
 	setWindowTitle("Skyrim Alchemy Helper - Save information");
 
 	auto vLayout = new QVBoxLayout;
-
-	auto& gamesave = GameSave::instance();
-	auto loaded = gamesave.isLoaded();
-	auto screenshotLabel = new QLabel("Not loaded"); 
-	if (loaded)
-		screenshotLabel->setPixmap(gamesave.screenshot());
-	vLayout->addWidget(screenshotLabel);
-
-	if (loaded)
-	{
-		auto knownIng = gamesave.knownIngredients();
-		int knownEffects = 0;
-		for (auto ing : knownIng)
-		{
-			for (int i = 0; i < 4; ++i)
-				if (ing.second[i])
-					++knownEffects;
-		}
-
-		int nbIng = knownIng.size();
-		auto ingLabel = new QLabel(QString("%1 known ingredients, with %2% of discovered effects").arg(nbIng).arg(nbIng ? knownEffects * 25 / nbIng : 0));
-		vLayout->addWidget(ingLabel);
-	}
-
+	m_saveInfoContainer = new QWidget;
+	vLayout->addWidget(m_saveInfoContainer);
 	vLayout->addStretch();
 
 	QPushButton* okButton = new QPushButton(tr("Ok"), this);
@@ -48,9 +26,50 @@ SaveDialog::SaveDialog(QWidget *parent)
 
 	setLayout(vLayout);
 
+	refreshInformation();
 }
 
 QSize SaveDialog::sizeHint() const
 {
 	return QSize(700, 500);
+}
+
+void SaveDialog::refreshInformation()
+{
+	auto l = m_saveInfoContainer->layout();
+	if (l)
+		QWidget().setLayout(l);
+	auto layout = new QVBoxLayout(m_saveInfoContainer);
+
+	auto& gamesave = GameSave::instance();
+	auto loaded = gamesave.isLoaded();
+	auto screenshotLabel = new QLabel("Not loaded");
+	if (!loaded)
+	{
+		layout->addWidget(screenshotLabel);
+		return;
+	}
+
+	screenshotLabel->setPixmap(gamesave.screenshot());
+	layout->addWidget(screenshotLabel);
+
+	auto header = gamesave.header();
+	layout->addWidget(new QLabel(header.playerName));
+	layout->addWidget(new QLabel(header.playerLocation));
+	layout->addWidget(new QLabel(QString("Level %1").arg(header.playerLevel)));
+	layout->addWidget(new QLabel(QString("Save #%1").arg(header.saveNumber)));
+
+	// Information about the known ingredients
+	auto knownIng = gamesave.knownIngredients();
+	int knownEffects = 0;
+	for (auto ing : knownIng)
+	{
+		for (int i = 0; i < 4; ++i)
+			if (ing.second[i])
+				++knownEffects;
+	}
+
+	int nbIng = knownIng.size();
+	auto ingLabel = new QLabel(QString("%1 known ingredients, with %2% of discovered effects").arg(nbIng).arg(nbIng ? knownEffects * 25 / nbIng : 0));
+	layout->addWidget(ingLabel);
 }

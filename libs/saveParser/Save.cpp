@@ -52,24 +52,21 @@ void Save::parseHeader()
 	std::array<char, 13> magic;
 	in >> magic;
 
-	uint32_t headerSize, version, saveNumber, playerLevel;
-	in >> headerSize >> version >> saveNumber;
+	in.jump(8); // headerSize + saveNumber
+	in >> m_header.saveNumber;
 
-	string playerName = in.readWString();
-	in >> playerLevel;
-	string playerLocation = in.readWString();
+	m_header.playerName = in.readWString();
+	in >> m_header.playerLevel;
+	m_header.playerLocation = in.readWString();
 
 	uint16_t stringSize;
 	in >> stringSize; in.jump(stringSize); // gameDate
 	in >> stringSize; in.jump(stringSize); // playerRaceEditorId
 
 	in.jump(18); // playerSex + playerCurExp + playerLvlUpExp + filetime
-	in >> m_screenshot.width >> m_screenshot.height;
-	m_screenshot.data.resize(3 * m_screenshot.width * m_screenshot.height);
-	in >> m_screenshot.data;
-
-	cout << playerName << endl;
-	cout << playerLocation << endl;
+	in >> m_header.ssWidth >> m_header.ssHeight;
+	m_header.ssData.resize(3 * m_header.ssWidth * m_header.ssHeight);
+	in >> m_header.ssData;
 
 	uint8_t formVersion;
 	in >> formVersion;
@@ -253,9 +250,9 @@ uint32_t Save::getFormID(const RefID& refID)
 	}
 }
 
-const Save::Screenshot& Save::screenshot() const
+const Save::Header& Save::header() const
 {
-	return m_screenshot;
+	return m_header;
 }
 
 const Save::KnownIngredients& Save::knownIngredients() const

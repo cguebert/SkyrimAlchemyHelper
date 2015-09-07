@@ -2,6 +2,8 @@
 
 #include <QDialog>
 
+class QWidget;
+
 class SaveDialog : public QDialog
 {
 	Q_OBJECT
@@ -12,6 +14,8 @@ public:
 	QSize sizeHint() const;
 
 public slots:
+	void refreshInformation();
 
 protected:
+	QWidget* m_saveInfoContainer;
 };
