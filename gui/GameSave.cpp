@@ -73,9 +73,10 @@ void GameSave::load(QString fileName)
 	}
 
 	// Convert inventory
+	const auto& saveIngredients = save.listedIngredients();
 	for (const auto& ing : save.inventory())
 	{
-		auto ingId = getIngredientId(ing.first);
+		auto ingId = getIngredientId(saveIngredients[ing.first]);
 		if (ingId == -1)
 			continue;
 
