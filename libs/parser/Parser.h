@@ -17,7 +17,7 @@ public:
 	std::streamoff tellg() { return m_in->tellg(); }
 	void seekg(std::streampos pos) { m_in->seekg(pos); }
 	void seekg(std::streamoff off, std::ios_base::seekdir dir) { m_in->seekg(off, dir); }
-	void jump(std::streamoff off) { m_in->seekg(off, std::ios_base::cur); }
+	void jump(std::streamoff off);
 	bool eof() { return m_in->eof(); }
 
 	template <class T, int N>

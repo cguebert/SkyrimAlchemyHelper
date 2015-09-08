@@ -4,6 +4,16 @@
 
 using namespace std;
 
+void Parser::jump(std::streamoff off)
+{
+	const int maxJump = 4096;
+	static char dummy[4096];
+	if (off <= maxJump)
+		m_in->read(dummy, off); // Reading is most often faster than doing a seekg that can flush the caches
+	else
+		m_in->seekg(off, std::ios_base::cur); 
+}
+
 uint32_t Parser::readVSVal()
 {
 	uint8_t byte1;
