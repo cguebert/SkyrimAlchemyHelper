@@ -82,9 +82,9 @@ void Save::parseChangeForms()
 		
 		if (form.formType == 0) // Container
 		{
-		//	form.ignore();
-			form.loadData();
-			parseContainer(form);
+			form.ignore();
+		//	form.loadData();
+		//	parseContainer(form);
 		}
 		else if (form.formType == 1) // Actor
 		{
@@ -116,9 +116,6 @@ void Save::parseFormIDArray()
 
 	m_formIDArray.resize(count);
 	in >> m_formIDArray;
-
-//	ofstream out("data/formIDs.data", ios::binary);
-//	out.write(reinterpret_cast<char*>(m_formIDArray.data()), count * 4);
 }
 
 void Save::parseKnownIngredient(const ChangeForm& form)
@@ -138,12 +135,6 @@ void Save::parseKnownIngredient(const ChangeForm& form)
 
 void Save::parsePlayer(const ChangeForm& form)
 {
-/*	ostringstream ss;
-	ss << "data/0x" << hex << uppercase << setfill('0') << setw(8) << form.formID << ".data";
-	ofstream out(ss.str(), ios::binary | ios::out);
-	out.write(reinterpret_cast<const char*>(&form.changeFlags), 4);
-	out.write(reinterpret_cast<const char*>(form.data.data()), form.data.size());
-*/
 	m_inventory.clear();
 	searchForIngredients(form, m_inventory);
 }
@@ -159,21 +150,8 @@ void Save::parseContainer(const ChangeForm& form)
 
 void Save::searchForIngredients(const ChangeForm& form, Inventory& inventory)
 {
-	// Naive approach: look for each possible ingredient
+	// Using our search helper, we look for each ingredient in a single pass
 	//  If found, the next int32 is its count
-/*	auto db = begin(form.data), de = end(form.data);
-	for (int i = 0, nb = m_ingredientsRefID.size(); i < nb; ++i)
-	{
-		const auto& refID = m_ingredientsRefID[i];
-		auto it = search(db, de, begin(refID), end(refID));
-		if (it != de)
-		{
-			int32_t nb = *reinterpret_cast<const int32_t*>(form.data.data() + (it - db) + 3);
-			inventory.emplace_back(i, nb);
-		}
-	}
-	*/
-	// Using our search helper
 	int pos = 0, refId = 0, prevRefId = 0;
 	while ((refId = m_searchHelper.search(form.data, pos)) != -1)
 	{
@@ -187,6 +165,7 @@ void Save::searchForIngredients(const ChangeForm& form, Inventory& inventory)
 		inventory.emplace_back(refId, nb);
 
 		prevRefId = refId;
+		pos += 4;
 	}
 }
 
@@ -373,16 +352,12 @@ void addUnique(C& container, const V& value)
 void Save::SearchHelper::setup(const RefIDs& refIDs)
 {
 	// Prepare the relations between the levels
-	vector<vector<int8_t>> l1In(256), l2In(256);
+	vector<vector<int8_t>> l1In(256);
+	vector<int> l2Nb(256, 0);
 	for (const auto& refID : refIDs)
 	{
 		addUnique(l1In[refID[1]], refID[0]);
-		addUnique(l2In[refID[2]], refID[1]);
-	}
-	for (int i = 0; i < 256; ++i)
-	{
-		sort(begin(l1In[i]), end(l1In[i]));
-		sort(begin(l2In[i]), end(l2In[i]));
+		++l2Nb[refID[2]];
 	}
 
 	// Size necessary for data
@@ -390,7 +365,7 @@ void Save::SearchHelper::setup(const RefIDs& refIDs)
 	for (int i = 0; i < 256; ++i)
 	{
 		if (!l1In[i].empty()) dataSize += 1 + l1In[i].size() * 2;
-		if (!l2In[i].empty()) dataSize += 1 + l2In[i].size() * 2;
+		if (l2Nb[i]) dataSize += 1 + l2Nb[i] * 2;
 	}
 
 	memset(levels, 0, 2 * 3 * 256);
@@ -411,9 +386,9 @@ void Save::SearchHelper::setup(const RefIDs& refIDs)
 
 	for (int i = 0; i < 256; ++i) // Third level offsets
 	{
-		if (l2In[i].empty())
+		if (!l2Nb[i])
 			continue;
-		int16_t nb = l2In[i].size();
+		int16_t nb = l2Nb[i];
 		levels[2][i] = pos;
 		data[pos] = nb;
 		pos += 1 + nb * 2;
@@ -476,12 +451,10 @@ int Save::SearchHelper::search(const Buffer& buffer, int& pos)
 	for (; pos < bufSize; ++pos)
 	{
 		// First verify that each level has something for these bytes
-		const uint8_t d0 = buffer[pos];
+		const uint8_t d0 = buffer[pos], d1 = buffer[pos + 1], d2 = buffer[pos + 2];
 		if (!levels[0][d0])
 			continue;
 
-		const uint8_t d1 = buffer[pos + 1];
-		const uint8_t d2 = buffer[pos + 2];
 		const uint16_t l1 = levels[1][d1], l2 = levels[2][d2];
 		if (!l1 || !l2)
 			continue;
@@ -496,6 +469,8 @@ int Save::SearchHelper::search(const Buffer& buffer, int& pos)
 				id = *p;
 				break;
 			}
+			else
+				++p;
 		}
 
 		if (!id)
