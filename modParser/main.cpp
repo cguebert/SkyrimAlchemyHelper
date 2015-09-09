@@ -24,8 +24,9 @@ void exportConfig(const Config& config)
 	ofstream effectsFile("data/Effects.txt");
 	for (const auto& effect : config.magicalEffectsList)
 	{
-		effectsFile << effect.second << endl;
-		effectsFile << hex << uppercase << effect.first << dec << endl;
+		effectsFile << effect.name << endl;
+		effectsFile << hex << uppercase << effect.id << dec << " ";
+		effectsFile << effect.flags << " " << effect.baseCost << endl;
 	}
 	effectsFile.close();
 

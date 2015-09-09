@@ -47,14 +47,23 @@ void PotionsListWidget::refreshList()
 		potionLayout->addLayout(ingredientsLayout);
 
 		auto effectsLayout = new QVBoxLayout;
+		auto strengthLayout = new QVBoxLayout;
 		for (int effId = 0; effId < PotionsList::maxEffectsPerPotion
 			&& potion.effects[effId] != -1; ++effId)
 		{
 			auto effLabel = new QLabel(effects[potion.effects[effId]].name);
 			effectsLayout->addWidget(effLabel);
+
+			QString strengthText;
+			if (potion.durations[effId] > 0)
+				strengthText = QString("%1 in %2 sec").arg(potion.magnitudes[effId], 0, 'f', 2).arg(potion.durations[effId], 0, 'f', 1);
+			else
+				strengthText = QString::number(potion.magnitudes[effId], 'f', 2);
+			strengthLayout->addWidget(new QLabel(strengthText));
 		}
 	//	effectsLayout->addStretch();
 		potionLayout->addLayout(effectsLayout);
+		potionLayout->addLayout(strengthLayout);
 
 		vLayout->addWidget(potionWidget);
 	}

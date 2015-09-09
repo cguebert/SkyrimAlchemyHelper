@@ -16,7 +16,7 @@ int EffectsListModel::rowCount(const QModelIndex& /*parent*/) const
 
 int EffectsListModel::columnCount(const QModelIndex& /*parent*/) const
 {
-	return 3;
+	return 4;
 }
 
 QVariant EffectsListModel::data(const QModelIndex& index, int role) const
@@ -28,7 +28,8 @@ QVariant EffectsListModel::data(const QModelIndex& index, int role) const
 		{
 		case 0: return effect.name;
 		case 1: return QString::number(effect.code, 16).toUpper();
-		case 2: return effect.nbIngredients;
+		case 2: return effect.baseCost;
+		case 3: return effect.nbIngredients;
 		}
 		return QVariant();
 	}
@@ -43,7 +44,8 @@ QVariant EffectsListModel::headerData(int section, Qt::Orientation orientation, 
 		{
 		case 0: return QString("name");
 		case 1: return QString("id");
-		case 2: return QString("# ingredients");
+		case 2: return QString("base cost");
+		case 3: return QString("# ingredients");
 		}
 	}
 	return QVariant();

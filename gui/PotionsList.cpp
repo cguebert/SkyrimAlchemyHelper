@@ -125,7 +125,8 @@ void PotionsList::recomputeList()
 			}
 		}
 	}
-			
+	
+	computePotionsStrength();
 	saveList();
 
 	m_currentFilters.clear();
@@ -208,4 +209,43 @@ void PotionsList::updateViews()
 {
 	if (m_updateCallback)
 		m_updateCallback();
+}
+
+void PotionsList::computePotionsStrength()
+{
+	const auto& ingredients = IngredientsList::instance().ingredients();
+	const auto& effects = EffectsList::instance().effects();
+
+	for (auto& potion : m_allPotions)
+	{
+		for (int i = 0; i < maxEffectsPerPotion; ++i)
+		{
+			auto effId = potion.effects[i];
+			if (effId == -1)
+				break;
+
+			const auto& effect = effects[effId];
+			float maxStrength = 0;
+			for (auto ingId : potion.ingredients)
+			{
+				if (ingId == -1)
+					break;
+
+				const auto& ing = ingredients[ingId];
+				for (const auto& ingEff : ing.effects)
+				{
+					if (ingEff.effectId == effId)
+					{
+						float strength = (ingEff.magnitude > 0 ? ingEff.magnitude : 1) * (ingEff.duration > 0 ? ingEff.duration : 1);
+						if (strength > maxStrength)
+						{
+							potion.magnitudes[i] = ingEff.magnitude;
+							potion.durations[i] = ingEff.duration;
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
 }

@@ -13,6 +13,8 @@ public:
 	{
 		QString name;
 		quint32 code = 0;
+		quint32 flags = 0;
+		float baseCost = 0;
 		int nbIngredients = 0;
 	};
 

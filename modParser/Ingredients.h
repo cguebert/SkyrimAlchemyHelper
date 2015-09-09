@@ -4,24 +4,21 @@
 #include <cstdint>
 #include <vector>
 
-using MagicalEffect = std::pair < uint32_t, std::string >;
-using MagicalEffectsList = std::vector < MagicalEffect >;
-
 class Ingredients
 {
 public:
-	struct Effect
+	struct EffectData
 	{
-		uint32_t id;
-		float magnitude;
-		uint32_t duration;
+		uint32_t id = 0;
+		float magnitude = 0;
+		uint32_t duration = 0;
 	};
 
 	struct Ingredient
 	{
-		uint32_t id;
+		uint32_t id = 0;
 		std::string name, modName;
-		Effect effects[4];
+		EffectData effects[4];
 	};
 
 	bool setIngredient(const Ingredient& ingredient); // return true if adding, false if modifying existing

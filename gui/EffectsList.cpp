@@ -30,7 +30,13 @@ void EffectsList::loadList()
 			effect.name = in.readLine();
 
 			QString line = in.readLine();
-			effect.code = line.toUInt(nullptr, 16);
+			QStringList split = line.split(" ");
+			if (split.size() == 3)
+			{
+				effect.code = split[0].toUInt(nullptr, 16);
+				effect.flags = split[1].toUInt(nullptr, 16);
+				effect.baseCost = split[2].toFloat();
+			}
 			if (!effect.name.isEmpty() && effect.code)
 				m_effects.push_back(effect);
 		}

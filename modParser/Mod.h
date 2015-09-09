@@ -6,6 +6,19 @@
 
 using ModsList = std::vector < std::string > ;
 
+struct MagicalEffect
+{
+	MagicalEffect() = default;
+	MagicalEffect(uint32_t id, std::string name, uint32_t flags = 0, float cost = 0)
+		: id(id), name(name), flags(flags), baseCost(cost) {}
+
+	uint32_t id = 0;
+	std::string name;
+	uint32_t flags = 0;
+	float baseCost = 0;
+};
+using MagicalEffectsList = std::vector < MagicalEffect >;
+
 struct Config
 {
 	Ingredients ingredientsList;
@@ -25,7 +38,9 @@ protected:
 	using Type = std::array<char, 4>;
 
 	bool isType(const Type& type, const std::string& name); 
+
 	void newIngredient();
+	void newMagicalEffect();
 	
 	void parseRecord();
 	void parseGenericRecord();
@@ -39,6 +54,7 @@ protected:
 	void parseMaster();
 	void parseIngredientName();
 	void parseMagicalEffectName();
+	void parseMagicalEffectData();
 	void parseEffectID();
 	void parseEffectItem();
 
@@ -51,8 +67,9 @@ protected:
 		m_nbEffAdded = 0, m_nbEffModified = 0;
 
 	Parser in;
-	std::string m_modFileName, m_modName, m_currentMagicalEffectName;
+	std::string m_modFileName, m_modName;
 	Ingredients::Ingredient m_currentIngredient;
+	MagicalEffect m_currentMagicalEffect;
 	enum class RecordType { None, Plugin, Ingredient, MagicalEffect };
 	RecordType m_currentRecord;
 	Config& m_config;

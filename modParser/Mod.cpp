@@ -82,6 +82,14 @@ void Mod::newIngredient()
 	}
 }
 
+void Mod::newMagicalEffect()
+{
+	m_currentMagicalEffect.id = 0;
+	m_currentMagicalEffect.name.clear();
+	m_currentMagicalEffect.flags = 0;
+	m_currentMagicalEffect.baseCost = 0;
+}
+
 void Mod::parseRecord()
 {
 	Type type{};
@@ -167,6 +175,8 @@ void Mod::parseIngredient()
 
 void Mod::parseMagicalEffect()
 {
+	newMagicalEffect();
+
 	uint32_t dataSize, id;
 	in >> dataSize; in.jump(4);
 	in >> id; in.jump(8);
@@ -204,6 +214,8 @@ void Mod::parseField()
 	case RecordType::MagicalEffect:
 		if (isType(type, "FULL"))
 			parseMagicalEffectName();
+		else if (isType(type, "DATA"))
+			parseMagicalEffectData();
 		else
 			parseGenericField();
 		break;
@@ -262,16 +274,23 @@ void Mod::parseMagicalEffectName()
 	{
 		uint32_t id;
 		in >> id;
-		m_currentMagicalEffectName = m_stringsTable.get(id);
+		m_currentMagicalEffect.name = m_stringsTable.get(id);
 	}
 	else
 	{
-		m_currentMagicalEffectName.resize(dataSize - 1); // Don't read null character in the string
-		in.stream().read(&m_currentMagicalEffectName[0], dataSize - 1);
-		uint8_t dummy; // read null character
-		in >> dummy;
+		m_currentMagicalEffect.name.resize(dataSize - 1); // Don't read null character in the string
+		in.stream().read(&m_currentMagicalEffect.name[0], dataSize - 1);
+		in.jump(1);
 	}
+}
 
+void Mod::parseMagicalEffectData()
+{
+	uint16_t dataSize;
+	in >> dataSize;
+	in >> m_currentMagicalEffect.flags;
+	in >> m_currentMagicalEffect.baseCost;
+	in.jump(144); // DATA is 152 bytes long
 	m_parsedMGEF = true;
 }
 
@@ -355,15 +374,16 @@ void Mod::updateMagicalEffects()
 	m_currentRecord = RecordType::MagicalEffect;
 	for (const auto& effect : effectsToUpdate)
 	{
-		in.seekg(effect.second);
+		newMagicalEffect();
+		m_currentMagicalEffect.id = effect.first;
 		m_parsedMGEF = false;
-		m_currentMagicalEffectName = "";
+		in.seekg(effect.second);
 
 		while (!m_parsedMGEF && !in.eof())
 			parseField();
 
-		if (!m_currentMagicalEffectName.empty())
-			updatedEffects.emplace_back(effect.first, m_currentMagicalEffectName);
+		if (!m_currentMagicalEffect.name.empty())
+			updatedEffects.push_back(m_currentMagicalEffect);
 	}
 	m_currentRecord = RecordType::None;
 
@@ -372,7 +392,7 @@ void Mod::updateMagicalEffects()
 	set_union(updatedEffects.begin(), updatedEffects.end(),
 		m_config.magicalEffectsList.begin(), m_config.magicalEffectsList.end(), 
 		back_inserter(outputList), [](const MagicalEffect& lhs, const MagicalEffect& rhs){
-		return lhs.first < rhs.first;
+		return lhs.id < rhs.id;
 	});
 
 	// Compute the number of effects added or modified

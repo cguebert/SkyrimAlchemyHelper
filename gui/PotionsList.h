@@ -19,12 +19,14 @@ public:
 		Potion()
 		{
 			for (int i = 0; i < maxIngredientsPerPotion; ++i) ingredients[i] = -1;
-			for (int i = 0; i < maxEffectsPerPotion; ++i) effects[i] = -1;
+			for (int i = 0; i < maxEffectsPerPotion; ++i) { effects[i] = -1; magnitudes[i] = durations[i] = 0; }
 		}
 
 		int potionId = -1;
 		int ingredients[maxIngredientsPerPotion];
 		int effects[maxEffectsPerPotion];
+		float magnitudes[maxEffectsPerPotion];
+		float durations[maxEffectsPerPotion];
 	};
 	using Potions = std::vector<Potion>;
 
@@ -55,6 +57,7 @@ protected:
 	void saveList();
 	void updateViews();
 	void applyFilters();
+	void computePotionsStrength();
 
 	Potions m_allPotions, m_filteredPotions;
 	Filters m_currentFilters;
