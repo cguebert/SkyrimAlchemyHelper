@@ -4,7 +4,6 @@
 #include <QDialog>
 
 class ConfigPane;
-class QTabWidget;
 
 class ConfigDialog : public QDialog
 {
@@ -20,7 +19,6 @@ public slots:
 	void onOk();
 
 protected:
-	QTabWidget* m_tabWidget;
 	ConfigPane* m_configPane;
 };
 

@@ -11,21 +11,22 @@ ConfigDialog::ConfigDialog(QWidget *parent, bool firstLaunch)
 {
 	setWindowTitle("Skyrim Alchemy Helper - Config");
 	QVBoxLayout* vLayout = new QVBoxLayout;
+	vLayout->setContentsMargins(5, 5, 5, 5);
 
-	m_tabWidget = new QTabWidget;
-	vLayout->addWidget(m_tabWidget);
+	auto tabWidget = new QTabWidget;
+	vLayout->addWidget(tabWidget);
 
 	m_configPane = new ConfigPane(this, firstLaunch);
-	m_tabWidget->addTab(m_configPane, "General");
+	tabWidget->addTab(m_configPane, "General");
 
 	auto pluginsWidget = new PluginsListWidget;
-	m_tabWidget->addTab(pluginsWidget, "Plugins");
+	tabWidget->addTab(pluginsWidget, "Plugins");
 
 	auto effectsWidget = new EffectsListWidget;
-	m_tabWidget->addTab(effectsWidget, "Effects");
+	tabWidget->addTab(effectsWidget, "Effects");
 
 	auto ingredientsWidget = new IngredientsListWidget;
-	m_tabWidget->addTab(ingredientsWidget, "Ingredients");
+	tabWidget->addTab(ingredientsWidget, "Ingredients");
 
 	QPushButton* okButton = new QPushButton(tr("Ok"), this);
 	connect(okButton, SIGNAL(clicked()), this, SLOT(onOk()));

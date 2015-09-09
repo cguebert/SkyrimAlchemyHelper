@@ -24,6 +24,7 @@ set(HEADER_FILES
 	IngredientsList.h
 	IngredientsListWidget.h
 	IngredientsSelector.h
+	InventoryWidget.h
 	MainWindow.h
 	PluginsList.h
 	PluginsListWidget.h
@@ -47,6 +48,7 @@ set(SOURCE_FILES
 	IngredientsList.cpp
 	IngredientsListWidget.cpp
 	IngredientsSelector.cpp
+	InventoryWidget.cpp
 	MainWindow.cpp
 	PluginsList.cpp
 	PluginsListWidget.cpp

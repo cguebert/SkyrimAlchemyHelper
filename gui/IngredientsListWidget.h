@@ -3,7 +3,6 @@
 #include <QWidget>
 #include <QAbstractTableModel>
 
-class QPushButton;
 class QTableView;
 class IngredientsList;
 class EffectsList;

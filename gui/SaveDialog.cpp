@@ -1,6 +1,7 @@
 #include <QtWidgets>
 
 #include "SaveDialog.h"
+#include "InventoryWidget.h"
 
 #include "GameSave.h"
 
@@ -10,9 +11,16 @@ SaveDialog::SaveDialog(QWidget *parent)
 	setWindowTitle("Skyrim Alchemy Helper - Save information");
 
 	auto vLayout = new QVBoxLayout;
+	vLayout->setContentsMargins(5, 5, 5, 5);
+
+	auto tabWidget = new QTabWidget;
+	vLayout->addWidget(tabWidget);
+
 	m_saveInfoContainer = new QWidget;
-	vLayout->addWidget(m_saveInfoContainer);
-	vLayout->addStretch();
+	tabWidget->addTab(m_saveInfoContainer, "Information");
+
+	auto inventoryWidget = new InventoryWidget;
+	tabWidget->addTab(inventoryWidget, "Inventory");
 
 	QPushButton* okButton = new QPushButton(tr("Ok"), this);
 	connect(okButton, SIGNAL(clicked()), this, SLOT(accept()));
@@ -72,4 +80,5 @@ void SaveDialog::refreshInformation()
 	int nbIng = knownIng.size();
 	auto ingLabel = new QLabel(QString("%1 known ingredients, with %2% of discovered effects").arg(nbIng).arg(nbIng ? knownEffects * 25 / nbIng : 0));
 	layout->addWidget(ingLabel);
+	layout->addStretch();
 }
