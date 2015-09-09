@@ -19,7 +19,6 @@ target_link_libraries(${PROJECT_NAME} "Parser")
 
 include_directories(${EXTLIB_INCLUDE_DIR})
 
-add_library("ZLib" SHARED IMPORTED)
-set_target_properties("ZLib" PROPERTIES IMPORTED_IMPLIB "${EXTLIB_BINARIES_DIR}/zdll.lib")
+add_library("ZLib" STATIC IMPORTED)
+set_target_properties("ZLib" PROPERTIES IMPORTED_LOCATION "${EXTLIB_BINARIES_DIR}/zlibstatic.lib")
 target_link_libraries(${PROJECT_NAME} "ZLib")
-install(FILES "${EXTLIB_BINARIES_DIR}/zlib1.dll" DESTINATION ${TARGET_DIR})
