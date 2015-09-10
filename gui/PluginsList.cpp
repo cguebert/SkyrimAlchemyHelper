@@ -62,17 +62,3 @@ int PluginsList::find(const QString& name) const
 		return it - m_plugins.begin();
 	return -1;
 }
-
-void PluginsList::removePlugins(int first, int count)
-{
-	auto start = m_plugins.begin() + first;
-	auto end = start + count;
-	m_plugins.erase(start, end);
-}
-
-void PluginsList::addPlugin()
-{
-	Plugin plugin;
-	plugin.name = "New Plugin";
-	m_plugins.push_back(plugin);
-}

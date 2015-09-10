@@ -7,9 +7,10 @@ SelectorWidget::SelectorWidget(QWidget* parent)
 {
 }
 
-void SelectorWidget::setItems(QStringList items)
+void SelectorWidget::setItems(QStringList items, QStringList tooltips)
 {
 	m_items = items;
+	m_tooltips = tooltips;
 
 	auto layout = this->layout();
 	if (layout)
@@ -29,15 +30,14 @@ void SelectorWidget::setItems(QStringList items)
 
 	const int buttonSize = 24;
 
-	int id = 0;
-	for (const auto& item : m_items)
+	for (int i = 0, nb = items.size(); i < nb; ++i)
 	{
 		auto boxLayout = new QHBoxLayout;
 		boxLayout->setContentsMargins(0, 0, 0, 0);
 		boxLayout->setSpacing(2);
 
 		auto addFilterContainsAction = new QAction(boxLayout);
-		addFilterContainsAction->setData(QVariant(id + addFilterContainsMask));
+		addFilterContainsAction->setData(QVariant(i + addFilterContainsMask));
 		auto addFilterContainsButton = new QPushButton(addFilterContainsIcon, "");
 		addFilterContainsButton->setMaximumSize(buttonSize, buttonSize);
 		addFilterContainsButton->setFlat(true);
@@ -46,7 +46,7 @@ void SelectorWidget::setItems(QStringList items)
 		boxLayout->addWidget(addFilterContainsButton);
 
 		auto addFilterDoesNotContainAction = new QAction(boxLayout);
-		addFilterDoesNotContainAction->setData(QVariant(id + addFilterDoesNotContainMask));
+		addFilterDoesNotContainAction->setData(QVariant(i + addFilterDoesNotContainMask));
 		auto addFilterDoesNotContainButton = new QPushButton(addFilterDoesNotContainIcon, "");
 		addFilterDoesNotContainButton->setMaximumSize(buttonSize, buttonSize);
 		addFilterDoesNotContainButton->setFlat(true);
@@ -55,7 +55,7 @@ void SelectorWidget::setItems(QStringList items)
 		boxLayout->addWidget(addFilterDoesNotContainButton);
 
 	/*	auto removeFilterAction = new QAction(boxLayout);
-		removeFilterAction->setData(QVariant(id + removeFilterMask));
+		removeFilterAction->setData(QVariant(i + removeFilterMask));
 		auto removeFilterButton = new QPushButton(removeFilterIcon, "");
 		removeFilterButton->setMaximumSize(buttonSize, buttonSize);
 		removeFilterButton->setFlat(true);
@@ -63,11 +63,12 @@ void SelectorWidget::setItems(QStringList items)
 		connect(removeFilterAction, SIGNAL(triggered(bool)), this, SLOT(modifyFilter()));
 		boxLayout->addWidget(removeFilterButton);
 		*/
-		auto label = new QLabel(item);
+
+		auto label = new QLabel(m_items[i]);
+		label->setToolTip(m_tooltips[i]);
 		boxLayout->addWidget(label);
 
 		mainLayout->addLayout(boxLayout);
-		++id;
 	}
 }
 

@@ -83,7 +83,7 @@ void FiltersWidget::effectFilterAction(FilterActionType action, int id)
 		return;
 
 	// Add this effect
-	const auto& effect = EffectsList::instance().effect(id);
+	const auto& effect = EffectsList::instance().effects()[id];
 
 	auto boxWidget = new QWidget;
 	auto boxLayout = new QHBoxLayout(boxWidget);
@@ -118,7 +118,7 @@ void FiltersWidget::ingredientFilterAction(FilterActionType action, int id)
 		return;
 
 	// Add this ingredient
-	const auto& ingredient = IngredientsList::instance().ingredient(id);
+	const auto& ingredient = IngredientsList::instance().ingredients()[id];
 
 	auto boxWidget = new QWidget;
 	auto boxLayout = new QHBoxLayout(boxWidget);

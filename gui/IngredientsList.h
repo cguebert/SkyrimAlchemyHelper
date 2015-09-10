@@ -29,11 +29,7 @@ public:
 	int size() const;
 	int find(int pluginId, quint32 code) const; // -1 if not found
 	const QVector<Ingredient>& ingredients() const;
-	Ingredient& ingredient(int index); // Will launch an exception if index is invalid
-	const Ingredient& ingredient(int index) const; // Will launch an exception if index is invalid
-
-	void removeIngredients(int first, int count = 1);
-	void addIngredient();
+	QVector<Ingredient>& ingredients();
 
 	void loadList();
 	void saveList();
@@ -52,10 +48,7 @@ inline int IngredientsList::size() const
 inline const QVector<IngredientsList::Ingredient>& IngredientsList::ingredients() const
 { return m_ingredients; }
 
-inline IngredientsList::Ingredient& IngredientsList::ingredient(int index)
-{ return m_ingredients[index]; }
-
-inline const IngredientsList::Ingredient& IngredientsList::ingredient(int index) const
-{ return m_ingredients[index]; }
+inline QVector<IngredientsList::Ingredient>& IngredientsList::ingredients()
+{ return m_ingredients; }
 
 #endif // INGREDIENTSLIST_H

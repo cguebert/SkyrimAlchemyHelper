@@ -19,15 +19,7 @@ public:
 	int size() const;
 	int find(const QString& name) const; // -1 if not found
 	const QVector<Plugin>& plugins() const;
-	Plugin& plugin(int index); // Will launch an exception if index is invalid
-	const Plugin& plugin(int index) const; // Will launch an exception if index is invalid
-
-	void setActive(int index, bool active);
-	void incrementNbIngredients(int index);
-	void decrementNbIngredients(int index);
-
-	void removePlugins(int first, int count = 1);
-	void addPlugin();
+	QVector<Plugin>& plugins();
 
 	void loadList();
 	void saveList();
@@ -46,19 +38,7 @@ inline int PluginsList::size() const
 inline const QVector<PluginsList::Plugin>& PluginsList::plugins() const
 { return m_plugins; }
 
-inline PluginsList::Plugin& PluginsList::plugin(int index)
-{ return m_plugins[index]; }
-
-inline const PluginsList::Plugin& PluginsList::plugin(int index) const
-{ return m_plugins[index]; }
-
-inline void PluginsList::setActive(int index, bool active)
-{ m_plugins[index].active = active; }
-
-inline void PluginsList::incrementNbIngredients(int index)
-{ ++m_plugins[index].nbIngredients; }
-
-inline void PluginsList::decrementNbIngredients(int index)
-{ --m_plugins[index].nbIngredients; }
+inline QVector<PluginsList::Plugin>& PluginsList::plugins()
+{ return m_plugins; }
 
 #endif // PLUGINSLIST_H

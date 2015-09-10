@@ -236,11 +236,12 @@ void PotionsList::computePotionsStrength()
 				{
 					if (ingEff.effectId == effId)
 					{
-						float strength = (ingEff.magnitude > 0 ? ingEff.magnitude : 1) * (ingEff.duration > 0 ? ingEff.duration : 1);
+						float strength = (ingEff.magnitude > 1 ? ingEff.magnitude : 1) * (ingEff.duration > 0 ? ingEff.duration / 10 : 1);
 						if (strength > maxStrength)
 						{
 							potion.magnitudes[i] = ingEff.magnitude;
 							potion.durations[i] = ingEff.duration;
+							maxStrength = strength;
 						}
 						break;
 					}

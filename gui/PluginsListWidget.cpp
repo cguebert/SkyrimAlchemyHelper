@@ -28,7 +28,7 @@ QVariant PluginsListModel::data(const QModelIndex& index, int role) const
 	case Qt::DisplayRole:
 	case Qt::EditRole:
 	{
-		const auto& plugin = m_pluginsList.plugin(index.row());
+		const auto& plugin = m_pluginsList.plugins()[index.row()];
 		switch (index.column())
 		{
 		case 0: return plugin.name;
@@ -41,7 +41,7 @@ QVariant PluginsListModel::data(const QModelIndex& index, int role) const
 	{
 		if (index.column() == 1)
 		{
-			const auto& plugin = m_pluginsList.plugin(index.row());
+			const auto& plugin = m_pluginsList.plugins()[index.row()];
 			return plugin.active ? Qt::Checked : Qt::Unchecked;
 		}
 		return QVariant();

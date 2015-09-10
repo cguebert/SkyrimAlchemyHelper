@@ -1,5 +1,6 @@
 #include "EffectsSelector.h"
 #include "EffectsList.h"
+#include "IngredientsList.h"
 
 EffectsSelector::EffectsSelector(QWidget* parent)
 	: SelectorWidget(parent)
@@ -10,11 +11,19 @@ EffectsSelector::EffectsSelector(QWidget* parent)
 void EffectsSelector::updateList()
 {
 	const auto& effects = EffectsList::instance().effects();
+	const auto& ingredients = IngredientsList::instance().ingredients();
 
-	QStringList list;
+	QStringList names, tooltips;
 	for (const auto& effect : effects)
-		list << effect.name;
-	setItems(list);
+	{
+		names << effect.name;
+
+		QString tooltip;
+		for (const auto& ingId : effect.ingredients)
+			tooltip += ingredients[ingId].name + "\n";
+		tooltips << tooltip.trimmed();
+	}
+	setItems(names, tooltips);
 }
 
 bool EffectsSelector::filterAction(FilterActionType action, int id)

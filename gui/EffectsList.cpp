@@ -82,17 +82,3 @@ int EffectsList::find(QString name) const
 		return it - m_effects.begin();
 	return -1;
 }
-
-void EffectsList::removeEffects(int first, int count)
-{
-	auto start = m_effects.begin() + first;
-	auto end = start + count;
-	m_effects.erase(start, end);
-}
-
-void EffectsList::addEffect()
-{
-	Effect effect;
-	effect.name = "New Effect";
-	m_effects.push_back(effect);
-}

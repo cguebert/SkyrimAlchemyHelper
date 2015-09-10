@@ -40,7 +40,7 @@ void GameSave::load(QString fileName)
 	for (const auto& ing : ingredients.ingredients())
 	{
 		Save::Ingredient pIng;
-		pIng.mod = plugins.plugin(ing.pluginId).name.toStdString();
+		pIng.mod = plugins.plugins()[ing.pluginId].name.toStdString();
 		pIng.id = ing.code;
 		possibleIngredients.push_back(pIng);
 	}

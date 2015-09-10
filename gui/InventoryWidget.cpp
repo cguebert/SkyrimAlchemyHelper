@@ -28,7 +28,7 @@ QVariant InventoryModel::data(const QModelIndex& index, int role) const
 		const auto& item = m_gameSave.inventory()[index.row()];
 		switch (index.column())
 		{
-		case 0: return m_ingredientsList.ingredient(item.first).name;
+		case 0: return m_ingredientsList.ingredients()[item.first].name;
 		case 1: return item.second;
 		}
 		return QVariant();

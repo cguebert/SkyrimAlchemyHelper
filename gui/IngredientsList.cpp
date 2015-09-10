@@ -24,8 +24,8 @@ void IngredientsList::loadList()
 {
 	m_ingredients.clear();
 
-	PluginsList& plugins = PluginsList::instance();
-	EffectsList& effects = EffectsList::instance();
+	PluginsList& pluginsList = PluginsList::instance();
+	EffectsList& effectsList = EffectsList::instance();
 
 	QFile inputFile(fileName);
 	if (inputFile.open(QIODevice::ReadOnly))
@@ -37,13 +37,13 @@ void IngredientsList::loadList()
 			ingredient.name = in.readLine();
 
 			QString pluginName = in.readLine();
-			ingredient.pluginId = plugins.find(pluginName);
+			ingredient.pluginId = pluginsList.find(pluginName);
 
 			QString ingredientId = in.readLine();
 			ingredient.code = ingredientId.toUInt(nullptr, 16);
 
 			if (ingredient.pluginId != -1)
-				plugins.incrementNbIngredients(ingredient.pluginId);
+				++pluginsList.plugins()[ingredient.pluginId].nbIngredients;
 
 			bool validEffects = true;
 			for (int i = 0; i < 4; ++i)
@@ -53,26 +53,32 @@ void IngredientsList::loadList()
 				QStringList split = line.split(" ");
 				if (split.size() == 3)
 				{
-					effectData.effectId = effects.find(split[0].toUInt(nullptr, 16));
+					effectData.effectId = effectsList.find(split[0].toUInt(nullptr, 16));
 					effectData.magnitude = split[1].toFloat();
 					effectData.duration = split[2].toFloat();
 				}
 
 				if (effectData.effectId == -1)
+				{
 					validEffects = false;
-				else
-					effects.incrementNbIngredients(effectData.effectId);
+					break;
+				}
 			}
 
-			// Sort the effects for an easier computation of potions,
-			//  but keep the original ones as they are for the known ingredients loaded for each save
-			copy(begin(ingredient.effects), end(ingredient.effects), begin(ingredient.sortedEffects));
-			sort(begin(ingredient.sortedEffects), end(ingredient.sortedEffects), [](const EffectData& lhs, const EffectData& rhs){
-				return lhs.effectId < rhs.effectId;
-			});
-
 			if (!ingredient.name.isEmpty() && ingredient.pluginId != -1 && validEffects)
+			{
+				// Sort the effects for an easier computation of potions,
+				//  but keep the original ones as they are for the known ingredients loaded for each save
+				copy(begin(ingredient.effects), end(ingredient.effects), begin(ingredient.sortedEffects));
+				sort(begin(ingredient.sortedEffects), end(ingredient.sortedEffects), [](const EffectData& lhs, const EffectData& rhs){
+					return lhs.effectId < rhs.effectId;
+				});
+
+				int ingId = m_ingredients.size();
 				m_ingredients.push_back(ingredient);
+				for (auto effect : ingredient.effects)
+					effectsList.effects()[effect.effectId].ingredients.push_back(ingId);
+			}
 		}
 		inputFile.close();
 	}
@@ -85,8 +91,8 @@ void IngredientsList::loadList()
 
 void IngredientsList::saveList()
 {
-	PluginsList& plugins = PluginsList::instance();
-	EffectsList& effects = EffectsList::instance();
+	PluginsList& pluginsList = PluginsList::instance();
+	EffectsList& effectsList = EffectsList::instance();
 
 	QFile outputFile(fileName);
 	if(outputFile.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -96,14 +102,14 @@ void IngredientsList::saveList()
 		{
 			out << ingredient.name << '\n';
 			if(ingredient.pluginId != -1)
-				out << plugins.plugin(ingredient.pluginId).name;
+				out << pluginsList.plugins()[ingredient.pluginId].name;
 			out << '\n';
 			out << QString::number(ingredient.code, 16).toUpper() << '\n';
 
 			for(int i = 0; i < 4; ++i)
 			{
 				const EffectData& effectData = ingredient.effects[i];
-				const EffectsList::Effect& effect = effects.effect(effectData.effectId);
+				const EffectsList::Effect& effect = effectsList.effects()[effectData.effectId];
 				out << QString::number(effect.code, 16).toUpper() << ' ';
 				out << effectData.magnitude << ' ' << effectData.duration << '\n';
 			}
@@ -119,29 +125,4 @@ int IngredientsList::find(int pluginId, quint32 code) const
 	if (it != m_ingredients.end())
 		return it - m_ingredients.begin();
 	return -1;
-}
-
-void IngredientsList::removeIngredients(int first, int count)
-{
-	static EffectsList& effects = EffectsList::instance();
-	for(int i = first, nb = m_ingredients.size(); i < nb && i < first + count; ++i)
-	{
-		for(int j = 0; j < 4; ++j)
-		{
-			int id = m_ingredients[i].effects[j].effectId;
-			if(id != -1)
-				effects.decrementNbIngredients(id);
-		}
-	}
-
-	auto start = m_ingredients.begin() + first;
-	auto end = start + count;
-	m_ingredients.erase(start, end);
-}
-
-void IngredientsList::addIngredient()
-{
-	Ingredient ingredient;
-	ingredient.name = "New Ingredient";
-	m_ingredients.push_back(ingredient);
 }

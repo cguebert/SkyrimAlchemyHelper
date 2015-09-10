@@ -15,7 +15,7 @@ class SelectorWidget : public QWidget
 public:
 	explicit SelectorWidget(QWidget* parent = nullptr);
 
-	void setItems(QStringList items);
+	void setItems(QStringList items, QStringList tooltips);
 
 public slots:
 	void modifyFilter();
@@ -23,6 +23,6 @@ public slots:
 protected:
 	virtual bool filterAction(FilterActionType actionType, int id) = 0;
 
-	QStringList m_items;
+	QStringList m_items, m_tooltips;
 };
 

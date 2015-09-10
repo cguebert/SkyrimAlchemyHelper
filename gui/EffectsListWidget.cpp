@@ -23,13 +23,13 @@ QVariant EffectsListModel::data(const QModelIndex& index, int role) const
 {
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		const auto& effect = m_effectsList.effect(index.row());
+		const auto& effect = m_effectsList.effects()[index.row()];
 		switch (index.column())
 		{
 		case 0: return effect.name;
 		case 1: return QString::number(effect.code, 16).toUpper();
 		case 2: return effect.baseCost;
-		case 3: return effect.nbIngredients;
+		case 3: return effect.ingredients.size();
 		}
 		return QVariant();
 	}
