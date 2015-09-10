@@ -152,52 +152,76 @@ void PotionsList::setFilters(const Filters& filters)
 
 void PotionsList::applyFilters()
 {
+	using FilterType = Filter::FilterType;
 	m_filteredPotions.clear();
 	std::copy_if(m_allPotions.begin(), m_allPotions.end(), std::back_inserter(m_filteredPotions), [this](const Potion& potion) {
 		for (const auto& filter : m_currentFilters)
 		{
-			if (filter.isIngredient)
+			switch (filter.type)
 			{
-				if (filter.contains)
-				{
-					bool contains = false;
-					for (int i = 0; i < maxIngredientsPerPotion; ++i)
-						if (potion.ingredients[i] == filter.id)
-						{
-							contains = true;
-							break;
-						}
-					if (!contains)
-						return false;
-				}
-				else
-				{
-					for (int i = 0; i < maxIngredientsPerPotion; ++i)
-						if (potion.ingredients[i] == filter.id)
-							return false;
-				}
-			}
-			else
+
+			case FilterType::HasIngredient:
 			{
-				if (filter.contains)
-				{
-					bool contains = false;
-					for (int i = 0; i < maxEffectsPerPotion; ++i)
-						if (potion.effects[i] == filter.id)
-						{
-							contains = true;
-							break;
-						}
-					if (!contains)
-						return false;
-				}
-				else
-				{
-					for (int i = 0; i < maxEffectsPerPotion; ++i)
-						if (potion.effects[i] == filter.id)
-							return false;
-				}
+				bool contains = false;
+				for (int i = 0; i < maxIngredientsPerPotion; ++i)
+					if (potion.ingredients[i] == filter.data)
+					{
+						contains = true;
+						break;
+					}
+				if (!contains)
+					return false;
+				break;
 			}
+
+			case FilterType::DoesNotHaveIngredient:
+			{
+				for (int i = 0; i < maxIngredientsPerPotion; ++i)
+					if (potion.ingredients[i] == filter.data)
+						return false;
+				break;
+			}
+
+			case FilterType::HasEffect:
+			{
+				bool contains = false;
+				for (int i = 0; i < maxEffectsPerPotion; ++i)
+					if (potion.effects[i] == filter.data)
+					{
+						contains = true;
+						break;
+					}
+				if (!contains)
+					return false;
+				break;
+			}
+
+			case FilterType::DoesNotHaveEffect:
+			{
+				for (int i = 0; i < maxEffectsPerPotion; ++i)
+					if (potion.effects[i] == filter.data)
+						return false;
+				break;
+			}
+
+			case FilterType::TwoIngredients:
+			{
+				if (potion.ingredients[2] != -1)
+					return false;
+				break;
+			}
+
+			case FilterType::ThreeIngredients:
+			{
+				if (potion.ingredients[2] == -1)
+					return false;
+				break;
+			}
+
+			default:
+				return false;
+
+			} // switch
 		}
 		return true;
 	});

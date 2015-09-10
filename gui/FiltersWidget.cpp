@@ -11,13 +11,35 @@ FiltersWidget::FiltersWidget(QWidget* parent)
 	: QWidget(parent)
 {
 	QVBoxLayout* vLayout = new QVBoxLayout;
-	vLayout->setContentsMargins(0, 0, 0, 0);
+	vLayout->setSpacing(3);
 
-	m_effectsLayout = new FlowLayout(nullptr, 0, 0, 0);
+	auto widgetsLayout = new FlowLayout(5, 5, 5);
+	m_inventoryCheckBox = new QCheckBox("Only available ingredients");
+	m_inventoryCheckBox->setCheckState(Qt::Checked);
+	widgetsLayout->addWidget(m_inventoryCheckBox);
+	connect(m_inventoryCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updatePotionsListFilters()));
+
+	m_ingredientsCountComboBox = new QComboBox;
+	QStringList ingredientsCountChoices;
+	ingredientsCountChoices << "2 or 3 ingredients" << "2 ingredients" << "3 ingredients";
+	m_ingredientsCountComboBox->addItems(ingredientsCountChoices);
+	widgetsLayout->addWidget(m_ingredientsCountComboBox);
+	connect(m_ingredientsCountComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updatePotionsListFilters()));
+
+	m_purityCombBox = new QComboBox;
+	QStringList purityChoices;
+	purityChoices << "Any purity" << "Pure" << "Pure positive" << "Pure negative";
+	m_purityCombBox->addItems(purityChoices);
+	widgetsLayout->addWidget(m_purityCombBox);
+	connect(m_purityCombBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updatePotionsListFilters()));
+
+	vLayout->addLayout(widgetsLayout);
+
+	m_effectsLayout = new FlowLayout(0, 0, 0);
 	m_effectsLayout->setSpacing(0);
 	vLayout->addLayout(m_effectsLayout);
 
-	m_ingredientsLayout = new FlowLayout(nullptr, 0, 0, 0);
+	m_ingredientsLayout = new FlowLayout(0, 0, 0);
 	m_ingredientsLayout->setSpacing(0);
 	vLayout->addLayout(m_ingredientsLayout);
 
@@ -99,7 +121,7 @@ void FiltersWidget::effectFilterAction(FilterActionType action, int id)
 
 	auto boxWidget = new QWidget;
 	auto boxLayout = new QHBoxLayout(boxWidget);
-	boxLayout->setContentsMargins(10, 5, 5, 5);
+	boxLayout->setContentsMargins(0, 0, 5, 0);
 
 	auto removeAction = new QAction(boxLayout);
 	removeAction->setData(QVariant(id));
@@ -134,7 +156,7 @@ void FiltersWidget::ingredientFilterAction(FilterActionType action, int id)
 
 	auto boxWidget = new QWidget;
 	auto boxLayout = new QHBoxLayout(boxWidget);
-	boxLayout->setContentsMargins(10, 5, 5, 5);
+	boxLayout->setContentsMargins(0, 0, 5, 0);
 
 	auto removeAction = new QAction(boxLayout);
 	removeAction->setData(QVariant(id));
@@ -220,17 +242,24 @@ void FiltersWidget::removeIngredient()
 void FiltersWidget::updatePotionsListFilters()
 {
 	PotionsList::Filters filters;
+	using FilterType = PotionsList::Filter::FilterType;
 	for (const auto& ing : m_ingredientsFilters)
 	{
 		bool contains = (ing.actionType == FilterActionType::addFilterContains);
-		filters.emplace_back(contains, true, ing.id);
+		filters.emplace_back(contains ? FilterType::HasIngredient : FilterType::DoesNotHaveIngredient, ing.id);
 	}
 
 	for (const auto& effect : m_effectsFilters)
 	{
 		bool contains = (effect.actionType == FilterActionType::addFilterContains);
-		filters.emplace_back(contains, false, effect.id);
+		filters.emplace_back(contains ? FilterType::HasEffect : FilterType::DoesNotHaveEffect, effect.id);
 	}
+
+	auto ingCountChoice = m_ingredientsCountComboBox->currentIndex();
+	if (ingCountChoice == 1)
+		filters.emplace_back(FilterType::TwoIngredients);
+	else if (ingCountChoice == 2)
+		filters.emplace_back(FilterType::ThreeIngredients);
 
 	PotionsList::instance().setFilters(filters);
 }

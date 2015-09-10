@@ -35,13 +35,21 @@ public:
 
 	struct Filter
 	{
-		Filter() {}
-		Filter(bool doesContain, bool targetIsIngredient, int targetId)
-			: contains(doesContain), isIngredient(targetIsIngredient), id(targetId) {}
+		enum class FilterType
+		{	
+			None, 
+			HasEffect, DoesNotHaveEffect, 
+			HasIngredient, DoesNotHaveIngredient, 
+			TwoIngredients, ThreeIngredients,
+			AvailableOnly, 
+			Pure, PurePositive, PureNegative 
+		};
 
-		bool contains = true; // If false -> doesNotContain
-		bool isIngredient = true; // If false -> isEffect
-		int id = 0; // Index of the ingredient or the effect
+		Filter() {}
+		Filter(FilterType type, int data = 0) : type(type), data(data) {}
+
+		FilterType type = FilterType::None;
+		int data = 0; // Index of the ingredient or the effect
 	};
 	using Filters = std::vector<Filter>;
 
