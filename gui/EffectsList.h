@@ -13,7 +13,7 @@ public:
 	{
 		quint32 code = 0, flags = 0;
 		float baseCost = 0;
-		QString name, description;
+		QString name, description, tooltip;
 		std::vector<int> ingredients;
 	};
 

@@ -26,7 +26,7 @@ void PotionsListWidget::refreshList()
 	int nbPotions = potions.size();
 
 	QVBoxLayout* vLayout = new QVBoxLayout;
-	auto label = new QLabel("# of potions : " + QString::number(potions.size()));
+	auto label = new QLabel("Number of potions : " + QString::number(potions.size()));
 	vLayout->addWidget(label);
 
 	for (int i = 0, nb = std::min(50, nbPotions); i < nb; ++i)
@@ -40,7 +40,9 @@ void PotionsListWidget::refreshList()
 		for (int ingId = 0; ingId < PotionsList::maxIngredientsPerPotion
 			&& potion.ingredients[ingId] != -1; ++ingId)
 		{
-			auto ingLabel = new QLabel(ingredients[potion.ingredients[ingId]].name);
+			const auto& ingredient = ingredients[potion.ingredients[ingId]];
+			auto ingLabel = new QLabel(ingredient.name);
+			ingLabel->setToolTip(ingredient.tooltip);
 			ingredientsLayout->addWidget(ingLabel);
 		}
 	//	ingredientsLayout->addStretch();
@@ -53,6 +55,7 @@ void PotionsListWidget::refreshList()
 		{
 			const auto& effect = effects[potion.effects[effId]];
 			auto effLabel = new QLabel(effect.name);
+			effLabel->setToolTip(effect.tooltip);
 			effectsLayout->addWidget(effLabel);
 
 			QString strengthText, magText, durText;
@@ -63,6 +66,8 @@ void PotionsListWidget::refreshList()
 			else
 				strengthText = QString::number(potion.magnitudes[effId], 'f', 2);
 			auto strengthLabel = new QLabel(strengthText);
+
+			// Using the description of the magical effect
 			if (!effect.description.isEmpty())
 			{
 				QString tooltip = effect.description;

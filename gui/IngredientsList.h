@@ -2,6 +2,7 @@
 #define INGREDIENTSLIST_H
 
 #include <QString>
+#include <QStringList>
 #include <vector>
 
 class IngredientsList
@@ -21,7 +22,7 @@ public:
 	{
 		int pluginId = 0;
 		quint32 code = 0;
-		QString name;
+		QString name, tooltip;
 		EffectData effects[nbEffectsPerIngredient],
 			sortedEffects[nbEffectsPerIngredient];
 	};

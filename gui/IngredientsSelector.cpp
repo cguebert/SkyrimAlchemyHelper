@@ -17,11 +17,7 @@ void IngredientsSelector::updateList()
 	for (const auto& ingredient : ingredients)
 	{
 		names << ingredient.name;
-
-		QString tooltip;
-		for (const auto& effect : ingredient.sortedEffects)
-			tooltip += effects[effect.effectId].name + "\n";
-		tooltips << tooltip.trimmed();
+		tooltips << ingredient.tooltip;
 	}
 	setItems(names, tooltips);
 }

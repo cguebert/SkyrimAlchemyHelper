@@ -74,10 +74,7 @@ void IngredientsList::loadList()
 					return lhs.effectId < rhs.effectId;
 				});
 
-				int ingId = m_ingredients.size();
 				m_ingredients.push_back(ingredient);
-				for (auto effect : ingredient.effects)
-					effectsList.effects()[effect.effectId].ingredients.push_back(ingId);
 			}
 		}
 		inputFile.close();
@@ -87,6 +84,24 @@ void IngredientsList::loadList()
 	sort(m_ingredients.begin(), m_ingredients.end(), [](const Ingredient& lhs, const Ingredient& rhs){
 		return lhs.name < rhs.name;
 	});
+
+	// Create the tooltips of the effects (with the sorted list of ingredients)
+	for (int i = 0, nb = m_ingredients.size(); i < nb; ++i)
+	{
+		auto& ingredient = m_ingredients[i];
+		for (auto effectData : ingredient.sortedEffects)
+		{
+			auto& effect = effectsList.effects()[effectData.effectId];
+			ingredient.tooltip += effect.name + "\n";
+			effect.ingredients.push_back(i);
+			effect.tooltip += ingredient.name + "\n";
+		}
+		ingredient.tooltip = ingredient.tooltip.trimmed();
+	}
+
+	// Trim the tooltips of the effects
+	for (auto& effect : effectsList.effects())
+		effect.tooltip = effect.tooltip.trimmed();
 }
 
 void IngredientsList::saveList()
