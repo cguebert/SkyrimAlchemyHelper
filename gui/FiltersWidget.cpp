@@ -15,7 +15,7 @@ FiltersWidget::FiltersWidget(QWidget* parent)
 
 	auto widgetsLayout = new FlowLayout(5, 5, 5);
 	m_inventoryCheckBox = new QCheckBox("Only available ingredients");
-	m_inventoryCheckBox->setCheckState(Qt::Checked);
+//	m_inventoryCheckBox->setCheckState(Qt::Checked);
 	widgetsLayout->addWidget(m_inventoryCheckBox);
 	connect(m_inventoryCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updatePotionsListFilters()));
 
@@ -254,6 +254,9 @@ void FiltersWidget::updatePotionsListFilters()
 		bool contains = (effect.actionType == FilterActionType::addFilterContains);
 		filters.emplace_back(contains ? FilterType::HasEffect : FilterType::DoesNotHaveEffect, effect.id);
 	}
+
+	if (m_inventoryCheckBox->checkState() == Qt::Checked)
+		filters.emplace_back(FilterType::AvailableIngredients);
 
 	auto ingCountChoice = m_ingredientsCountComboBox->currentIndex();
 	if (ingCountChoice == 1)

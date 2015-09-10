@@ -41,7 +41,7 @@ public:
 			HasEffect, DoesNotHaveEffect, 
 			HasIngredient, DoesNotHaveIngredient, 
 			TwoIngredients, ThreeIngredients,
-			AvailableOnly, 
+			AvailableIngredients, 
 			Pure, PurePositive, PureNegative 
 		};
 

@@ -1,6 +1,7 @@
 #include "PotionsList.h"
 #include "IngredientsList.h"
 #include "EffectsList.h"
+#include "GameSave.h"
 
 #include <algorithm>
 #include <iterator>
@@ -154,8 +155,11 @@ void PotionsList::setFilters(const Filters& filters)
 void PotionsList::applyFilters()
 {
 	using FilterType = Filter::FilterType;
+	const auto& ingredientsCount = GameSave::instance().ingredientsCount();
+
 	m_filteredPotions.clear();
-	std::copy_if(m_allPotions.begin(), m_allPotions.end(), std::back_inserter(m_filteredPotions), [this](const Potion& potion) {
+
+	std::copy_if(m_allPotions.begin(), m_allPotions.end(), std::back_inserter(m_filteredPotions), [this, &ingredientsCount](const Potion& potion) {
 		for (const auto& filter : m_currentFilters)
 		{
 			switch (filter.type)
@@ -219,6 +223,13 @@ void PotionsList::applyFilters()
 				break;
 			}
 
+			case FilterType::AvailableIngredients:
+			{
+				for (int i = 0; i < maxIngredientsPerPotion; ++i)
+					if (potion.ingredients[i] != -1 && !ingredientsCount[potion.ingredients[i]])
+						return false;
+				break;
+			}
 			case FilterType::Pure:
 			{
 				bool toxicity = m_toxicity[potion.effects[0]];

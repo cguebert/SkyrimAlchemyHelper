@@ -32,15 +32,16 @@ void GameSave::load(QString fileName)
 	m_screenshot = QPixmap();
 	m_knownIngredients.clear();
 	m_inventory.clear();
+	m_ingredientsCount.clear();
 
-	const auto& plugins = PluginsList::instance();
-	const auto& ingredients = IngredientsList::instance();
+	const auto& plugins = PluginsList::instance().plugins();
+	const auto& ingredients = IngredientsList::instance().ingredients();
 
 	Save::Ingredients possibleIngredients;
-	for (const auto& ing : ingredients.ingredients())
+	for (const auto& ing : ingredients)
 	{
 		Save::Ingredient pIng;
-		pIng.mod = plugins.plugins()[ing.pluginId].name.toStdString();
+		pIng.mod = plugins[ing.pluginId].name.toStdString();
 		pIng.id = ing.code;
 		possibleIngredients.push_back(pIng);
 	}
@@ -73,6 +74,8 @@ void GameSave::load(QString fileName)
 	}
 
 	// Convert inventory
+	m_ingredientsCount.clear();
+	m_ingredientsCount.resize(ingredients.size());
 	const auto& saveIngredients = save.listedIngredients();
 	for (const auto& ing : save.inventory())
 	{
@@ -81,6 +84,7 @@ void GameSave::load(QString fileName)
 			continue;
 
 		m_inventory.emplace_back(ingId, ing.second);
+		m_ingredientsCount[ingId] = ing.second;
 	}
 }
 

@@ -34,6 +34,8 @@ public:
 	using Inventory = std::vector<InventoryItem>;
 	const Inventory& inventory() const;
 
+	const std::vector<int> ingredientsCount() const; // Same as inventory, but more direct and with the 0-count ingredients
+
 protected:
 	GameSave();
 
@@ -42,6 +44,7 @@ protected:
 	Header m_header;
 	KnownIngredients m_knownIngredients;
 	Inventory m_inventory;
+	std::vector<int> m_ingredientsCount;
 };
 
 //****************************************************************************//
@@ -60,3 +63,6 @@ inline const GameSave::KnownIngredients& GameSave::knownIngredients() const
 
 inline const GameSave::Inventory& GameSave::inventory() const
 { return m_inventory; }
+
+inline const std::vector<int> GameSave::ingredientsCount() const
+{ return m_ingredientsCount; }
