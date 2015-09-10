@@ -51,15 +51,26 @@ void PotionsListWidget::refreshList()
 		for (int effId = 0; effId < PotionsList::maxEffectsPerPotion
 			&& potion.effects[effId] != -1; ++effId)
 		{
-			auto effLabel = new QLabel(effects[potion.effects[effId]].name);
+			const auto& effect = effects[potion.effects[effId]];
+			auto effLabel = new QLabel(effect.name);
 			effectsLayout->addWidget(effLabel);
 
-			QString strengthText;
+			QString strengthText, magText, durText;
+			magText = QString::number(potion.magnitudes[effId], 'f', 2);
+			durText = QString::number(potion.durations[effId], 'f', 1);
 			if (potion.durations[effId] > 0)
-				strengthText = QString("%1 in %2 sec").arg(potion.magnitudes[effId], 0, 'f', 2).arg(potion.durations[effId], 0, 'f', 1);
+				strengthText = QString("%1 during %2 sec").arg(magText).arg(durText);
 			else
 				strengthText = QString::number(potion.magnitudes[effId], 'f', 2);
-			strengthLayout->addWidget(new QLabel(strengthText));
+			auto strengthLabel = new QLabel(strengthText);
+			if (!effect.description.isEmpty())
+			{
+				QString tooltip = effect.description;
+				tooltip.replace("<mag>", magText);
+				tooltip.replace("<dur>", durText);
+				strengthLabel->setToolTip(tooltip);
+			}
+			strengthLayout->addWidget(strengthLabel);
 		}
 	//	effectsLayout->addStretch();
 		potionLayout->addLayout(effectsLayout);

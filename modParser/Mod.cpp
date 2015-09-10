@@ -202,7 +202,7 @@ void Mod::parseField()
 
 	case RecordType::Ingredient:
 		if (isType(type, "FULL"))
-			parseIngredientName();
+			m_currentIngredient.name = readLStringField();
 		else if (isType(type, "EFID"))
 			parseEffectID();
 		else if (isType(type, "EFIT"))
@@ -213,9 +213,15 @@ void Mod::parseField()
 
 	case RecordType::MagicalEffect:
 		if (isType(type, "FULL"))
-			parseMagicalEffectName();
+			m_currentMagicalEffect.name = readLStringField();
 		else if (isType(type, "DATA"))
 			parseMagicalEffectData();
+		else if (isType(type, "DNAM"))
+		{
+			m_currentMagicalEffect.description = readLStringField();
+			m_parsedMGEF = true;
+
+		}
 		else
 			parseGenericField();
 		break;
@@ -245,45 +251,6 @@ void Mod::parseMaster()
 	m_masters.push_back(getModName(name));
 }
 
-void Mod::parseIngredientName()
-{
-	uint16_t dataSize;
-	in >> dataSize;
-
-	if (m_useStringsTable)
-	{
-		uint32_t id;
-		in >> id;
-		m_currentIngredient.name = m_stringsTable.get(id);
-	}
-	else
-	{
-		string& name = m_currentIngredient.name;
-		name.resize(dataSize-1); // Don't read null character in the string
-		in.stream().read(&name[0], dataSize-1);
-		in.jump(1);
-	}
-}
-
-void Mod::parseMagicalEffectName()
-{
-	uint16_t dataSize;
-	in >> dataSize;
-
-	if (m_useStringsTable)
-	{
-		uint32_t id;
-		in >> id;
-		m_currentMagicalEffect.name = m_stringsTable.get(id);
-	}
-	else
-	{
-		m_currentMagicalEffect.name.resize(dataSize - 1); // Don't read null character in the string
-		in.stream().read(&m_currentMagicalEffect.name[0], dataSize - 1);
-		in.jump(1);
-	}
-}
-
 void Mod::parseMagicalEffectData()
 {
 	uint16_t dataSize;
@@ -291,7 +258,6 @@ void Mod::parseMagicalEffectData()
 	in >> m_currentMagicalEffect.flags;
 	in >> m_currentMagicalEffect.baseCost;
 	in.jump(144); // DATA is 152 bytes long
-	m_parsedMGEF = true;
 }
 
 void Mod::parseEffectID()
@@ -403,4 +369,25 @@ void Mod::updateMagicalEffects()
 	m_nbEffModified = updateSize - m_nbEffAdded;
 
 	m_config.magicalEffectsList.swap(outputList);
+}
+
+string Mod::readLStringField()
+{
+	uint16_t dataSize;
+	in >> dataSize;
+
+	if (m_useStringsTable)
+	{
+		uint32_t id;
+		in >> id;
+		return m_stringsTable.get(id);
+	}
+	else
+	{
+		string text;
+		text.resize(dataSize - 1); // Don't read null character in the string
+		in.stream().read(&text[0], dataSize - 1);
+		in.jump(1);
+		return text;
+	}
 }

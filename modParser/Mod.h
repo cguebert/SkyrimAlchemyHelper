@@ -8,13 +8,8 @@ using ModsList = std::vector < std::string > ;
 
 struct MagicalEffect
 {
-	MagicalEffect() = default;
-	MagicalEffect(uint32_t id, std::string name, uint32_t flags = 0, float cost = 0)
-		: id(id), name(name), flags(flags), baseCost(cost) {}
-
-	uint32_t id = 0;
-	std::string name;
-	uint32_t flags = 0;
+	uint32_t id = 0, flags = 0;
+	std::string name, description;
 	float baseCost = 0;
 };
 using MagicalEffectsList = std::vector < MagicalEffect >;
@@ -52,14 +47,14 @@ protected:
 	void parseField();
 	void parseGenericField();
 	void parseMaster();
-	void parseIngredientName();
-	void parseMagicalEffectName();
 	void parseMagicalEffectData();
 	void parseEffectID();
 	void parseEffectItem();
 
 	void computeIngredientId(uint32_t id);
 	void updateMagicalEffects();
+
+	std::string readLStringField();
 	
 	bool m_useStringsTable = false,
 		m_parsedMGEF = false;

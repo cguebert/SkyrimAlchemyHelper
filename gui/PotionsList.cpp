@@ -239,7 +239,7 @@ void PotionsList::computePotionsStrength()
 						float strength = (ingEff.magnitude > 1 ? ingEff.magnitude : 1) * (ingEff.duration > 0 ? ingEff.duration / 10 : 1);
 						if (strength > maxStrength)
 						{
-							potion.magnitudes[i] = ingEff.magnitude;
+							potion.magnitudes[i] = ingEff.magnitude * 6;
 							potion.durations[i] = ingEff.duration;
 							maxStrength = strength;
 						}

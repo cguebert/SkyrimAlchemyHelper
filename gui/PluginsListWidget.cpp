@@ -18,7 +18,7 @@ int PluginsListModel::rowCount(const QModelIndex& /*parent*/) const
 
 int PluginsListModel::columnCount(const QModelIndex& /*parent*/) const
 {
-	return 3;
+	return 2;
 }
 
 QVariant PluginsListModel::data(const QModelIndex& index, int role) const
@@ -32,17 +32,7 @@ QVariant PluginsListModel::data(const QModelIndex& index, int role) const
 		switch (index.column())
 		{
 		case 0: return plugin.name;
-		case 1: return plugin.active;
-		case 2: return plugin.nbIngredients;
-		}
-		return QVariant();
-	}
-	case Qt::CheckStateRole:
-	{
-		if (index.column() == 1)
-		{
-			const auto& plugin = m_pluginsList.plugins()[index.row()];
-			return plugin.active ? Qt::Checked : Qt::Unchecked;
+		case 1: return plugin.nbIngredients;
 		}
 		return QVariant();
 	}
@@ -57,8 +47,7 @@ QVariant PluginsListModel::headerData(int section, Qt::Orientation orientation, 
 		switch (section)
 		{
 		case 0: return QString("name");
-		case 1: return QString("active");
-		case 2: return QString("# ingredients");
+		case 1: return QString("# ingredients");
 		}
 	}
 	return QVariant();
@@ -92,7 +81,6 @@ PluginsListWidget::PluginsListWidget(QWidget* parent) : QWidget(parent)
 	m_view->horizontalHeader()->resizeSection(0, 250);
 	m_view->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_view->setSelectionMode(QAbstractItemView::SingleSelection);
-	m_view->hideColumn(1);
 	vLayout->addWidget(m_view);
 
 	setLayout(vLayout);

@@ -37,6 +37,8 @@ void EffectsList::loadList()
 				effect.flags = split[1].toUInt(nullptr, 16);
 				effect.baseCost = split[2].toFloat();
 			}
+
+			effect.description = in.readLine();
 			if (!effect.name.isEmpty() && effect.code)
 				m_effects.push_back(effect);
 		}

@@ -2,7 +2,7 @@
 #define INGREDIENTSLIST_H
 
 #include <QString>
-#include <QVector>
+#include <vector>
 
 class IngredientsList
 {
@@ -19,17 +19,17 @@ public:
 
 	struct Ingredient
 	{
-		QString name;
 		int pluginId = 0;
 		quint32 code = 0;
+		QString name;
 		EffectData effects[nbEffectsPerIngredient],
 			sortedEffects[nbEffectsPerIngredient];
 	};
 
 	int size() const;
 	int find(int pluginId, quint32 code) const; // -1 if not found
-	const QVector<Ingredient>& ingredients() const;
-	QVector<Ingredient>& ingredients();
+	const std::vector<Ingredient>& ingredients() const;
+	std::vector<Ingredient>& ingredients();
 
 	void loadList();
 	void saveList();
@@ -37,7 +37,7 @@ public:
 protected:
 	IngredientsList();
 
-	QVector<Ingredient> m_ingredients;
+	std::vector<Ingredient> m_ingredients;
 };
 
 //****************************************************************************//
@@ -45,10 +45,10 @@ protected:
 inline int IngredientsList::size() const
 { return m_ingredients.size(); }
 
-inline const QVector<IngredientsList::Ingredient>& IngredientsList::ingredients() const
+inline const std::vector<IngredientsList::Ingredient>& IngredientsList::ingredients() const
 { return m_ingredients; }
 
-inline QVector<IngredientsList::Ingredient>& IngredientsList::ingredients()
+inline std::vector<IngredientsList::Ingredient>& IngredientsList::ingredients()
 { return m_ingredients; }
 
 #endif // INGREDIENTSLIST_H
