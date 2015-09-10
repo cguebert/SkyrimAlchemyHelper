@@ -34,10 +34,10 @@ protected:
 		QWidget* widget;
 	};
 
-	bool updateExisting(std::vector<FilterItem>& list, FilterActionType action, int id);
-	void removeWidget(QWidget* widget);
+	bool updateExisting(std::vector<FilterItem>& list, FlowLayout *layout, FilterActionType action, int id);
+	void removeWidget(FlowLayout *layout, QWidget* widget);
 	void updatePotionsListFilters();
 
-	FlowLayout *m_flowLayout;
-	std::vector<FilterItem> m_effects, m_ingredients;
+	FlowLayout *m_effectsLayout, *m_ingredientsLayout;
+	std::vector<FilterItem> m_effectsFilters, m_ingredientsFilters;
 };

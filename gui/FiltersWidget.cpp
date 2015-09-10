@@ -13,27 +13,39 @@ FiltersWidget::FiltersWidget(QWidget* parent)
 	QVBoxLayout* vLayout = new QVBoxLayout;
 	vLayout->setContentsMargins(0, 0, 0, 0);
 
-	m_flowLayout = new FlowLayout(nullptr, 0, 0, 0);
-	m_flowLayout->setSpacing(0);
-	vLayout->addLayout(m_flowLayout);
+	m_effectsLayout = new FlowLayout(nullptr, 0, 0, 0);
+	m_effectsLayout->setSpacing(0);
+	vLayout->addLayout(m_effectsLayout);
 
+	m_ingredientsLayout = new FlowLayout(nullptr, 0, 0, 0);
+	m_ingredientsLayout->setSpacing(0);
+	vLayout->addLayout(m_ingredientsLayout);
+
+	vLayout->addStretch();
 	setLayout(vLayout);
 }
 
 void FiltersWidget::clear()
 {
-	while (auto child = m_flowLayout->takeAt(0))
+	while (auto child = m_effectsLayout->takeAt(0))
 	{
 		auto w = child->widget();
 		if (w) delete w;
 		delete child;
 	}
 
-	m_effects.clear();
-	m_ingredients.clear();
+	while (auto child = m_ingredientsLayout->takeAt(0))
+	{
+		auto w = child->widget();
+		if (w) delete w;
+		delete child;
+	}
+
+	m_effectsFilters.clear();
+	m_ingredientsFilters.clear();
 }
 
-bool FiltersWidget::updateExisting(std::vector<FilterItem>& list, FilterActionType action, int id)
+bool FiltersWidget::updateExisting(std::vector<FilterItem>& list, FlowLayout *layout, FilterActionType action, int id)
 {
 	auto it = std::find_if(list.begin(), list.end(), [id](const FilterItem& item){
 		return item.id == id;
@@ -50,7 +62,7 @@ bool FiltersWidget::updateExisting(std::vector<FilterItem>& list, FilterActionTy
 			else if (oldAction == FilterActionType::addFilterDoesNotContain)
 			{
 				list.erase(it);
-				removeWidget(widget);
+				removeWidget(layout, widget);
 			}
 			break;
 		case FilterActionType::addFilterDoesNotContain:
@@ -59,12 +71,12 @@ bool FiltersWidget::updateExisting(std::vector<FilterItem>& list, FilterActionTy
 			else if (oldAction == FilterActionType::addFilterContains)
 			{
 				list.erase(it);
-				removeWidget(widget);
+				removeWidget(layout, widget);
 			}
 			break;
 		case FilterActionType::RemoveFilter:
 			list.erase(it);
-			removeWidget(widget);
+			removeWidget(layout, widget);
 			updatePotionsListFilters();
 			return false;
 		}
@@ -76,7 +88,7 @@ bool FiltersWidget::updateExisting(std::vector<FilterItem>& list, FilterActionTy
 void FiltersWidget::effectFilterAction(FilterActionType action, int id)
 {
 	// Do we already have this effect ?
-	if (!updateExisting(m_effects, action, id))
+	if (!updateExisting(m_effectsFilters, m_effectsLayout, action, id))
 		return;
 
 	if (action == FilterActionType::RemoveFilter)
@@ -101,9 +113,9 @@ void FiltersWidget::effectFilterAction(FilterActionType action, int id)
 	auto label = new QLabel((action == FilterActionType::addFilterContains ? "Has " : "Does not have ") + effect.name);
 	boxLayout->addWidget(label);
 
-	m_flowLayout->addWidget(boxWidget);
+	m_effectsLayout->addWidget(boxWidget);
 
-	m_effects.emplace_back(action, id, boxWidget);
+	m_effectsFilters.emplace_back(action, id, boxWidget);
 
 	updatePotionsListFilters();
 }
@@ -111,7 +123,7 @@ void FiltersWidget::effectFilterAction(FilterActionType action, int id)
 void FiltersWidget::ingredientFilterAction(FilterActionType action, int id)
 {
 	// Do we already have this ingredient ?
-	if (!updateExisting(m_ingredients, action, id))
+	if (!updateExisting(m_ingredientsFilters, m_ingredientsLayout, action, id))
 		return;
 
 	if (action == FilterActionType::RemoveFilter)
@@ -136,26 +148,26 @@ void FiltersWidget::ingredientFilterAction(FilterActionType action, int id)
 	auto label = new QLabel((action == FilterActionType::addFilterContains ? "Has " : "Does not have ") + ingredient.name);
 	boxLayout->addWidget(label);
 
-	m_flowLayout->addWidget(boxWidget);
+	m_ingredientsLayout->addWidget(boxWidget);
 
-	m_ingredients.emplace_back(action, id, boxWidget);
+	m_ingredientsFilters.emplace_back(action, id, boxWidget);
 
 	updatePotionsListFilters();
 }
 
-void FiltersWidget::removeWidget(QWidget* widget)
+void FiltersWidget::removeWidget(FlowLayout *layout, QWidget* widget)
 {
-	int nb = m_flowLayout->count();
+	int nb = layout->count();
 	for (int i = 0; i < nb; ++i)
 	{
-		auto item = m_flowLayout->itemAt(i);
+		auto item = layout->itemAt(i);
 		if (item && item->widget() == widget)
 		{
-			auto item = m_flowLayout->takeAt(i);
+			auto item = layout->takeAt(i);
 			auto w = item->widget();
 			if (w) delete w;
 			delete item;
-			m_flowLayout->update();
+			layout->update();
 			return;
 		}
 	}
@@ -170,13 +182,13 @@ void FiltersWidget::removeEffect()
 		int id = action->data().toInt(&ok);
 		if (ok)
 		{
-			auto it = std::find_if(m_effects.begin(), m_effects.end(), [id](const FilterItem& item){
+			auto it = std::find_if(m_effectsFilters.begin(), m_effectsFilters.end(), [id](const FilterItem& item){
 				return item.id == id;
 			});
-			if (it != m_effects.end())
+			if (it != m_effectsFilters.end())
 			{
-				removeWidget(it->widget);
-				m_effects.erase(it);
+				removeWidget(m_effectsLayout, it->widget);
+				m_effectsFilters.erase(it);
 				updatePotionsListFilters();
 			}
 		}
@@ -192,13 +204,13 @@ void FiltersWidget::removeIngredient()
 		int id = action->data().toInt(&ok);
 		if (ok)
 		{
-			auto it = std::find_if(m_ingredients.begin(), m_ingredients.end(), [id](const FilterItem& item){
+			auto it = std::find_if(m_ingredientsFilters.begin(), m_ingredientsFilters.end(), [id](const FilterItem& item){
 				return item.id == id;
 			});
-			if (it != m_ingredients.end())
+			if (it != m_ingredientsFilters.end())
 			{
-				removeWidget(it->widget);
-				m_ingredients.erase(it);
+				removeWidget(m_ingredientsLayout, it->widget);
+				m_ingredientsFilters.erase(it);
 				updatePotionsListFilters();
 			}
 		}
@@ -208,13 +220,13 @@ void FiltersWidget::removeIngredient()
 void FiltersWidget::updatePotionsListFilters()
 {
 	PotionsList::Filters filters;
-	for (const auto& ing : m_ingredients)
+	for (const auto& ing : m_ingredientsFilters)
 	{
 		bool contains = (ing.actionType == FilterActionType::addFilterContains);
 		filters.emplace_back(contains, true, ing.id);
 	}
 
-	for (const auto& effect : m_effects)
+	for (const auto& effect : m_effectsFilters)
 	{
 		bool contains = (effect.actionType == FilterActionType::addFilterContains);
 		filters.emplace_back(contains, false, effect.id);
