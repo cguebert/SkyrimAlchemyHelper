@@ -66,10 +66,12 @@ protected:
 	void updateViews();
 	void applyFilters();
 	void computePotionsStrength();
+	void updateEffectsToxicity();
 
 	Potions m_allPotions, m_filteredPotions;
 	Filters m_currentFilters;
 	Callback m_updateCallback;
+	std::vector<bool> m_toxicity;
 };
 
 //****************************************************************************//

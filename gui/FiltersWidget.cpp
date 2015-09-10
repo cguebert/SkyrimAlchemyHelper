@@ -26,12 +26,12 @@ FiltersWidget::FiltersWidget(QWidget* parent)
 	widgetsLayout->addWidget(m_ingredientsCountComboBox);
 	connect(m_ingredientsCountComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updatePotionsListFilters()));
 
-	m_purityCombBox = new QComboBox;
+	m_purityComboBox = new QComboBox;
 	QStringList purityChoices;
 	purityChoices << "Any purity" << "Pure" << "Pure positive" << "Pure negative";
-	m_purityCombBox->addItems(purityChoices);
-	widgetsLayout->addWidget(m_purityCombBox);
-	connect(m_purityCombBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updatePotionsListFilters()));
+	m_purityComboBox->addItems(purityChoices);
+	widgetsLayout->addWidget(m_purityComboBox);
+	connect(m_purityComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updatePotionsListFilters()));
 
 	vLayout->addLayout(widgetsLayout);
 
@@ -260,6 +260,14 @@ void FiltersWidget::updatePotionsListFilters()
 		filters.emplace_back(FilterType::TwoIngredients);
 	else if (ingCountChoice == 2)
 		filters.emplace_back(FilterType::ThreeIngredients);
+
+	auto purityChoice = m_purityComboBox->currentIndex();
+	if (purityChoice == 1)
+		filters.emplace_back(FilterType::Pure);
+	else if (purityChoice == 2)
+		filters.emplace_back(FilterType::PurePositive);
+	else if (purityChoice == 3)
+		filters.emplace_back(FilterType::PureNegative);
 
 	PotionsList::instance().setFilters(filters);
 }

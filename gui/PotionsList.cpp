@@ -127,6 +127,7 @@ void PotionsList::recomputeList()
 	}
 	
 	computePotionsStrength();
+	updateEffectsToxicity();
 	saveList();
 
 	m_currentFilters.clear();
@@ -218,6 +219,31 @@ void PotionsList::applyFilters()
 				break;
 			}
 
+			case FilterType::Pure:
+			{
+				bool toxicity = m_toxicity[potion.effects[0]];
+				for (int i = 1; i < maxEffectsPerPotion; ++i)
+					if (potion.effects[i] != -1 && m_toxicity[potion.effects[i]] != toxicity)
+						return false;
+				break;
+			}
+			
+			case FilterType::PurePositive:
+			{
+				for (int i = 0; i < maxEffectsPerPotion; ++i)
+					if (potion.effects[i] != -1 && m_toxicity[potion.effects[i]])
+						return false;
+				break;
+			}
+			
+			case FilterType::PureNegative:
+			{
+				for (int i = 0; i < maxEffectsPerPotion; ++i)
+					if (potion.effects[i] != -1 && !m_toxicity[potion.effects[i]])
+						return false;
+				break;
+			}
+
 			default:
 				return false;
 
@@ -272,5 +298,18 @@ void PotionsList::computePotionsStrength()
 				}
 			}
 		}
+	}
+}
+
+void PotionsList::updateEffectsToxicity()
+{
+	const auto& effects = EffectsList::instance().effects();
+	int nb = effects.size();
+	m_toxicity.resize(nb);
+
+	for (int i = 0; i < nb; ++i)
+	{
+		const auto& effect = effects[i];
+		m_toxicity[i] = ((effect.flags & 0x01) != 0);
 	}
 }

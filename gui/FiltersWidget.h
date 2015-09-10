@@ -43,5 +43,5 @@ protected:
 	FlowLayout *m_effectsLayout, *m_ingredientsLayout;
 	std::vector<FilterItem> m_effectsFilters, m_ingredientsFilters;
 	QCheckBox *m_inventoryCheckBox;
-	QComboBox *m_ingredientsCountComboBox, *m_purityCombBox;
+	QComboBox *m_ingredientsCountComboBox, *m_purityComboBox;
 };
