@@ -8,7 +8,7 @@
 #include "IngredientsList.h"
 #include "PluginsList.h"
 
-int getIngredientId(const Save::Ingredient& ing)
+int getIngredientId(const saveParser::Save::Ingredient& ing)
 {
 	auto pluginId = PluginsList::instance().find(ing.mod.c_str());
 	if (pluginId == -1)
@@ -23,16 +23,16 @@ void GameSave::load(QString fileName)
 	const auto& plugins = PluginsList::instance().plugins();
 	const auto& ingredients = IngredientsList::instance().ingredients();
 
-	Save::Ingredients possibleIngredients;
+	saveParser::Save::Ingredients possibleIngredients;
 	for (const auto& ing : ingredients)
 	{
-		Save::Ingredient pIng;
+		saveParser::Save::Ingredient pIng;
 		pIng.mod = plugins[ing.pluginId].name.toStdString();
 		pIng.id = ing.code;
 		possibleIngredients.push_back(pIng);
 	}
 
-	Save save;
+	saveParser::Save save;
 	save.setPossibleIngredients(possibleIngredients);
 	m_isLoaded = save.parse(fileName.toStdString());
 	if (!m_isLoaded)

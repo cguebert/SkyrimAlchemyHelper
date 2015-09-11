@@ -2,6 +2,9 @@
 
 #include <parser/Parser.h>
 
+namespace modParser
+{
+
 class StringsTable
 {
 public:
@@ -12,8 +15,8 @@ protected:
 	void loadDirectory();
 	std::string readString();
 
-	Parser in;
-	using StringEntry = std::pair < uint32_t, std::streamoff > ;
+	parser::Parser in;
+	using StringEntry = std::pair < uint32_t, std::streamoff >;
 	std::vector<StringEntry> m_offsets;
 
 	struct StringEntryComp
@@ -23,3 +26,4 @@ protected:
 	};
 };
 
+} // namespace modParser

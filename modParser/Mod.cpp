@@ -3,6 +3,9 @@
 #include <iostream>
 #include <fstream>
 
+namespace modParser
+{
+
 using namespace std;
 
 string getModName(const string& modFileName)
@@ -61,7 +64,7 @@ bool Mod::isType(const Type& type, const string& name)
 	if (name.size() != 4)
 		return false;
 
-	for (int i = 0; i<4; ++i)
+	for (int i = 0; i < 4; ++i)
 	{
 		if (type[i] != name[i])
 			return false;
@@ -302,7 +305,7 @@ void Mod::parseEffectItem()
 
 	uint32_t area;
 	int i = 0;
-	while (i<3 && m_currentIngredient.effects[i + 1].id)
+	while (i < 3 && m_currentIngredient.effects[i + 1].id)
 		++i;
 	in >> m_currentIngredient.effects[i].magnitude >> area >> m_currentIngredient.effects[i].duration;
 }
@@ -373,7 +376,7 @@ void Mod::updateMagicalEffects()
 	// Merge the updated effects into the main list
 	MagicalEffectsList outputList;
 	set_union(updatedEffects.begin(), updatedEffects.end(),
-		m_config.magicalEffectsList.begin(), m_config.magicalEffectsList.end(), 
+		m_config.magicalEffectsList.begin(), m_config.magicalEffectsList.end(),
 		back_inserter(outputList), [](const MagicalEffect& lhs, const MagicalEffect& rhs){
 		return lhs.id < rhs.id;
 	});
@@ -408,3 +411,5 @@ string Mod::readLStringField()
 		return text;
 	}
 }
+
+} // namespace modParser

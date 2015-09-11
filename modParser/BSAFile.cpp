@@ -4,6 +4,9 @@
 
 #include "BSAFile.h"
 
+namespace modParser
+{
+
 using namespace std;
 
 const int32_t BSA_ARCHIVE_COMPRESSED = 1 << 2;
@@ -47,7 +50,7 @@ void BSAFile::load(const string& fileName)
 uint64_t stringHash(string s)
 {
 	uint32_t hash = 0;
-	for (auto c : s) 
+	for (auto c : s)
 		hash = hash * 0x1003F + c;
 	return hash;
 }
@@ -57,13 +60,13 @@ uint64_t fileExtHash(string file, string ext)
 	uint64_t hash1 = 0, hash2 = 0, hash3 = 0;
 	auto len = file.length();
 
-	if (len > 0) 
+	if (len > 0)
 		hash1 = file[len - 1] + (len > 2 ? (file[len - 2] << 8) : 0) + (len << 16) + (file[0] << 24);
 
 	if (len > 3)
 		hash2 = stringHash(file.substr(1, len - 3));
 
-	if (ext.length() > 0) 
+	if (ext.length() > 0)
 	{
 		hash3 = stringHash(ext);
 
@@ -77,19 +80,19 @@ uint64_t fileExtHash(string file, string ext)
 	return (hash2 << 32) + hash1;
 }
 
-uint64_t pathHash(string path) 
+uint64_t pathHash(string path)
 {
 	transform(path.begin(), path.end(), path.begin(), ::tolower);
 	replace(path.begin(), path.end(), '/', '\\');
 
 	string file, ext;
 	auto pos = path.find_last_of(".");
-	if (pos != string::npos) 
+	if (pos != string::npos)
 	{
 		ext = path.substr(pos);
 		file = path.substr(0, pos);
 	}
-	else 
+	else
 		file = path;
 
 	return fileExtHash(file, ext);
@@ -170,3 +173,5 @@ string BSAFile::extractFile(int64_t dir, int64_t file)
 	in.stream().read(&result[0], size);
 	return result;
 }
+
+} // namespace modParser

@@ -5,6 +5,9 @@
 #include "StringsTable.h"
 #include "BSAFile.h"
 
+namespace modParser
+{
+
 using namespace std;
 
 pair<string, string> getDirAndFile(const string& modFileName)
@@ -74,7 +77,7 @@ string StringsTable::readString()
 	while (find(buf.begin() + prev, buf.end(), 0) == buf.end())
 	{
 		prev = size;
-		buf.resize(size*2);
+		buf.resize(size * 2);
 		in.stream().read(&buf.front() + prev, size);
 		size *= 2;
 	}
@@ -112,3 +115,5 @@ void StringsTable::loadDirectory()
 		return lhs.first < rhs.first;
 	});
 }
+
+} // namespace modParser

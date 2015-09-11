@@ -2,6 +2,9 @@
 
 #include "Parser.h"
 
+namespace parser
+{
+
 using namespace std;
 
 void Parser::jump(std::streamoff off)
@@ -11,7 +14,7 @@ void Parser::jump(std::streamoff off)
 	if (off <= maxJump)
 		m_in->read(dummy, off); // Reading is most often faster than doing a seekg that can flush the caches
 	else
-		m_in->seekg(off, std::ios_base::cur); 
+		m_in->seekg(off, std::ios_base::cur);
 }
 
 uint32_t Parser::readVSVal()
@@ -111,3 +114,5 @@ std::string Parser::readString(int size)
 	m_in->read(&text[0], size);
 	return text;
 }
+
+} // namespace parser

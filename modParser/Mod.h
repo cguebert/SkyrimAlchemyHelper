@@ -4,6 +4,9 @@
 #include "Config.h"
 #include "StringsTable.h"
 
+namespace modParser
+{
+
 class Mod
 {
 public:
@@ -14,7 +17,7 @@ protected:
 	void doParse();
 
 	using Type = std::array<char, 4>;
-	bool isType(const Type& type, const std::string& name); 
+	bool isType(const Type& type, const std::string& name);
 
 	void newIngredient();
 	void newMagicalEffect();
@@ -44,7 +47,7 @@ protected:
 	int m_nbIngrAdded = 0, m_nbIngrModified = 0,
 		m_nbEffAdded = 0, m_nbEffModified = 0;
 
-	Parser in;
+	parser::Parser in;
 	std::string m_modFileName, m_modName;
 	Ingredient m_currentIngredient;
 	MagicalEffect m_currentMagicalEffect;
@@ -67,3 +70,4 @@ protected:
 	};
 };
 
+} // namespace modParser

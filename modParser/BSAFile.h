@@ -2,6 +2,9 @@
 
 #include <parser/parser.h>
 
+namespace modParser
+{
+
 class BSAFile
 {
 public:
@@ -11,7 +14,7 @@ public:
 protected:
 	std::string extractFile(int64_t dir, int64_t file);
 
-	Parser in;
+	parser::Parser in;
 
 	int32_t m_flags, m_filesNameLen;
 	bool m_archiveCompressed;
@@ -30,3 +33,4 @@ protected:
 	};
 };
 
+} // namespace modParser

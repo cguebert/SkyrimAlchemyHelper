@@ -7,6 +7,9 @@
 #include <string>
 #include <vector>
 
+namespace parser
+{
+
 class Parser
 {
 public:
@@ -30,7 +33,7 @@ public:
 	template <class T>
 	Parser& operator>>(std::vector<T>& v)
 	{
-		if(!v.empty())
+		if (!v.empty())
 			m_in->read(reinterpret_cast<char*>(v.data()), v.size() * sizeof(T));
 		return *this;
 	}
@@ -63,3 +66,4 @@ protected:
 	}
 };
 
+} // namespace parser

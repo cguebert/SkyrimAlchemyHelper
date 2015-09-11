@@ -12,7 +12,7 @@ float round(float v, int d)
 	return round(v * p) / p;
 }
 
-void exportConfig(const Config& config)
+void exportConfig(const modParser::Config& config)
 {
 	ofstream modsFile("data/Plugins.txt");
 	for (const auto& mod : config.modsList)
@@ -47,17 +47,17 @@ void exportConfig(const Config& config)
 	ingredientsFile.close();
 }
 
-void loadMods(Config& config)
+void loadMods(modParser::Config& config)
 {
 	ifstream pathsFile("data/paths.txt");
 	string modPath;
 	while (getline(pathsFile, modPath))
-		Mod::parse(modPath, config);
+		modParser::Mod::parse(modPath, config);
 }
 
 int main(int argc, char** argv)
 {
-	Config config;
+	modParser::Config config;
 
 	loadMods(config);
 	exportConfig(config);

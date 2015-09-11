@@ -2,6 +2,9 @@
 
 #include <parser/Parser.h>
 
+namespace saveParser
+{
+
 class Save
 {
 public:
@@ -54,18 +57,18 @@ protected:
 	class ChangeForm
 	{
 	public:
-		ChangeForm(Parser& parser);
+		ChangeForm(parser::Parser& parser);
 
 		void ignore(); // Jump over the data
 		void loadData(); // Decompress the data for use
 
 		RefID refID;
 		uint32_t formID = 0, changeFlags = 0;
-		uint8_t formType= 0;
+		uint8_t formType = 0;
 		std::vector<unsigned char> data;
 
 	protected:
-		Parser& in;
+		parser::Parser& in;
 		uint32_t length1, length2;
 	};
 
@@ -92,7 +95,7 @@ protected:
 	uint32_t getFormID(const RefID& refID);
 	RefID getRefID(uint32_t formID);
 
-	Parser in;
+	parser::Parser in;
 	uint32_t m_formIDArrayCountOffset, m_changeFormCount, m_changeFormsOffset;
 	std::vector<uint32_t> m_formIDArray;
 	std::vector<std::string> m_plugins;
@@ -124,3 +127,5 @@ inline const Save::Inventory& Save::inventory() const
 
 inline const Save::Inventories& Save::containers() const
 { return m_containers; }
+
+} // namespace saveParser

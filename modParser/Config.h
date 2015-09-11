@@ -4,6 +4,9 @@
 #include <cstdint>
 #include <vector>
 
+namespace modParser
+{
+
 using ModsList = std::vector < std::string >;
 
 struct MagicalEffect
@@ -35,3 +38,5 @@ struct Config
 	MagicalEffectsList magicalEffectsList;
 	ModsList modsList;
 };
+
+} // namespace modParser

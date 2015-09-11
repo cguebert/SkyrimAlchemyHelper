@@ -6,6 +6,9 @@
 #include <fstream>
 #include <sstream>
 
+namespace saveParser
+{
+
 using namespace std;
 
 bool Save::parse(const std::string& fileName)
@@ -318,7 +321,7 @@ void Save::computeIngredientsRefIDs()
 
 //****************************************************************************//
 
-Save::ChangeForm::ChangeForm(Parser& parser)
+Save::ChangeForm::ChangeForm(parser::Parser& parser)
 	: in(parser)
 {
 	in >> refID >> changeFlags;
@@ -542,3 +545,5 @@ int Save::SearchHelper::search(const Buffer& buffer, int& pos)
 
 	return -1;
 }
+
+} // namespace saveParser
