@@ -20,5 +20,5 @@ include_directories("libs")
 
 add_subdirectory("libs/parser")
 add_subdirectory("libs/saveParser")
-add_subdirectory("modParser")
+add_subdirectory("libs/modParser")
 add_subdirectory("gui")
