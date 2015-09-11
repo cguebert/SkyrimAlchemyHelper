@@ -311,6 +311,8 @@ void PotionsList::computePotionsStrength()
 	const auto& ingredients = IngredientsList::instance().ingredients();
 	const auto& effects = EffectsList::instance().effects();
 	m_maxGoldPotion = 0;
+	maxEffectMagnitude.assign(effects.size(), 0);
+	maxEffectDuration.assign(effects.size(), 0);
 	const float powerFactor = 6; // For alchemy @ 100, no perks
 
 	for (auto& potion : m_allPotions)
@@ -363,6 +365,12 @@ void PotionsList::computePotionsStrength()
 			if (duration > 0)
 				durCost = 0.0794328 * pow(duration, 1.1f);
 			potion.goldCost += std::floor(effect.baseCost * magCost * durCost);
+
+			if (magnitude > maxEffectMagnitude[effId])
+				maxEffectMagnitude[effId] = magnitude;
+
+			if (duration > maxEffectDuration[effId])
+				maxEffectDuration[effId] = duration;
 		}
 
 		if (potion.goldCost > m_maxGoldPotion)
@@ -386,17 +394,44 @@ void PotionsList::updateEffectsToxicity()
 void PotionsList::prepareDefaultSortFunctions()
 {
 	m_defaultSortFunctions.clear();
+	const auto& effects = EffectsList::instance().effects();
 
 	bool hasEffectFilter = false;
 	for (const auto& filter : m_currentFilters)
 	{
 		if (filter.type == Filter::FilterType::HasEffect)
 		{
-			hasEffectFilter = true;
-			break;
+			int effectId = filter.data;
+			
+			// Sorting by magnitude
+			if (effects[effectId].flags & EffectFlags::PowerAffectsMagnitude)
+			{
+				float maxMag = maxEffectMagnitude[effectId];
+				if (maxMag > 0)
+					m_defaultSortFunctions.push_back([maxMag, effectId](const Potion& potion){
+						for (int i = 0; i < maxEffectsPerPotion; ++i)
+							if (potion.effects[i] == effectId)
+								return potion.magnitudes[i] / maxMag;
+						return 0.f;
+					});
+			}
+
+			// Sorting by duration
+			if (effects[effectId].flags & EffectFlags::PowerAffectsDuration)
+			{
+				float maxDur = maxEffectDuration[effectId];
+				if(maxDur > 0)
+					m_defaultSortFunctions.push_back([maxDur, effectId](const Potion& potion){
+						for (int i = 0; i < maxEffectsPerPotion; ++i)
+							if (potion.effects[i] == effectId)
+								return potion.durations[i] / maxDur;
+						return 0.f;
+					});
+			}
 		}
 	}
 
+	// Last, sort by gold cost
 	auto maxGold = m_maxGoldPotion;
 	m_defaultSortFunctions.push_back([maxGold](const Potion& potion){
 		return potion.goldCost / maxGold;

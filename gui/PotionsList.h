@@ -81,6 +81,7 @@ protected:
 	std::vector<bool> m_toxicity;
 	SortFunctions m_defaultSortFunctions;
 	float m_maxGoldPotion = 0;
+	std::vector<float> maxEffectMagnitude, maxEffectDuration;
 };
 
 //****************************************************************************//
