@@ -10,7 +10,6 @@ PotionsListWidget::PotionsListWidget(QWidget* parent)
 	: QFrame(parent)
 {
 	setFrameShape(QFrame::StyledPanel);
-	PotionsList::instance().setUpdateCallback([this]() { refreshList(); });
 	refreshList();
 }
 
@@ -22,16 +21,17 @@ void PotionsListWidget::refreshList()
 
 	const auto& ingredients = IngredientsList::instance().ingredients();
 	const auto& effects = EffectsList::instance().effects();
-	const auto& potions = PotionsList::instance().filteredPotions();
-	int nbPotions = potions.size();
+	const auto& potions = PotionsList::instance().allPotions();
+	const auto& potionsId = PotionsList::instance().sortedPotions();
+	int nbPotions = potionsId.size();
 
 	QVBoxLayout* vLayout = new QVBoxLayout;
-	auto label = new QLabel("Number of potions : " + QString::number(potions.size()));
+	auto label = new QLabel("Number of potions : " + QString::number(nbPotions));
 	vLayout->addWidget(label);
 
 	for (int i = 0, nb = std::min(50, nbPotions); i < nb; ++i)
 	{
-		const auto& potion = potions[i];
+		const auto& potion = potions[potionsId[i]];
 		auto potionWidget = new QFrame;
 		potionWidget->setFrameShape(QFrame::Box);
 		auto potionLayout = new QHBoxLayout(potionWidget);
@@ -45,7 +45,7 @@ void PotionsListWidget::refreshList()
 			ingLabel->setToolTip(ingredient.tooltip);
 			ingredientsLayout->addWidget(ingLabel);
 		}
-	//	ingredientsLayout->addStretch();
+
 		potionLayout->addLayout(ingredientsLayout);
 
 		auto effectsLayout = new QVBoxLayout;
@@ -59,10 +59,15 @@ void PotionsListWidget::refreshList()
 			effectsLayout->addWidget(effLabel);
 
 			QString strengthText, magText, durText;
-			magText = QString::number(potion.magnitudes[effId], 'f', 2);
-			durText = QString::number(potion.durations[effId], 'f', 1);
+			magText = QString::number(potion.magnitudes[effId], 'f', 0);
+			durText = QString::number(potion.durations[effId], 'f', 0);
 			if (potion.durations[effId] > 0)
-				strengthText = QString("%1 during %2 sec").arg(magText).arg(durText);
+			{
+				if (potion.magnitudes[effId] > 0)
+					strengthText = QString("%1 during %2 sec").arg(magText).arg(durText);
+				else
+					strengthText = QString("during %1 sec").arg(durText);
+			}
 			else
 				strengthText = QString::number(potion.magnitudes[effId], 'f', 2);
 			auto strengthLabel = new QLabel(strengthText);
@@ -77,9 +82,14 @@ void PotionsListWidget::refreshList()
 			}
 			strengthLayout->addWidget(strengthLabel);
 		}
-	//	effectsLayout->addStretch();
+
 		potionLayout->addLayout(effectsLayout);
 		potionLayout->addLayout(strengthLayout);
+
+		auto infoLayout = new QVBoxLayout;
+		auto goldLabel = new QLabel(QString("%1 gold").arg(static_cast<int>(potion.goldCost)));
+		infoLayout->addWidget(goldLabel);
+		potionLayout->addLayout(infoLayout);
 
 		vLayout->addWidget(potionWidget);
 	}

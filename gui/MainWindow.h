@@ -5,6 +5,7 @@
 class EffectsSelector;
 class IngredientsSelector;
 class FiltersWidget;
+class PotionsListWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -33,4 +34,5 @@ protected:
 	EffectsSelector *m_effectsSelector;
 	IngredientsSelector *m_ingredientsSelector;
 	FiltersWidget *m_filtersWidget;
+	PotionsListWidget *m_potionsWidget;
 };

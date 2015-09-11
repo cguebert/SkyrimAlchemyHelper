@@ -273,4 +273,5 @@ void FiltersWidget::updatePotionsListFilters()
 		filters.emplace_back(FilterType::PureNegative);
 
 	PotionsList::instance().setFilters(filters);
+	emit modified();
 }

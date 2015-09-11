@@ -27,11 +27,13 @@ public:
 		int effects[maxEffectsPerPotion];
 		float magnitudes[maxEffectsPerPotion];
 		float durations[maxEffectsPerPotion];
+		float goldCost = 0;
 	};
 	using Potions = std::vector<Potion>;
+	using PotionsId = std::vector<int>;
 
 	const Potions& allPotions() const;
-	const Potions& filteredPotions() const;
+	const PotionsId& sortedPotions() const;
 
 	struct Filter
 	{
@@ -56,22 +58,29 @@ public:
 	void setFilters(const Filters& filters);
 	const Filters& filters() const;
 
-	using Callback = std::function<void()>;
-	void setUpdateCallback(Callback func);
+	using FilterFunc = std::function<bool(const Potion&)>; // Do we keep this potion or not
+	using SortFunc = std::function<float(const Potion&)>; // Score of this potion [0:1] (higher is first)
+	using SortFunctions = std::vector<SortFunc>;
 
 protected:
 	PotionsList();
 	bool loadList();
 	void saveList();
-	void updateViews();
+
 	void applyFilters();
+	void sortPotions();
 	void computePotionsStrength();
 	void updateEffectsToxicity();
 
-	Potions m_allPotions, m_filteredPotions;
+	bool defaultFilters(const Potion& potion);
+	void prepareDefaultSortFunctions();
+	
+	Potions m_allPotions;
+	PotionsId m_filteredPotions, m_sortedPotions;
 	Filters m_currentFilters;
-	Callback m_updateCallback;
 	std::vector<bool> m_toxicity;
+	SortFunctions m_defaultSortFunctions;
+	float m_maxGoldPotion = 0;
 };
 
 //****************************************************************************//
@@ -79,13 +88,10 @@ protected:
 inline const PotionsList::Potions& PotionsList::allPotions() const
 { return m_allPotions; }
 
-inline const PotionsList::Potions& PotionsList::filteredPotions() const
-{ return m_filteredPotions; }
+inline const PotionsList::PotionsId& PotionsList::sortedPotions() const
+{ return m_sortedPotions; }
 
 inline const PotionsList::Filters& PotionsList::filters() const
 { return m_currentFilters; }
-
-inline void PotionsList::setUpdateCallback(Callback func)
-{ m_updateCallback = func; }
 
 #endif // POTIONSLIST_H

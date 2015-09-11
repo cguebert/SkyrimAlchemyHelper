@@ -23,7 +23,6 @@ MainWindow::MainWindow(QWidget *parent)
 	setTabPosition(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea, QTabWidget::North);
 
 	auto filtersScrollArea = new QScrollArea(this);
-//	filtersScrollArea->setFrameStyle(QFrame::NoFrame);
 	filtersScrollArea->setWidgetResizable(true);
 	m_filtersWidget = new FiltersWidget(this);
 	filtersScrollArea->setWidget(m_filtersWidget);
@@ -35,7 +34,6 @@ MainWindow::MainWindow(QWidget *parent)
 	addDockWidget(Qt::TopDockWidgetArea, filtersDock);
 
 	auto ingredientsScrollArea = new QScrollArea(this);
-//	ingredientsScrollArea->setFrameStyle(QFrame::NoFrame);
 	ingredientsScrollArea->setWidgetResizable(true);
 	m_ingredientsSelector = new IngredientsSelector(this);
 	ingredientsScrollArea->setWidget(m_ingredientsSelector);
@@ -47,7 +45,6 @@ MainWindow::MainWindow(QWidget *parent)
 	addDockWidget(Qt::LeftDockWidgetArea, ingredientsDock);
 
 	auto effectsScrollArea = new QScrollArea(this);
-//	effectsScrollArea->setFrameStyle(QFrame::NoFrame);
 	effectsScrollArea->setWidgetResizable(true);
 	m_effectsSelector = new EffectsSelector(this);
 	effectsScrollArea->setWidget(m_effectsSelector);
@@ -64,8 +61,8 @@ MainWindow::MainWindow(QWidget *parent)
 	vLayout->setContentsMargins(0, 0, 0, 0);
 
 	auto potionsScrollArea = new QScrollArea(this);
-	auto potionsWidget = new PotionsListWidget;
-	potionsScrollArea->setWidget(potionsWidget);
+	m_potionsWidget = new PotionsListWidget;
+	potionsScrollArea->setWidget(m_potionsWidget);
 	potionsScrollArea->setFrameStyle(QFrame::NoFrame);
 	potionsScrollArea->setWidgetResizable(true);
 	vLayout->addWidget(potionsScrollArea);
@@ -91,6 +88,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	connect(m_ingredientsSelector, SIGNAL(ingredientFilterAction(FilterActionType, int)), m_filtersWidget, SLOT(ingredientFilterAction(FilterActionType, int)));
 	connect(m_effectsSelector, SIGNAL(effectFilterAction(FilterActionType, int)), m_filtersWidget, SLOT(effectFilterAction(FilterActionType, int)));
+	connect(m_filtersWidget, SIGNAL(modified()), m_potionsWidget, SLOT(refreshList()));
 
 	readSettings();
 }
@@ -129,6 +127,7 @@ void MainWindow::editConfig()
 		m_ingredientsSelector->updateList();
 		m_filtersWidget->clear();
 		PotionsList::instance().recomputeList();
+		m_potionsWidget->refreshList();
 	}
 }
 

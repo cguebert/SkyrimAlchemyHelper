@@ -9,12 +9,8 @@ class PotionsListWidget : public QFrame
 public:
 	explicit PotionsListWidget(QWidget* parent = nullptr);
 
-signals:
-
 public slots:
 	void refreshList();
-
-protected:
 };
 
 #endif // POTIONSLISTWIDGET_H
