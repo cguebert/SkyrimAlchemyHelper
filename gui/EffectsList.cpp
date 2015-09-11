@@ -49,7 +49,10 @@ void EffectsList::saveList()
 		for(const Effect& effect : m_effects)
 		{
 			out << effect.name << '\n';
-			out << QString::number(effect.code, 16).toUpper() << '\n';
+			out << QString::number(effect.code, 16).toUpper() << ' ';
+			out << QString::number(effect.flags, 16).toUpper() << ' ';
+			out << effect.baseCost << '\n';
+			out << effect.description << '\n';
 		}
 	}
 }

@@ -7,16 +7,6 @@
 #include <iterator>
 #include <limits>
 
-namespace EffectFlags
-{
-enum
-{
-	Hostile = 0x01,
-	PowerAffectsMagnitude = 0x00200000,
-	PowerAffectsDuration = 0x00400000
-};
-}
-
 PotionsList& PotionsList::instance()
 {
 	static PotionsList potions;
@@ -364,7 +354,7 @@ void PotionsList::computePotionsStrength()
 				magCost = pow(magnitude, 1.1f);
 			if (duration > 0)
 				durCost = 0.0794328 * pow(duration, 1.1f);
-			potion.goldCost += std::floor(effect.baseCost * magCost * durCost);
+			potion.goldCost += effect.baseCost * magCost * durCost;
 
 			if (magnitude > maxEffectMagnitude[effId])
 				maxEffectMagnitude[effId] = magnitude;
@@ -373,6 +363,7 @@ void PotionsList::computePotionsStrength()
 				maxEffectDuration[effId] = duration;
 		}
 
+		potion.goldCost = std::floor(potion.goldCost);
 		if (potion.goldCost > m_maxGoldPotion)
 			m_maxGoldPotion = potion.goldCost;
 	}

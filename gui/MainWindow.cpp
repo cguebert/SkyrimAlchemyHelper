@@ -29,7 +29,6 @@ MainWindow::MainWindow(QWidget *parent)
 	auto filtersDock = new QDockWidget(tr("Filters"));
 	filtersDock->setObjectName("FiltersDock");
 	filtersDock->setWidget(filtersScrollArea);
-	filtersDock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	filtersDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
 	addDockWidget(Qt::TopDockWidgetArea, filtersDock);
 

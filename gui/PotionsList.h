@@ -4,6 +4,16 @@
 #include <functional>
 #include <vector>
 
+namespace EffectFlags
+{
+enum
+{
+	Hostile = 0x01,
+	PowerAffectsMagnitude = 0x00200000,
+	PowerAffectsDuration = 0x00400000
+};
+}
+
 class PotionsList
 {
 public:

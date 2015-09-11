@@ -93,4 +93,8 @@ void ConfigDialog::copyLists()
 	EffectsList::instance() = m_effectsList;
 	IngredientsList::instance() = m_ingredientsList;
 	PluginsList::instance() = m_pluginsList;
+
+	m_pluginsList.saveList();
+	m_effectsList.saveList();
+	m_ingredientsList.saveList();
 }

@@ -128,6 +128,7 @@ void FiltersWidget::effectFilterAction(FilterActionType action, int id)
 	auto removeButton = new QPushButton(QIcon("://icons/Delete.png"), "");
 	removeButton->setMaximumSize(24, 24);
 	removeButton->setFlat(true);
+	removeButton->setToolTip(tr("Remove this filter"));
 	connect(removeButton, SIGNAL(clicked(bool)), removeAction, SLOT(trigger()));
 	connect(removeAction, SIGNAL(triggered(bool)), this, SLOT(removeEffect()));
 	boxLayout->addWidget(removeButton);
@@ -163,6 +164,7 @@ void FiltersWidget::ingredientFilterAction(FilterActionType action, int id)
 	auto removeButton = new QPushButton(QIcon("://icons/Delete.png"), "");
 	removeButton->setMaximumSize(24, 24);
 	removeButton->setFlat(true);
+	removeButton->setToolTip(tr("Remove this filter"));
 	connect(removeButton, SIGNAL(clicked(bool)), removeAction, SLOT(trigger()));
 	connect(removeAction, SIGNAL(triggered(bool)), this, SLOT(removeIngredient()));
 	boxLayout->addWidget(removeButton);

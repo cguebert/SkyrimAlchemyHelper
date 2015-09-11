@@ -10,6 +10,11 @@ PotionsListWidget::PotionsListWidget(QWidget* parent)
 	: QFrame(parent)
 {
 	setFrameShape(QFrame::StyledPanel);
+
+	// TODO: what does it do on dark themes ?
+	m_positiveColor.setRgb(0, 100, 0);
+	m_negativeColor.setRgb(100, 0, 0);
+
 	refreshList();
 }
 
@@ -24,12 +29,20 @@ void PotionsListWidget::refreshList()
 	const auto& potions = PotionsList::instance().allPotions();
 	const auto& potionsId = PotionsList::instance().sortedPotions();
 	int nbPotions = potionsId.size();
+	const int showNbPotions = 50;
 
 	QVBoxLayout* vLayout = new QVBoxLayout;
-	auto label = new QLabel("Number of potions : " + QString::number(nbPotions));
+	QString potionsCountText;
+	if (!nbPotions)
+		potionsCountText = tr("No potions corresponding to these filters");
+	else if (nbPotions > showNbPotions)
+		potionsCountText = tr("Showing %1 potions out of %2").arg(showNbPotions).arg(nbPotions);
+	else
+		potionsCountText = tr("Showing all %1 potions").arg(nbPotions);
+	auto label = new QLabel(potionsCountText);
 	vLayout->addWidget(label);
 
-	for (int i = 0, nb = std::min(50, nbPotions); i < nb; ++i)
+	for (int i = 0, nb = std::min(showNbPotions, nbPotions); i < nb; ++i)
 	{
 		const auto& potion = potions[potionsId[i]];
 		auto potionWidget = new QFrame;
@@ -55,6 +68,14 @@ void PotionsListWidget::refreshList()
 		{
 			const auto& effect = effects[potion.effects[effId]];
 			auto effLabel = new QLabel(effect.name);
+			effLabel->setAutoFillBackground(true);
+			QPalette pal = effLabel->palette();
+			if (effect.flags & EffectFlags::Hostile)
+				pal.setColor(QPalette::WindowText, m_negativeColor);
+			else
+				pal.setColor(QPalette::WindowText, m_positiveColor);
+			effLabel->setPalette(pal);
+
 			effLabel->setToolTip(effect.tooltip);
 			effectsLayout->addWidget(effLabel);
 

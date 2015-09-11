@@ -41,6 +41,7 @@ void SelectorWidget::setItems(QStringList items, QStringList tooltips)
 		auto addFilterContainsButton = new QPushButton(addFilterContainsIcon, "");
 		addFilterContainsButton->setMaximumSize(buttonSize, buttonSize);
 		addFilterContainsButton->setFlat(true);
+		addFilterContainsButton->setToolTip(tr("Only show potions that contain this item"));
 		connect(addFilterContainsButton, SIGNAL(clicked(bool)), addFilterContainsAction, SLOT(trigger()));
 		connect(addFilterContainsAction, SIGNAL(triggered(bool)), this, SLOT(modifyFilter()));
 		boxLayout->addWidget(addFilterContainsButton);
@@ -50,6 +51,7 @@ void SelectorWidget::setItems(QStringList items, QStringList tooltips)
 		auto addFilterDoesNotContainButton = new QPushButton(addFilterDoesNotContainIcon, "");
 		addFilterDoesNotContainButton->setMaximumSize(buttonSize, buttonSize);
 		addFilterDoesNotContainButton->setFlat(true);
+		addFilterDoesNotContainButton->setToolTip(tr("Hide potions containing this item"));
 		connect(addFilterDoesNotContainButton, SIGNAL(clicked(bool)), addFilterDoesNotContainAction, SLOT(trigger()));
 		connect(addFilterDoesNotContainAction, SIGNAL(triggered(bool)), this, SLOT(modifyFilter()));
 		boxLayout->addWidget(addFilterDoesNotContainButton);

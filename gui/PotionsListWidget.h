@@ -11,6 +11,9 @@ public:
 
 public slots:
 	void refreshList();
+
+protected:
+	QColor m_positiveColor, m_negativeColor;
 };
 
 #endif // POTIONSLISTWIDGET_H
