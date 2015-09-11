@@ -64,6 +64,7 @@ void SaveDialog::refreshInformation()
 	if (!loaded)
 	{
 		layout->addWidget(screenshotLabel);
+		layout->addStretch();
 		return;
 	}
 

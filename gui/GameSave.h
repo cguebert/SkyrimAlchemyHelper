@@ -38,6 +38,8 @@ public:
 	const std::vector<int> ingredientsCount() const; // Same as inventory, but more direct and with the 0-count ingredients
 
 protected:
+	void clear();
+
 	bool m_isLoaded = false;
 	QPixmap m_screenshot;
 	Header m_header;

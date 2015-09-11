@@ -205,30 +205,38 @@ void ConfigPane::defaultConfig()
 	m_pluginsListPathEdit->setText("");
 	m_savesFolderEdit->setText("");
 
-	if (m_useModOrganizerCheckBox->checkState() == Qt::Checked)
+	bool useModOrganizer = (m_useModOrganizerCheckBox->checkState() == Qt::Checked);
+	if (useModOrganizer)
 	{
 		QString modOrganizerPath = m_modOrganizerPathEdit->text();
 		if (!modOrganizerPath.isEmpty())
 		{
 			QDir modOrganizerDir = QFileInfo(modOrganizerPath).absoluteDir();
-			if (modOrganizerDir.exists())
+			QFileInfo modOrganizerIni(modOrganizerDir, "ModOrganizer.ini"); // We read the settings to get the current profile
+			if (modOrganizerIni.exists())
 			{
-				modOrganizerDir.cd("profiles");
-				auto profiles = modOrganizerDir.entryInfoList(QDir::Dirs, QDir::Time);
-				for (auto profile : profiles)
+				QSettings modOrganizerSettings(modOrganizerIni.absoluteFilePath(), QSettings::IniFormat);
+				QString profile = modOrganizerSettings.value("selected_profile").toString();
+				if (!profile.isEmpty())
 				{
-					QString tmp = profile.absoluteFilePath();
-					if (profile.baseName().isEmpty()) // Remove "." & ".."
-						continue;
-
-					m_pluginsListPathEdit->setText(profile.absoluteFilePath() + "/plugins.txt");
-					m_savesFolderEdit->setText(profile.absoluteFilePath() + "/saves");
-					break;
+					modOrganizerDir.cd("profiles");
+					modOrganizerDir.cd(profile);
+					if (modOrganizerDir.exists())
+					{
+						m_pluginsListPathEdit->setText(modOrganizerDir.absolutePath() + "/plugins.txt");
+						m_savesFolderEdit->setText(modOrganizerDir.absolutePath() + "/saves");
+					}
 				}
+			}
+			else
+			{
+				m_useModOrganizerCheckBox->setCheckState(Qt::Unchecked);
+				useModOrganizer = false;
 			}
 		}
 	}
-	else
+	
+	if (!useModOrganizer) // Can be changed if the ModOrganizer configuration cannot be read
 	{
 		QString pluginsListPath = QStandardPaths::locate(QStandardPaths::GenericDataLocation, "Skyrim/plugins.txt", QStandardPaths::LocateFile);
 		if (!pluginsListPath.isEmpty())
@@ -296,12 +304,9 @@ bool ConfigPane::prepareParsing()
 	}
 
 	std::string pathsFilePath = dataDir.absolutePath().toStdString() + "/paths.txt";
+
+	std::vector<std::string> modsPathList;
 	std::ofstream outFile(pathsFilePath);
-	if (!outFile.is_open())
-	{
-		QMessageBox::warning(this, tr("Access error"), tr("Cannot write to data/paths.txt"));
-		return false;
-	}
 
 	std::string dataDirPath = m_dataFolderEdit->text().toStdString();
 	std::string pluginsListPath = m_pluginsListPathEdit->text().toStdString();
@@ -312,7 +317,7 @@ bool ConfigPane::prepareParsing()
 		std::string inList = loadFile(pluginsListPath);
 		std::transform(inList.begin(), inList.end(), inList.begin(), ::tolower);
 		if (inList.find("skyrim.esm") == std::string::npos)
-			outFile << dataDirPath + "/Skyrim.esm" << std::endl;
+			modsPathList.emplace_back("Skyrim.esm");
 	}
 
 	std::ifstream inFile(pluginsListPath);
@@ -322,7 +327,32 @@ bool ConfigPane::prepareParsing()
 		if (modName[0] == '#')
 			continue;
 
-		outFile << dataDirPath + "/" + modName << std::endl;
+		modsPathList.emplace_back(modName);
+	}
+
+	if (m_useModOrganizerCheckBox->checkState() == Qt::Checked)
+	{
+		if (!getRealModPaths(modsPathList))
+		{
+			QMessageBox::warning(this, tr("Mods list error"), tr("There was an error trying to find mods with ModOrganizer"));
+			return false;
+		}
+	}
+	else
+	{
+		for (auto& path : modsPathList)
+			path = dataDirPath + "/" + path;
+	}
+
+	if (outFile.is_open())
+	{
+		for (const auto& mod : modsPathList)
+			outFile << mod << std::endl;
+	}
+	else
+	{
+		QMessageBox::warning(this, tr("Access error"), tr("Cannot write to data/paths.txt"));
+		return false;
 	}
 
 	QDir::setCurrent(appDir);
@@ -335,15 +365,7 @@ void ConfigPane::parseMods()
 		return;
 
 	QString modParserPath = QCoreApplication::applicationDirPath() +"/ModParser.exe";
-	int result = 0;
-
-	QString modOrganizerPath = m_modOrganizerPathEdit->text();
-	if (m_useModOrganizerCheckBox->checkState() == Qt::Checked && !modOrganizerPath.isEmpty() && QFileInfo::exists(modOrganizerPath))
-		result = QProcess::execute(modOrganizerPath + " " + modParserPath);
-	else
-		result = QProcess::execute(modParserPath);
-
-	if (result)
+	if (QProcess::execute(modParserPath)) // 0 is the code for no error
 	{
 		QMessageBox::warning(this, tr("Error in parsing"), tr("There was an error trying to extract ingredients from the plugins"));
 		return;
@@ -402,4 +424,89 @@ void ConfigPane::updateLists()
 bool ConfigPane::modified()
 {
 	return m_modified;
+}
+
+bool ConfigPane::getRealModPaths(std::vector<std::string>& paths)
+{
+	QString modsDirPath;
+	QString modOrganizerPath = m_modOrganizerPathEdit->text();
+	QString pluginsListPath = m_pluginsListPathEdit->text();
+	if (modOrganizerPath.isEmpty() || pluginsListPath.isEmpty())
+		return false;
+
+	// Convert to a QStringList
+	QStringList pathsList;
+	for (const auto& path : paths)
+		pathsList.push_back(path.c_str());
+	paths.clear();
+
+	// Get the current profile
+	QDir modOrganizerDir = QFileInfo(modOrganizerPath).absoluteDir();
+	QFileInfo modOrganizerIni(modOrganizerDir, "ModOrganizer.ini"); 
+	if (!modOrganizerIni.exists())
+		return false;
+
+	// Get the mod directory
+	QSettings modOrganizerSettings(modOrganizerIni.absoluteFilePath(), QSettings::IniFormat);
+	modsDirPath = modOrganizerSettings.value("Settings/mod_directory").toString();
+	if (modsDirPath.isEmpty())
+		return false;
+
+	QDir modsDir(modsDirPath);
+	if (!modsDir.exists())
+		return false;
+
+	// Get the mod list
+	QDir modOrganizerProfileDir = QFileInfo(pluginsListPath).absoluteDir();
+	QFileInfo modListFileInfo(modOrganizerProfileDir, "modlist.txt");
+	if (!modListFileInfo.exists())
+		return false;
+
+	QFile modListFile(modListFileInfo.absoluteFilePath());
+	if (!modListFile.open(QIODevice::ReadOnly))
+		return false;
+
+	using QStringPair = std::pair<QString, QString>;
+	std::vector<QStringPair> realPathsPairs;
+	QStringList filters;
+	filters << "*.esm" << "*.esp";
+	QTextStream modListStream(&modListFile);
+	while (!modListStream.atEnd())
+	{
+		QString modName = modListStream.readLine();
+		if (!modName.startsWith('+'))
+			continue;
+		modName = modName.mid(1); // Remove '+'
+
+		QDir modDir(modsDir);
+		if (!modDir.cd(modName))
+			continue;
+
+		QStringList files = modDir.entryList(filters, QDir::Files);
+		for (const auto& path : pathsList)
+		{
+			if (files.contains(path))
+				realPathsPairs.emplace_back(path, QFileInfo(modDir, path).absoluteFilePath());
+		}
+	}
+
+	// Lastly, look into the Skyrim data folder
+	QDir dataDir(m_dataFolderEdit->text());
+	QStringList files = dataDir.entryList(filters, QDir::Files);
+	for (const auto& path : pathsList)
+	{
+		if (files.contains(path))
+			realPathsPairs.emplace_back(path, QFileInfo(dataDir, path).absoluteFilePath());
+	}
+
+	for (const auto& path : pathsList)
+	{
+		auto it = std::find_if(realPathsPairs.begin(), realPathsPairs.end(), [&path](const QStringPair& p){
+			return p.first == path;
+		});
+		if (it != realPathsPairs.end())
+			paths.push_back(it->second.toStdString());
+	}
+
+	return true;
 }

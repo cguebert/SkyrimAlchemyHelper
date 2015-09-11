@@ -44,6 +44,7 @@ signals:
 protected:
 	void loadConfig();
 	bool prepareParsing();
+	bool getRealModPaths(std::vector<std::string>& paths);
 
 	bool m_firstLaunch;
 	QLineEdit *m_dataFolderEdit,

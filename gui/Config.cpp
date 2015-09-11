@@ -20,7 +20,7 @@ bool Config::isEmpty()
 
 void Config::load()
 {
-	QSettings settings;
+	QSettings settings("SAH.ini", QSettings::IniFormat);
 
 	m_isEmpty = !settings.contains("useModOrganizer");
 
@@ -36,7 +36,7 @@ void Config::load()
 
 void Config::save()
 {
-	QSettings settings;
+	QSettings settings("SAH.ini", QSettings::IniFormat);
 
 	settings.setValue("skyrimDataFolder", dataFolder);
 	settings.setValue("savesFolder", savesFolder);

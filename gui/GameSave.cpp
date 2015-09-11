@@ -18,10 +18,7 @@ int getIngredientId(const Save::Ingredient& ing)
 
 void GameSave::load(QString fileName)
 {
-	m_screenshot = QPixmap();
-	m_knownIngredients.clear();
-	m_inventory.clear();
-	m_ingredientsCount.clear();
+	clear();
 
 	const auto& plugins = PluginsList::instance().plugins();
 	const auto& ingredients = IngredientsList::instance().ingredients();
@@ -63,7 +60,6 @@ void GameSave::load(QString fileName)
 	}
 
 	// Convert inventory
-	m_ingredientsCount.clear();
 	m_ingredientsCount.resize(ingredients.size());
 	const auto& saveIngredients = save.listedIngredients();
 	for (const auto& ing : save.inventory())
@@ -79,6 +75,8 @@ void GameSave::load(QString fileName)
 
 void GameSave::loadSaveFromConfig()
 {
+	clear();
+
 	auto& config = Config::instance();
 	if (config.savesFolder.isEmpty())
 		return;
@@ -97,4 +95,14 @@ void GameSave::loadSaveFromConfig()
 		return;
 
 	load(saves.first().absoluteFilePath());
+}
+
+void GameSave::clear()
+{
+	m_isLoaded = false;
+	m_screenshot = QPixmap();
+	m_header = Header();
+	m_knownIngredients.clear();
+	m_inventory.clear();
+	m_ingredientsCount.clear();
 }

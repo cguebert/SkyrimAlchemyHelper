@@ -95,12 +95,12 @@ MainWindow::MainWindow(QWidget *parent)
 
 QSize MainWindow::sizeHint() const
 {
-	return QSize(800, 600);
+	return QSize(950, 800);
 }
 
 void MainWindow::readSettings()
 {
-	QSettings settings;
+	QSettings settings("SAH.ini", QSettings::IniFormat);
 	restoreGeometry(settings.value("geometry").toByteArray());
 	restoreState(settings.value("state").toByteArray());
 
@@ -109,7 +109,7 @@ void MainWindow::readSettings()
 
 void MainWindow::writeSettings()
 {
-	QSettings settings;
+	QSettings settings("SAH.ini", QSettings::IniFormat);
 	settings.setValue("geometry", saveGeometry());
 	settings.setValue("state", saveState());
 
@@ -123,6 +123,7 @@ void MainWindow::editConfig()
 	{
 		m_effectsSelector->updateList();
 		m_ingredientsSelector->updateList();
+		GameSave::instance().loadSaveFromConfig();
 		m_filtersWidget->clear();
 		PotionsList::instance().recomputeList();
 		m_potionsWidget->refreshList();
@@ -131,12 +132,12 @@ void MainWindow::editConfig()
 
 void MainWindow::afterLaunch()
 {
-	QSettings settings;
-	if (!settings.contains("useModOrganizer"))
+	if (Config::instance().isEmpty())
 	{
 		QMessageBox::information(this, tr("First launch"), tr("Please verify the configuration"));
 		ConfigDialog dlg(this, true);
-		dlg.exec();
+		if(dlg.exec())
+			GameSave::instance().loadSaveFromConfig();
 	}
 }
 
