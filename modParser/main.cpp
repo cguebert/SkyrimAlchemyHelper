@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "Ingredients.h"
+#include "Config.h"
 #include "Mod.h"
 
 using namespace std;
@@ -33,7 +33,7 @@ void exportConfig(const Config& config)
 	effectsFile.close();
 
 	ofstream ingredientsFile("data/Ingredients.txt");
-	for (const auto& ingr : config.ingredientsList.ingredients())
+	for (const auto& ingr : config.ingredientsList)
 	{
 		ingredientsFile << ingr.name << endl << ingr.modName << endl;
 		ingredientsFile << hex << uppercase << ingr.id << dec << endl;
@@ -62,11 +62,9 @@ int main(int argc, char** argv)
 	loadMods(config);
 	exportConfig(config);
 
-//	system("Pause");
-
 	// Returns 0 only if the 3 lists are not empty
 	return (config.modsList.empty() 
 		|| config.magicalEffectsList.empty() 
-		|| config.ingredientsList.ingredients().empty())
+		|| config.ingredientsList.empty())
 		? 1 : 0;
 }

@@ -151,6 +151,24 @@ void Mod::parseGroup()
 		in.seekg(start + groupSize);
 }
 
+bool Mod::setIngredient(const Ingredient& ingredient)
+{
+	auto it = std::find_if(m_config.ingredientsList.begin(), m_config.ingredientsList.end(), [&ingredient](const Ingredient& ing){
+		return ingredient.id == ing.id && ingredient.modName == ing.modName;
+	});
+
+	if (it != m_config.ingredientsList.end())
+	{
+		*it = ingredient;
+		return false; // false if modifying
+	}
+	else
+	{
+		m_config.ingredientsList.push_back(ingredient);
+		return true; // true if adding
+	}
+}
+
 void Mod::parseIngredient()
 {
 	newIngredient();
@@ -167,7 +185,7 @@ void Mod::parseIngredient()
 		parseField();
 	m_currentRecord = RecordType::None;
 
-	if (m_config.ingredientsList.setIngredient(m_currentIngredient))
+	if (setIngredient(m_currentIngredient))
 		++m_nbIngrAdded;
 	else
 		++m_nbIngrModified;
@@ -220,7 +238,6 @@ void Mod::parseField()
 		{
 			m_currentMagicalEffect.description = readLStringField();
 			m_parsedMGEF = true;
-
 		}
 		else
 			parseGenericField();
@@ -313,8 +330,8 @@ void Mod::updateMagicalEffects()
 
 	// Compute the list of ids used by the ingredients
 	vector<uint32_t> effectsIds;
-	effectsIds.reserve(m_config.ingredientsList.ingredients().size() * 4);
-	for (const auto& ing : m_config.ingredientsList.ingredients())
+	effectsIds.reserve(m_config.ingredientsList.size() * 4);
+	for (const auto& ing : m_config.ingredientsList)
 	{
 		for (const auto& eff : ing.effects)
 			effectsIds.push_back(eff.id);

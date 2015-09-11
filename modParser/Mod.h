@@ -1,25 +1,8 @@
 #pragma once
 
 #include <parser/Parser.h>
-#include "Ingredients.h"
+#include "Config.h"
 #include "StringsTable.h"
-
-using ModsList = std::vector < std::string > ;
-
-struct MagicalEffect
-{
-	uint32_t id = 0, flags = 0;
-	std::string name, description;
-	float baseCost = 0;
-};
-using MagicalEffectsList = std::vector < MagicalEffect >;
-
-struct Config
-{
-	Ingredients ingredientsList;
-	MagicalEffectsList magicalEffectsList;
-	ModsList modsList;
-};
 
 class Mod
 {
@@ -31,7 +14,6 @@ protected:
 	void doParse();
 
 	using Type = std::array<char, 4>;
-
 	bool isType(const Type& type, const std::string& name); 
 
 	void newIngredient();
@@ -52,6 +34,7 @@ protected:
 	void parseEffectItem();
 
 	void computeIngredientId(uint32_t id);
+	bool setIngredient(const Ingredient& ingredient); // Return true if adding, false if modifying existing
 	void updateMagicalEffects();
 
 	std::string readLStringField();
@@ -63,7 +46,7 @@ protected:
 
 	Parser in;
 	std::string m_modFileName, m_modName;
-	Ingredients::Ingredient m_currentIngredient;
+	Ingredient m_currentIngredient;
 	MagicalEffect m_currentMagicalEffect;
 	enum class RecordType { None, Plugin, Ingredient, MagicalEffect };
 	RecordType m_currentRecord;
