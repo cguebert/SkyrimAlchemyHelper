@@ -3,9 +3,9 @@
 #include "EffectsListWidget.h"
 #include "EffectsList.h"
 
-EffectsListModel::EffectsListModel(QObject* parent)
+EffectsListModel::EffectsListModel(EffectsList& effectsList, QObject* parent)
 	: QAbstractTableModel(parent)
-	, m_effectsList(EffectsList::instance())
+	, m_effectsList(effectsList)
 {
 }
 
@@ -63,14 +63,14 @@ void EffectsListModel::endReset()
 
 //****************************************************************************//
 
-EffectsListWidget::EffectsListWidget(QWidget* parent)
+EffectsListWidget::EffectsListWidget(EffectsList& effectsList, QWidget* parent)
 	: QWidget(parent)
 {
 	QVBoxLayout* vLayout = new QVBoxLayout;
 
 	auto m_view = new QTableView(this);
 	m_view->setSortingEnabled(true);
-	m_model = new EffectsListModel(this);
+	m_model = new EffectsListModel(effectsList, this);
 	auto proxyModel = new QSortFilterProxyModel(this);
 	proxyModel->setSourceModel(m_model);
 	proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);

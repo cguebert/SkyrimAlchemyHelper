@@ -8,12 +8,20 @@ class QLineEdit;
 class QPushButton;
 class QTimer;
 
+class IngredientsList;
+class EffectsList;
+class PluginsList;
+
 class ConfigPane : public QWidget
 {
 	Q_OBJECT
 
 public:
-	ConfigPane(QWidget* parent = 0, bool firstLaunch = false);
+	ConfigPane(IngredientsList& ingredientsList,
+		EffectsList& effectsList,
+		PluginsList& pluginsList,
+		bool firstLaunch = false,
+		QWidget* parent = nullptr);
 
 	bool testConfig(); // Returns false if there is a problem with the current configuration
 	void saveConfig();
@@ -46,6 +54,10 @@ protected:
 	QPushButton *m_modOrganizerPathButton;
 	QTimer *m_timer;
 	bool m_listsModified = false;
+
+	IngredientsList& m_ingredientsList;
+	EffectsList& m_effectsList;
+	PluginsList& m_pluginsList;
 };
 
 #endif // CONFIGPANE_H

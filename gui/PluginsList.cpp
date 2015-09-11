@@ -7,17 +7,6 @@
 
 const QString fileName = "data/plugins.txt";
 
-PluginsList& PluginsList::instance()
-{
-	static PluginsList plugins;
-	return plugins;
-}
-
-PluginsList::PluginsList()
-{
-	loadList();
-}
-
 void PluginsList::loadList()
 {
 	m_plugins.clear();

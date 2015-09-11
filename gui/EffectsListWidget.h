@@ -10,7 +10,7 @@ class EffectsList;
 class EffectsListModel : public QAbstractTableModel
 {
 public:
-	EffectsListModel(QObject* parent = nullptr);
+	EffectsListModel(EffectsList& effectsList, QObject* parent = nullptr);
 
 	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -30,7 +30,7 @@ class EffectsListWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit EffectsListWidget(QWidget* parent = nullptr);
+	explicit EffectsListWidget(EffectsList& effectsList, QWidget* parent = nullptr);
 
 public slots:
 	void beginReset();

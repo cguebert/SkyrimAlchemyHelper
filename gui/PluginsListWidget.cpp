@@ -3,9 +3,9 @@
 #include "PluginsListWidget.h"
 #include "PluginsList.h"
 
-PluginsListModel::PluginsListModel(QObject* parent)
+PluginsListModel::PluginsListModel(PluginsList& pluginsList, QObject* parent)
 	: QAbstractTableModel(parent)
-	, m_pluginsList(PluginsList::instance())
+	, m_pluginsList(pluginsList)
 {
 
 }
@@ -65,13 +65,14 @@ void PluginsListModel::endReset()
 
 //****************************************************************************//
 
-PluginsListWidget::PluginsListWidget(QWidget* parent) : QWidget(parent)
+PluginsListWidget::PluginsListWidget(PluginsList& pluginsList, QWidget* parent) 
+	: QWidget(parent)
 {
 	QVBoxLayout* vLayout = new QVBoxLayout;
 
 	m_view = new QTableView(this);
 	m_view->setSortingEnabled(true);
-	m_model = new PluginsListModel(this);
+	m_model = new PluginsListModel(pluginsList, this);
 	auto proxyModel = new QSortFilterProxyModel(this);
 	proxyModel->setSourceModel(m_model);
 	proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);

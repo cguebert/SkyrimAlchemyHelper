@@ -8,17 +8,6 @@
 #include "IngredientsList.h"
 #include "PluginsList.h"
 
-GameSave& GameSave::instance()
-{
-	static GameSave save;
-	return save;
-}
-
-GameSave::GameSave()
-{
-	loadSaveFromConfig();
-}
-
 int getIngredientId(const Save::Ingredient& ing)
 {
 	auto pluginId = PluginsList::instance().find(ing.mod.c_str());

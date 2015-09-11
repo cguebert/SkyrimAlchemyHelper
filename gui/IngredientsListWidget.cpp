@@ -5,11 +5,14 @@
 #include "EffectsList.h"
 #include "PluginsList.h"
 
-IngredientsListModel::IngredientsListModel(QObject* parent)
+IngredientsListModel::IngredientsListModel(IngredientsList& ingredientsList,
+	EffectsList& effectsList,
+	PluginsList& pluginsList, 
+	QObject* parent)
 	: QAbstractTableModel(parent)
-	, m_ingredientsList(IngredientsList::instance())
-	, m_effectsList(EffectsList::instance())
-	, m_pluginsList(PluginsList::instance())
+	, m_ingredientsList(ingredientsList)
+	, m_effectsList(effectsList)
+	, m_pluginsList(pluginsList)
 {
 }
 
@@ -105,14 +108,17 @@ void IngredientsListModel::endReset()
 
 //****************************************************************************//
 
-IngredientsListWidget::IngredientsListWidget(QWidget* parent)
+IngredientsListWidget::IngredientsListWidget(IngredientsList& ingredientsList,
+	EffectsList& effectsList,
+	PluginsList& pluginsList, 
+	QWidget* parent)
 	: QWidget(parent)
 {
 	QVBoxLayout* vLayout = new QVBoxLayout;
 
 	auto m_view = new QTableView(this);
 	m_view->setSortingEnabled(true);
-	m_model = new IngredientsListModel(this);
+	m_model = new IngredientsListModel(ingredientsList, effectsList, pluginsList, this);
 	auto proxyModel = new QSortFilterProxyModel(this);
 	proxyModel->setSourceModel(m_model);
 	proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);

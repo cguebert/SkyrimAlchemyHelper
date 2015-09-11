@@ -11,7 +11,10 @@ class PluginsList;
 class IngredientsListModel : public QAbstractTableModel
 {
 public:
-	IngredientsListModel(QObject* parent = nullptr);
+	IngredientsListModel(IngredientsList& ingredientsList,
+		EffectsList& effectsList,
+		PluginsList& pluginsList,
+		QObject* parent = nullptr);
 
 	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -33,7 +36,10 @@ class IngredientsListWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit IngredientsListWidget(QWidget* parent = nullptr);
+	explicit IngredientsListWidget(IngredientsList& ingredientsList, 
+		EffectsList& effectsList, 
+		PluginsList& pluginsList, 
+		QWidget* parent = nullptr);
 
 public slots:
 	void beginReset();

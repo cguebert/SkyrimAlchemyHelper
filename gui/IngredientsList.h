@@ -2,13 +2,16 @@
 #define INGREDIENTSLIST_H
 
 #include <QString>
-#include <QStringList>
 #include <vector>
+
+class EffectsList;
+class PluginsList;
 
 class IngredientsList
 {
 public:
-	static IngredientsList& instance();
+	static IngredientsList& instance() // Not a singleton, just the one everyone use
+	{ static IngredientsList ingredients; return ingredients; }
 
 	static const int nbEffectsPerIngredient = 4;
 
@@ -32,12 +35,10 @@ public:
 	const std::vector<Ingredient>& ingredients() const;
 	std::vector<Ingredient>& ingredients();
 
-	void loadList();
+	void loadList(EffectsList* effectsListPtr = nullptr, PluginsList* pluginsListPtr = nullptr);
 	void saveList();
 
 protected:
-	IngredientsList();
-
 	std::vector<Ingredient> m_ingredients;
 };
 

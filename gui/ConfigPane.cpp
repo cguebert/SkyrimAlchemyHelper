@@ -9,9 +9,16 @@
 #include "IngredientsList.h"
 #include "PluginsList.h"
 
-ConfigPane::ConfigPane(QWidget *parent, bool firstLaunch)
+ConfigPane::ConfigPane(IngredientsList& ingredientsList,
+	EffectsList& effectsList,
+	PluginsList& pluginsList,
+	bool firstLaunch,
+	QWidget *parent)
 	: QWidget(parent)
 	, m_firstLaunch(firstLaunch)
+	, m_ingredientsList(ingredientsList)
+	, m_effectsList(effectsList)
+	, m_pluginsList(pluginsList)
 {
 	auto gridLayout = new QGridLayout;
 
@@ -383,9 +390,9 @@ void ConfigPane::updateLists()
 {
 	emit startModsParse();
 
-	PluginsList::instance().loadList();
-	EffectsList::instance().loadList();
-	IngredientsList::instance().loadList();
+	m_pluginsList.loadList();
+	m_effectsList.loadList();
+	m_ingredientsList.loadList(&m_effectsList, &m_pluginsList);
 
 	emit endModsParse();
 

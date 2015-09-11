@@ -9,23 +9,12 @@ using namespace std;
 
 const QString fileName = "data/ingredients.txt";
 
-IngredientsList& IngredientsList::instance()
-{
-	static IngredientsList ingredients;
-	return ingredients;
-}
-
-IngredientsList::IngredientsList()
-{
-	loadList();
-}
-
-void IngredientsList::loadList()
+void IngredientsList::loadList(EffectsList* effectsListPtr, PluginsList* pluginsListPtr)
 {
 	m_ingredients.clear();
 
-	PluginsList& pluginsList = PluginsList::instance();
-	EffectsList& effectsList = EffectsList::instance();
+	EffectsList& effectsList = effectsListPtr ? *effectsListPtr : EffectsList::instance();
+	PluginsList& pluginsList = pluginsListPtr ? *pluginsListPtr : PluginsList::instance();
 
 	QFile inputFile(fileName);
 	if (inputFile.open(QIODevice::ReadOnly))

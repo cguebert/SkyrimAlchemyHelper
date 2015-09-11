@@ -119,9 +119,7 @@ void MainWindow::writeSettings()
 void MainWindow::editConfig()
 {
 	ConfigDialog dlg(this);
-	dlg.exec();
-
-	if (dlg.areListsModified())
+	if (dlg.exec() && dlg.areListsModified())
 	{
 		m_effectsSelector->updateList();
 		m_ingredientsSelector->updateList();

@@ -9,7 +9,8 @@
 class GameSave
 {
 public:
-	static GameSave& instance();
+	static GameSave& instance() // Not a singleton, just the one everyone use
+	{ static GameSave save; return save; }
 
 	void loadSaveFromConfig();
 
@@ -37,8 +38,6 @@ public:
 	const std::vector<int> ingredientsCount() const; // Same as inventory, but more direct and with the 0-count ingredients
 
 protected:
-	GameSave();
-
 	bool m_isLoaded = false;
 	QPixmap m_screenshot;
 	Header m_header;

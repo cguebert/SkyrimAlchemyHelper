@@ -7,7 +7,8 @@
 class PluginsList
 {
 public:
-	static PluginsList& instance();
+	static PluginsList& instance() // Not a singleton, just the one everyone use
+	{ static PluginsList plugins; return plugins; }
 
 	struct Plugin
 	{
@@ -24,8 +25,6 @@ public:
 	void saveList();
 
 protected:
-	PluginsList();
-
 	std::vector<Plugin> m_plugins;
 };
 

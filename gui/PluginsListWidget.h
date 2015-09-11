@@ -11,7 +11,7 @@ class PluginsListModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	PluginsListModel(QObject* parent = nullptr);
+	PluginsListModel(PluginsList& pluginsList, QObject* parent = nullptr);
 
 	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -31,7 +31,7 @@ class PluginsListWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit PluginsListWidget(QWidget* parent = nullptr);
+	explicit PluginsListWidget(PluginsList& pluginsList, QWidget* parent = nullptr);
 
 public slots:
 	void beginReset();

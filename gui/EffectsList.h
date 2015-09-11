@@ -7,7 +7,8 @@
 class EffectsList
 {
 public:
-	static EffectsList& instance();
+	static EffectsList& instance() // Not a singleton, just the one everyone use
+	{ static EffectsList effects; return effects; }
 
 	struct Effect
 	{
@@ -27,8 +28,6 @@ public:
 	void saveList();
 
 protected:
-	EffectsList();
-
 	std::vector<Effect> m_effects;
 };
 

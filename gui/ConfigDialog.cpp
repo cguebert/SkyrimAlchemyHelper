@@ -9,6 +9,11 @@
 ConfigDialog::ConfigDialog(QWidget *parent, bool firstLaunch)
 	: QDialog(parent)
 {
+	// Copy main lists
+	m_effectsList = EffectsList::instance();
+	m_ingredientsList = IngredientsList::instance();
+	m_pluginsList = PluginsList::instance();
+
 	setWindowTitle("Skyrim Alchemy Helper - Config");
 	QVBoxLayout* vLayout = new QVBoxLayout;
 	vLayout->setContentsMargins(5, 5, 5, 5);
@@ -16,16 +21,16 @@ ConfigDialog::ConfigDialog(QWidget *parent, bool firstLaunch)
 	auto tabWidget = new QTabWidget;
 	vLayout->addWidget(tabWidget);
 
-	m_configPane = new ConfigPane(this, firstLaunch);
+	m_configPane = new ConfigPane(m_ingredientsList, m_effectsList, m_pluginsList, firstLaunch);
 	tabWidget->addTab(m_configPane, "General");
 
-	auto pluginsWidget = new PluginsListWidget;
+	auto pluginsWidget = new PluginsListWidget(m_pluginsList);
 	tabWidget->addTab(pluginsWidget, "Plugins");
 
-	auto effectsWidget = new EffectsListWidget;
+	auto effectsWidget = new EffectsListWidget(m_effectsList);
 	tabWidget->addTab(effectsWidget, "Effects");
 
-	auto ingredientsWidget = new IngredientsListWidget;
+	auto ingredientsWidget = new IngredientsListWidget(m_ingredientsList, m_effectsList, m_pluginsList);
 	tabWidget->addTab(ingredientsWidget, "Ingredients");
 
 	QPushButton* okButton = new QPushButton(tr("Ok"), this);
@@ -64,6 +69,7 @@ void ConfigDialog::onOk()
 	if (m_configPane->testConfig())
 	{
 		m_configPane->saveConfig();
+		copyLists();
 		accept();
 	}
 	else
@@ -74,9 +80,17 @@ void ConfigDialog::onOk()
 		if (button == QMessageBox::Yes)
 		{
 			m_configPane->saveConfig();
+			copyLists();
 			accept();
 		}
 		else if (button == QMessageBox::No)
 			reject();
 	}
+}
+
+void ConfigDialog::copyLists()
+{
+	EffectsList::instance() = m_effectsList;
+	IngredientsList::instance() = m_ingredientsList;
+	PluginsList::instance() = m_pluginsList;
 }

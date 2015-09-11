@@ -5,17 +5,6 @@
 
 const QString fileName = "data/effects.txt";
 
-EffectsList& EffectsList::instance()
-{
-	static EffectsList effects;
-	return effects;
-}
-
-EffectsList::EffectsList()
-{
-	loadList();
-}
-
 void EffectsList::loadList()
 {
 	m_effects.clear();
