@@ -87,7 +87,7 @@ protected:
 	void parseKnownIngredient(const ChangeForm& form);
 	void parsePlayer(const ChangeForm& form);
 	void parseContainer(const ChangeForm& form);
-	void searchForIngredients(const ChangeForm& form, Inventory& inventory);
+	Inventory searchForIngredients(const ChangeForm& form);
 
 	uint32_t getFormID(const RefID& refID);
 	RefID getRefID(uint32_t formID);

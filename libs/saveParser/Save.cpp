@@ -135,38 +135,90 @@ void Save::parseKnownIngredient(const ChangeForm& form)
 
 void Save::parsePlayer(const ChangeForm& form)
 {
-	m_inventory.clear();
-	searchForIngredients(form, m_inventory);
+	m_inventory = searchForIngredients(form);
 }
 
 void Save::parseContainer(const ChangeForm& form)
 {
-	Inventory container;
-	searchForIngredients(form, container);
+	Inventory container = searchForIngredients(form);
 
 //	if (container.size() > 10)
 //		m_containers.push_back(container);
 }
 
-void Save::searchForIngredients(const ChangeForm& form, Inventory& inventory)
+Save::Inventory Save::searchForIngredients(const ChangeForm& form)
 {
+	Inventory inventory;
 	// Using our search helper, we look for each ingredient in a single pass
 	//  If found, the next int32 is its count
-	int pos = 0, refId = 0, prevRefId = 0;
+	int pos = 0, refId = 0;
 	while ((refId = m_searchHelper.search(form.data, pos)) != -1)
 	{
-		pos += 3;
-
-		// Observation : if we give the ingredients sorted by name, the refId in the save will only increment
-		if (refId < prevRefId)
-			break;
-
+		pos += 3; // Jumping to the count
 		int32_t nb = *reinterpret_cast<const int32_t*>(form.data.data() + pos);
 		inventory.emplace_back(refId, nb);
-
-		prevRefId = refId;
-		pos += 4;
+		pos += 4; // Jumping over the count
 	}
+
+	// The problem is that we can have some values that should not have been interpreted as ingredients
+	int nb = inventory.size();
+	if (nb <= 2) // Cannot filter errors with only 2 values
+		return inventory;
+	
+	// We cut the list into ranges of continuously increasing or decreasing refIDs
+	enum class Progression { None, Increasing, Decreasing };
+	using InventoryIter = Inventory::const_iterator;
+	std::vector<std::pair<InventoryIter, InventoryIter>> ranges;
+	auto itBeg = inventory.begin(), itEnd = inventory.end();
+	ranges.emplace_back(itBeg, itBeg);
+	InventoryIter prevIt = itBeg;
+	Progression progresssion = Progression::None;
+	for (InventoryIter it = ++itBeg; it != itEnd; ++it)
+	{
+		bool newRange = false;
+		
+		if (prevIt->first < it->first) // Increasing values
+		{
+			if (progresssion == Progression::None)
+				progresssion = Progression::Increasing;
+			else if (progresssion == Progression::Decreasing)
+				newRange = true;
+		}
+		else if (prevIt->first > it->first) // Decreasing values
+		{
+			if (progresssion == Progression::None)
+				progresssion = Progression::Decreasing;
+			else if (progresssion == Progression::Increasing)
+				newRange = true;
+		}
+		else // Equal
+			newRange = true;
+
+		if (newRange)
+		{
+			ranges.back().second = it;
+			ranges.emplace_back(it, it);
+		}
+
+		prevIt = it;
+	}
+	ranges.back().second = itEnd;
+	
+	// We only want the longest range
+	int maxLen = 0, maxId = 0;
+	for (int i = 0, nbRanges = ranges.size(); i < nbRanges; ++i)
+	{
+		const auto& range = ranges[i];
+		int len = range.second - range.first;
+		if (len > maxLen)
+		{
+			maxLen = len;
+			maxId = i;
+		}
+	}
+
+	const auto& maxRange = ranges[maxId];
+	return Inventory(maxRange.first, maxRange.second);
 }
 
 uint32_t Save::getFormID(const RefID& refID)
