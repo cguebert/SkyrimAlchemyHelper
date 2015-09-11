@@ -6,11 +6,12 @@
 class QCheckBox;
 class QLineEdit;
 class QPushButton;
-class QTimer;
 
 class IngredientsList;
 class EffectsList;
 class PluginsList;
+
+namespace modParser { struct Config; }
 
 class ConfigPane : public QWidget
 {
@@ -35,7 +36,6 @@ public slots:
 	void useModOrganizerChanged(int);
 	void parseMods();
 	void defaultConfig();
-	void updateLists();
 
 signals:
 	void startModsParse();
@@ -43,8 +43,9 @@ signals:
 
 protected:
 	void loadConfig();
-	bool prepareParsing();
-	bool getRealModPaths(std::vector<std::string>& paths);
+	void convertConfig(const modParser::Config& config);
+	bool getModsPaths(std::vector<std::string>& paths);
+	bool findRealPaths(std::vector<std::string>& paths);
 
 	bool m_firstLaunch;
 	QLineEdit *m_dataFolderEdit,
@@ -53,7 +54,6 @@ protected:
 		*m_modOrganizerPathEdit;
 	QCheckBox *m_useModOrganizerCheckBox;
 	QPushButton *m_modOrganizerPathButton;
-	QTimer *m_timer;
 	bool m_modified = false;
 
 	IngredientsList& m_ingredientsList;

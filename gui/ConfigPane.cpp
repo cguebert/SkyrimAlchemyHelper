@@ -9,6 +9,8 @@
 #include "IngredientsList.h"
 #include "PluginsList.h"
 
+#include <modParser/ModParser.h>
+
 ConfigPane::ConfigPane(IngredientsList& ingredientsList,
 	EffectsList& effectsList,
 	PluginsList& pluginsList,
@@ -65,11 +67,8 @@ ConfigPane::ConfigPane(IngredientsList& ingredientsList,
 	connect(parseModsButton, SIGNAL(clicked()), this, SLOT(parseMods()));
 	auto defaultConfigButton = new QPushButton(tr("Default configuration"));
 	connect(defaultConfigButton, SIGNAL(clicked()), this, SLOT(defaultConfig()));
-	auto reloadListsButton = new QPushButton(tr("Reload lists"));
-	connect(reloadListsButton, SIGNAL(clicked()), this, SLOT(updateLists()));
 	buttonsLayout->addWidget(parseModsButton);
 	buttonsLayout->addWidget(defaultConfigButton);
-	buttonsLayout->addWidget(reloadListsButton);
 	buttonsLayout->addStretch();
 	gridLayout->addLayout(buttonsLayout, 5, 0, 1, 3);
 
@@ -80,10 +79,6 @@ ConfigPane::ConfigPane(IngredientsList& ingredientsList,
 	setLayout(gridLayout);
 
 	loadConfig();
-
-	m_timer = new QTimer(this);
-	m_timer->setSingleShot(true);
-	connect(m_timer, SIGNAL(timeout()), this, SLOT(updateLists()));
 }
 
 void ConfigPane::loadConfig()
@@ -286,28 +281,8 @@ void ConfigPane::saveConfig()
 	config.modOrganizerPath = m_modOrganizerPathEdit->text();
 }
 
-bool ConfigPane::prepareParsing()
+bool ConfigPane::getModsPaths(std::vector<std::string>& modsPathList)
 {
-	QString appDir = QCoreApplication::applicationDirPath();
-
-	// Prepare the "data/paths.txt" file
-	QDir dataDir(appDir);
-	if (!dataDir.cd("data"))
-	{
-		if (!dataDir.mkdir("data"))
-		{
-			QMessageBox::warning(this, tr("Access error"), tr("Cannot create the data folder"));
-			return false;
-		}
-
-		dataDir.cd("data");
-	}
-
-	std::string pathsFilePath = dataDir.absolutePath().toStdString() + "/paths.txt";
-
-	std::vector<std::string> modsPathList;
-	std::ofstream outFile(pathsFilePath);
-
 	std::string dataDirPath = m_dataFolderEdit->text().toStdString();
 	std::string pluginsListPath = m_pluginsListPathEdit->text().toStdString();
 	
@@ -320,6 +295,7 @@ bool ConfigPane::prepareParsing()
 			modsPathList.emplace_back("Skyrim.esm");
 	}
 
+	// Loading the "plugins.txt" file
 	std::ifstream inFile(pluginsListPath);
 	std::string modName;
 	while (std::getline(inFile, modName))
@@ -332,7 +308,7 @@ bool ConfigPane::prepareParsing()
 
 	if (m_useModOrganizerCheckBox->checkState() == Qt::Checked)
 	{
-		if (!getRealModPaths(modsPathList))
+		if (!findRealPaths(modsPathList)) // Convert the mods name to their real location inside ModOrganizer
 		{
 			QMessageBox::warning(this, tr("Mods list error"), tr("There was an error trying to find mods with ModOrganizer"));
 			return false;
@@ -344,34 +320,33 @@ bool ConfigPane::prepareParsing()
 			path = dataDirPath + "/" + path;
 	}
 
-	if (outFile.is_open())
-	{
-		for (const auto& mod : modsPathList)
-			outFile << mod << std::endl;
-	}
-	else
-	{
-		QMessageBox::warning(this, tr("Access error"), tr("Cannot write to data/paths.txt"));
-		return false;
-	}
-
-	QDir::setCurrent(appDir);
 	return true;
 }
 
 void ConfigPane::parseMods()
 {
-	if (!prepareParsing())
+	std::vector<std::string> modsPathList;
+	if (!getModsPaths(modsPathList))
 		return;
 
-	QString modParserPath = QCoreApplication::applicationDirPath() +"/ModParser.exe";
-	if (QProcess::execute(modParserPath)) // 0 is the code for no error
+	modParser::ModParser modParser;
+	modParser.setModsList(modsPathList);
+	auto config = modParser.parseConfig();
+
+	if (config.ingredientsList.empty())
 	{
-		QMessageBox::warning(this, tr("Error in parsing"), tr("There was an error trying to extract ingredients from the plugins"));
+		QMessageBox::warning(this, tr("Error in parsing"), tr("There was an error trying to extract ingredients from the mods"));
 		return;
 	}
+	else
+	{
+		emit startModsParse();
+		convertConfig(config);
+		emit endModsParse();
+		m_modified = true;
 
-	m_timer->start(3000); // Files can still be locked for now, I have found that waiting 3 seconds is enough for me
+		QMessageBox::information(this, tr("Loading finished"), tr("%1 ingredients found in %2 mods").arg(m_ingredientsList.size()).arg(m_pluginsList.size()));
+	}
 }
 
 void ConfigPane::editDataPath()
@@ -408,25 +383,12 @@ void ConfigPane::useModOrganizerChanged(int state)
 	m_modOrganizerPathButton->setEnabled(state == Qt::Checked);
 }
 
-void ConfigPane::updateLists()
-{
-	emit startModsParse();
-
-	m_pluginsList.loadList();
-	m_effectsList.loadList();
-	m_ingredientsList.loadList(&m_effectsList, &m_pluginsList);
-
-	emit endModsParse();
-
-	m_modified = true;
-}
-
 bool ConfigPane::modified()
 {
 	return m_modified;
 }
 
-bool ConfigPane::getRealModPaths(std::vector<std::string>& paths)
+bool ConfigPane::findRealPaths(std::vector<std::string>& paths)
 {
 	QString modsDirPath;
 	QString modOrganizerPath = m_modOrganizerPathEdit->text();
@@ -509,4 +471,122 @@ bool ConfigPane::getRealModPaths(std::vector<std::string>& paths)
 	}
 
 	return true;
+}
+
+int indexOf(const EffectsList::Effects& effects, quint32 id)
+{
+	auto it = std::find_if(effects.begin(), effects.end(), [&id](const EffectsList::Effect& effect){
+		return effect.code == id;
+	});
+	if (it != effects.end())
+		return it - effects.begin();
+	return -1;
+}
+
+int indexOf(const PluginsList::Plugins& plugins, QString name)
+{
+	auto it = std::find_if(plugins.begin(), plugins.end(), [&name](const PluginsList::Plugin& plugin){
+		return !plugin.name.compare(name, Qt::CaseInsensitive);
+	});
+	if (it != plugins.end())
+		return it - plugins.begin();
+	return -1;
+}
+
+void ConfigPane::convertConfig(const modParser::Config& config)
+{
+	auto& plugins = m_pluginsList.plugins();
+	auto& effects = m_effectsList.effects();
+	auto& ingredients = m_ingredientsList.ingredients();
+
+	plugins.clear();
+	effects.clear();
+	ingredients.clear();
+
+	// Add plugins
+	for (const auto& inMod : config.modsList)
+		plugins.emplace_back(inMod.c_str());
+
+	// Sort the plugins list by name
+	std::sort(plugins.begin(), plugins.end(), [](const PluginsList::Plugin& lhs, const PluginsList::Plugin& rhs){
+		return lhs.name < rhs.name;
+	});
+
+	// Add effects
+	for (const auto& inEffect : config.magicalEffectsList)
+	{
+		EffectsList::Effect effect;
+		effect.code = inEffect.id;
+		effect.flags = inEffect.flags;
+		effect.baseCost = inEffect.baseCost;
+		effect.name = inEffect.name.c_str();
+		effect.description = inEffect.description.c_str();
+		effects.push_back(effect);
+	}
+
+	// Sort the effects list by name
+	std::sort(effects.begin(), effects.end(), [](const EffectsList::Effect& lhs, const EffectsList::Effect& rhs){
+		return lhs.name < rhs.name;
+	});
+
+	// Add ingredients
+	for (const auto& inIng : config.ingredientsList)
+	{
+		IngredientsList::Ingredient ingredient;
+		ingredient.code = inIng.id;
+		ingredient.name = inIng.name.c_str();
+		ingredient.pluginId = indexOf(plugins, inIng.modName.c_str());
+		if (ingredient.pluginId == -1)
+			continue;
+		++plugins[ingredient.pluginId].nbIngredients;
+
+		bool validEffects = true;
+		for (int i = 0; i < 4; ++i)
+		{
+			IngredientsList::EffectData& effectData = ingredient.effects[i];
+			effectData.effectId = indexOf(effects, inIng.effects[i].id);
+			if (effectData.effectId == -1)
+			{
+				validEffects = false;
+				break;
+			}
+			effectData.magnitude = inIng.effects[i].magnitude;
+			effectData.duration = inIng.effects[i].duration;
+		}
+		if (!validEffects)
+			continue;
+
+		// Sort the effects for an easier computation of potions,
+		//  but keep the original ones as they are for the known ingredients loaded for each save
+		std::copy(std::begin(ingredient.effects), std::end(ingredient.effects), std::begin(ingredient.sortedEffects));
+		std::sort(std::begin(ingredient.sortedEffects), std::end(ingredient.sortedEffects), 
+			[](const IngredientsList::EffectData& lhs, const IngredientsList::EffectData& rhs)
+			{ return lhs.effectId < rhs.effectId; }
+		);
+
+		ingredients.push_back(ingredient);
+	}
+
+	// Sort the ingredients list by name
+	std::sort(ingredients.begin(), ingredients.end(), [](const IngredientsList::Ingredient& lhs, const IngredientsList::Ingredient& rhs){
+		return lhs.name < rhs.name;
+	});
+
+	// Create the tooltips of the effects (with the sorted list of ingredients)
+	for (int i = 0, nb = ingredients.size(); i < nb; ++i)
+	{
+		auto& ingredient = ingredients[i];
+		for (auto effectData : ingredient.sortedEffects)
+		{
+			auto& effect = effects[effectData.effectId];
+			ingredient.tooltip += effect.name + "\n";
+			effect.ingredients.push_back(i);
+			effect.tooltip += ingredient.name + "\n";
+		}
+		ingredient.tooltip = ingredient.tooltip.trimmed();
+	}
+
+	// Trim the tooltips of the effects
+	for (auto& effect : effects)
+		effect.tooltip = effect.tooltip.trimmed();
 }

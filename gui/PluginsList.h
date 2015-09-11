@@ -12,14 +12,16 @@ public:
 
 	struct Plugin
 	{
+		Plugin(QString name = "") : name(name) {}
 		int nbIngredients = 0;
 		QString name;
 	};
+	using Plugins = std::vector<Plugin>;
 
 	int size() const;
 	int find(const QString& name) const; // -1 if not found
-	const std::vector<Plugin>& plugins() const;
-	std::vector<Plugin>& plugins();
+	const Plugins& plugins() const;
+	Plugins& plugins();
 
 	void loadList();
 	void saveList();
@@ -33,10 +35,10 @@ protected:
 inline int PluginsList::size() const
 { return m_plugins.size(); }
 
-inline const std::vector<PluginsList::Plugin>& PluginsList::plugins() const
+inline const PluginsList::Plugins& PluginsList::plugins() const
 { return m_plugins; }
 
-inline std::vector<PluginsList::Plugin>& PluginsList::plugins()
+inline PluginsList::Plugins& PluginsList::plugins()
 { return m_plugins; }
 
 #endif // PLUGINSLIST_H

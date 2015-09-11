@@ -29,17 +29,18 @@ public:
 		EffectData effects[nbEffectsPerIngredient],
 			sortedEffects[nbEffectsPerIngredient];
 	};
+	using Ingredients = std::vector<Ingredient>;
 
 	int size() const;
 	int find(int pluginId, quint32 code) const; // -1 if not found
-	const std::vector<Ingredient>& ingredients() const;
-	std::vector<Ingredient>& ingredients();
+	const Ingredients& ingredients() const;
+	Ingredients& ingredients();
 
 	void loadList(EffectsList* effectsListPtr = nullptr, PluginsList* pluginsListPtr = nullptr);
 	void saveList();
 
 protected:
-	std::vector<Ingredient> m_ingredients;
+	Ingredients m_ingredients;
 };
 
 //****************************************************************************//
@@ -47,10 +48,10 @@ protected:
 inline int IngredientsList::size() const
 { return m_ingredients.size(); }
 
-inline const std::vector<IngredientsList::Ingredient>& IngredientsList::ingredients() const
+inline const IngredientsList::Ingredients& IngredientsList::ingredients() const
 { return m_ingredients; }
 
-inline std::vector<IngredientsList::Ingredient>& IngredientsList::ingredients()
+inline IngredientsList::Ingredients& IngredientsList::ingredients()
 { return m_ingredients; }
 
 #endif // INGREDIENTSLIST_H

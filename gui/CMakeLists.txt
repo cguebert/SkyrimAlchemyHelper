@@ -67,7 +67,7 @@ add_executable(${PROJECT_NAME} WIN32 ${HEADER_FILES} ${SOURCE_FILES} ${RESSOURCE
 
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Applications")
 
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets SaveParser)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets SaveParser ModParser)
 
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${TARGET_DIR})
 

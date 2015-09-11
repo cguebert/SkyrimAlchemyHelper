@@ -17,18 +17,19 @@ public:
 		QString name, description, tooltip;
 		std::vector<int> ingredients;
 	};
+	using Effects = std::vector<Effect>;
 
 	int size() const;
 	int find(quint32 code) const; // -1 if not found
 	int find(QString name) const; // -1 if not found
-	const std::vector<Effect>& effects() const;
-	std::vector<Effect>& effects();
+	const Effects& effects() const;
+	Effects& effects();
 
 	void loadList();
 	void saveList();
 
 protected:
-	std::vector<Effect> m_effects;
+	Effects m_effects;
 };
 
 //****************************************************************************//
@@ -36,10 +37,10 @@ protected:
 inline int EffectsList::size() const
 { return m_effects.size(); }
 
-inline const std::vector<EffectsList::Effect>& EffectsList::effects() const
+inline const EffectsList::Effects& EffectsList::effects() const
 { return m_effects; }
 
-inline std::vector<EffectsList::Effect>& EffectsList::effects()
+inline EffectsList::Effects& EffectsList::effects()
 { return m_effects; }
 
 #endif // EFFECTSLIST_H
