@@ -4,10 +4,10 @@
 #include "IngredientsList.h"
 #include "GameSave.h"
 
-InventoryModel::InventoryModel(QObject* parent)
+InventoryModel::InventoryModel(GameSave& gamesave, QObject* parent)
 	: QAbstractTableModel(parent)
 	, m_ingredientsList(IngredientsList::instance())
-	, m_gameSave(GameSave::instance())
+	, m_gameSave(gamesave)
 {
 }
 
@@ -61,14 +61,14 @@ void InventoryModel::endReset()
 
 //****************************************************************************//
 
-InventoryWidget::InventoryWidget(QWidget* parent)
+InventoryWidget::InventoryWidget(GameSave& gamesave, QWidget* parent)
 	: QWidget(parent)
 {
 	QVBoxLayout* vLayout = new QVBoxLayout;
 
 	auto m_view = new QTableView(this);
 	m_view->setSortingEnabled(true);
-	m_model = new InventoryModel(this);
+	m_model = new InventoryModel(gamesave, this);
 	auto proxyModel = new QSortFilterProxyModel(this);
 	proxyModel->setSourceModel(m_model);
 	proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);

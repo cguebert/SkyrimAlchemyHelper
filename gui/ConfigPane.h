@@ -25,7 +25,7 @@ public:
 
 	bool testConfig(); // Returns false if there is a problem with the current configuration
 	void saveConfig();
-	bool areListsModified();
+	bool modified();
 
 public slots:
 	void editDataPath();
@@ -53,7 +53,7 @@ protected:
 	QCheckBox *m_useModOrganizerCheckBox;
 	QPushButton *m_modOrganizerPathButton;
 	QTimer *m_timer;
-	bool m_listsModified = false;
+	bool m_modified = false;
 
 	IngredientsList& m_ingredientsList;
 	EffectsList& m_effectsList;

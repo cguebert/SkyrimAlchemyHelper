@@ -119,7 +119,7 @@ void MainWindow::writeSettings()
 void MainWindow::editConfig()
 {
 	ConfigDialog dlg(this);
-	if (dlg.exec() && dlg.areListsModified())
+	if (dlg.exec() && dlg.modified())
 	{
 		m_effectsSelector->updateList();
 		m_ingredientsSelector->updateList();
@@ -156,5 +156,10 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::gameSaveInformation()
 {
 	SaveDialog dlg(this);
-	dlg.exec();
+	if (dlg.exec() && dlg.modified())
+	{
+		m_filtersWidget->clear();
+		PotionsList::instance().recomputeList();
+		m_potionsWidget->refreshList();
+	}
 }

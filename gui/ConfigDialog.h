@@ -17,7 +17,7 @@ public:
 	ConfigDialog(QWidget *parent = nullptr, bool firstLaunch = false);
 
 	QSize sizeHint() const;
-	bool areListsModified() const;
+	bool modified() const;
 
 public slots:
 	void onOk();

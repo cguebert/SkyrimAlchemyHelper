@@ -10,7 +10,7 @@ class IngredientsList;
 class InventoryModel : public QAbstractTableModel
 {
 public:
-	InventoryModel(QObject* parent = nullptr);
+	InventoryModel(GameSave& gamesave, QObject* parent = nullptr);
 
 	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -31,7 +31,7 @@ class InventoryWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit InventoryWidget(QWidget* parent = nullptr);
+	explicit InventoryWidget(GameSave& gamesave, QWidget* parent = nullptr);
 
 public slots:
 	void beginReset();

@@ -396,10 +396,10 @@ void ConfigPane::updateLists()
 
 	emit endModsParse();
 
-	m_listsModified = true;
+	m_modified = true;
 }
 
-bool ConfigPane::areListsModified()
+bool ConfigPane::modified()
 {
-	return m_listsModified;
+	return m_modified;
 }
