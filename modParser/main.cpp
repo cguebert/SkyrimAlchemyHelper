@@ -26,7 +26,8 @@ void exportConfig(const Config& config)
 	{
 		effectsFile << effect.name << endl;
 		effectsFile << hex << uppercase << effect.id << dec << " ";
-		effectsFile << effect.flags << " " << effect.baseCost << endl;
+		effectsFile << hex << uppercase << effect.flags << " ";
+		effectsFile << dec << effect.baseCost << endl;
 		effectsFile << effect.description << endl;
 	}
 	effectsFile.close();
