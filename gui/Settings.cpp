@@ -32,6 +32,9 @@ void Settings::load()
 
 	useModOrganizer = settings.value("useModOrganizer").toBool();
 	loadMostRecentSave = settings.value("loadMostRecentSave").toBool();
+
+	maxValidIngredientCount = settings.value("maxValidIngredientCount", 1000).toInt();
+	minValidNbIngredients = settings.value("minValidNbIngredients", 5).toInt();
 }
 
 void Settings::save()
@@ -46,4 +49,7 @@ void Settings::save()
 
 	settings.setValue("useModOrganizer", useModOrganizer);
 	settings.setValue("loadMostRecentSave", loadMostRecentSave);
+
+	settings.setValue("maxValidIngredientCount", maxValidIngredientCount);
+	settings.setValue("minValidNbIngredients", minValidNbIngredients);
 }

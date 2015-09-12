@@ -13,10 +13,15 @@ public:
 	static GameSave& instance() // Not a singleton, just the one everyone use
 	{ static GameSave save; return save; }
 
+	GameSave();
+
 	QFileInfoList savesList();
 	void loadSaveFromConfig();
 	void load(QString fileName);
 	bool isLoaded() const;
+
+	void setMaxValidIngredientCount(int count); // Everything higher than this is considered invalid (if 0, accept everything)
+	void setMinValidNbIngredients(int nb); // Ignore containers (and the player inventory) if there is less than nb different ingredients (if 0, accept everything)
 
 	QPixmap screenshot() const;
 
@@ -46,6 +51,7 @@ protected:
 	KnownIngredients m_knownIngredients;
 	Inventory m_inventory;
 	std::vector<int> m_ingredientsCount;
+	int m_maxValidIngredientCount, m_minValidNbIngredients;
 };
 
 //****************************************************************************//
@@ -67,3 +73,9 @@ inline const GameSave::Inventory& GameSave::inventory() const
 
 inline const std::vector<int> GameSave::ingredientsCount() const
 { return m_ingredientsCount; }
+
+inline void GameSave::setMaxValidIngredientCount(int count)
+{ m_maxValidIngredientCount = count; }
+
+inline void GameSave::setMinValidNbIngredients(int nb)
+{ m_minValidNbIngredients = nb; }

@@ -144,9 +144,8 @@ void Save::parsePlayer(const ChangeForm& form)
 void Save::parseContainer(const ChangeForm& form)
 {
 	Inventory container = searchForIngredients(form);
-
-//	if (container.size() > 10)
-//		m_containers.push_back(container);
+	if (!container.empty())
+		m_containers.push_back(container);
 }
 
 Save::Inventory Save::searchForIngredients(const ChangeForm& form)
@@ -157,14 +156,23 @@ Save::Inventory Save::searchForIngredients(const ChangeForm& form)
 	int pos = 0, refId = 0;
 	while ((refId = m_searchHelper.search(form.data, pos)) != -1)
 	{
-		pos += 3; // Jumping to the count
-		int32_t nb = *reinterpret_cast<const int32_t*>(form.data.data() + pos);
+		int32_t nb = *reinterpret_cast<const int32_t*>(form.data.data() + pos + 3);
+		if (nb < 0 || (m_maxValidIngredientCount > 0 && nb > m_maxValidIngredientCount))
+		{
+			++pos;
+			continue;
+		}
+
 		inventory.emplace_back(refId, nb);
-		pos += 4; // Jumping over the count
+		pos += 7; // Jumping over the refID and the count
 	}
 
 	// The problem is that we can have some values that should not have been interpreted as ingredients
 	int nb = inventory.size();
+
+	if (m_minValidNbIngredients > 0 && nb < m_minValidNbIngredients)
+		return Inventory();
+
 	if (nb <= 2) // Cannot filter errors with only 2 values
 		return inventory;
 	

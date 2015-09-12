@@ -17,6 +17,9 @@ public:
 	bool useModOrganizer = false,	// Is Mod Organizer used to separate mods ?
 		loadMostRecentSave = true;	// Always load the most recent save instead of a user chosen one
 
+	int maxValidIngredientCount = 1000, // When parsing a save, an ingredient count higher than this is considered invalid (if 0, accept everything)
+		minValidNbIngredients = 5; // When parsing a save, ignore containers and the player inventory if there is less than this number of different ingredients (if 0, accept everything)
+
 	bool isEmpty();
 	void load();
 	void save();

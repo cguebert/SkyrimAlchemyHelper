@@ -8,6 +8,13 @@
 #include "PluginsList.h"
 #include "Settings.h"
 
+GameSave::GameSave()
+{
+	const auto& settings = Settings::instance();
+	m_maxValidIngredientCount = settings.maxValidIngredientCount;
+	m_minValidNbIngredients = settings.minValidNbIngredients;
+}
+
 int getIngredientId(const saveParser::Save::Ingredient& ing)
 {
 	auto pluginId = PluginsList::instance().find(ing.mod.c_str());
@@ -35,6 +42,8 @@ void GameSave::load(QString fileName)
 
 	saveParser::Save save;
 	save.setPossibleIngredients(possibleIngredients);
+	save.setMaxValidIngredientCount(m_maxValidIngredientCount);
+	save.setMinValidNbIngredients(m_minValidNbIngredients);
 	m_isLoaded = save.parse(fileName.toStdString());
 	if (!m_isLoaded)
 		return;

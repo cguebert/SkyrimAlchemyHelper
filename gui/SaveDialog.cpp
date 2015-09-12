@@ -23,50 +23,71 @@ SaveDialog::SaveDialog(QWidget *parent)
 	auto tabWidget = new QTabWidget;
 	vLayout->addWidget(tabWidget);
 
-	auto informationWidget = new QWidget;
-	auto informationLayout = new QHBoxLayout(informationWidget);
-
-	auto settingsGroupBox = new QGroupBox(tr("Settings"));
-	auto settingsLayout = new QVBoxLayout;
+	// Settings for the save selection
+	auto loadSettingsGroupBox = new QGroupBox(tr("Save selection"));
+	auto loadSettingsLayout = new QVBoxLayout(loadSettingsGroupBox);
 
 	auto useMostRecentCheckBox = new QCheckBox(tr("Use most recent save"));
 	useMostRecentCheckBox->setCheckState(m_loadMostRecent ? Qt::Checked : Qt::Unchecked);
-	settingsLayout->addWidget(useMostRecentCheckBox);
+	loadSettingsLayout->addWidget(useMostRecentCheckBox);
 	
 	auto saveComboBox = new QComboBox;
 	QStringList savesNames;
 	for (auto fileInfo : m_savesList)
 		savesNames.push_back(fileInfo.completeBaseName());
 	saveComboBox->addItems(savesNames);
-	settingsLayout->addWidget(saveComboBox);
+	loadSettingsLayout->addWidget(saveComboBox);
 
-	if (!m_selectedSavePath.isEmpty())
+	if (!m_selectedSavePath.isEmpty()) // Set current index based on previous settings
 	{
 		auto name = QFileInfo(m_selectedSavePath).completeBaseName();
 		auto pos = savesNames.indexOf(name);
 		if (pos != -1)
 			saveComboBox->setCurrentIndex(pos);
 	}
+	
+	// Settings for the save parsing
+	auto parseSettingsGroupBox = new QGroupBox(tr("Parse settings"));
+	auto parseSettingsLayout = new QFormLayout(parseSettingsGroupBox);
 
-	settingsLayout->addStretch();
-	settingsGroupBox->setLayout(settingsLayout);
-	informationLayout->addWidget(settingsGroupBox);
+	m_maxValidIngredientCountEdit = new QLineEdit;
+	m_minValidNbIngredientsEdit = new QLineEdit;
 
+	m_maxValidIngredientCountEdit->setText(QString::number(settings.maxValidIngredientCount));
+	m_minValidNbIngredientsEdit->setText(QString::number(settings.minValidNbIngredients));
+
+	parseSettingsLayout->addRow(tr("Maximum valid ingredient count"), m_maxValidIngredientCountEdit);
+	parseSettingsLayout->addRow(tr("Minimum valid number of ingredients"), m_minValidNbIngredientsEdit);
+
+	// Left layout
+	auto leftLayout = new QVBoxLayout;
+	leftLayout->addWidget(loadSettingsGroupBox);
+	leftLayout->addWidget(parseSettingsGroupBox);
+	leftLayout->addStretch();
+	
+	// Right widget
 	m_saveInfoContainer = new QGroupBox(tr("Information"));
+	
+	// General tab layout
+	auto informationLayout = new QHBoxLayout;
+	informationLayout->addLayout(leftLayout);
 	informationLayout->addWidget(m_saveInfoContainer);
+	auto informationWidget = new QWidget;
+	informationWidget->setLayout(informationLayout);
 	tabWidget->addTab(informationWidget, tr("General"));
+
+	// Other tabs
+	m_knownIngredientsWidget = new KnownIngredientsWidget(m_gameSave);
+	tabWidget->addTab(m_knownIngredientsWidget, tr("Known ingredients effects"));
 
 	m_inventoryWidget = new InventoryWidget(m_gameSave);
 	tabWidget->addTab(m_inventoryWidget, tr("Inventory"));
-
-	m_knownIngredientsWidget = new KnownIngredientsWidget(m_gameSave);
-	tabWidget->addTab(m_knownIngredientsWidget, tr("Known ingredients effects"));
 
 	QPushButton* okButton = new QPushButton(tr("Ok"), this);
 	connect(okButton, SIGNAL(clicked()), this, SLOT(accept()));
 	QPushButton* cancelButton = new QPushButton(tr("Cancel"), this);
 	connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
-	QPushButton* loadButton = new QPushButton(tr("Load save"), this);
+	QPushButton* loadButton = new QPushButton(tr("Reload save"), this);
 	connect(loadButton, SIGNAL(clicked()), this, SLOT(loadSave()));
 
 	QHBoxLayout* buttonsLayout = new QHBoxLayout;
@@ -143,6 +164,8 @@ void SaveDialog::copySave()
 	auto& settings = Settings::instance();
 	settings.loadMostRecentSave = m_loadMostRecent;
 	settings.selectedSavePath = m_selectedSavePath;
+	settings.maxValidIngredientCount = m_maxValidIngredientCountEdit->text().toInt();
+	settings.minValidNbIngredients = m_minValidNbIngredientsEdit->text().toInt();
 }
 
 void SaveDialog::loadSave()
@@ -150,6 +173,9 @@ void SaveDialog::loadSave()
 	m_modified = true;
 	m_inventoryWidget->beginReset();
 	m_knownIngredientsWidget->beginReset();
+
+	m_gameSave.setMaxValidIngredientCount(m_maxValidIngredientCountEdit->text().toInt());
+	m_gameSave.setMinValidNbIngredients(m_minValidNbIngredientsEdit->text().toInt());
 
 	if (m_loadMostRecent && !m_savesList.empty())
 		m_gameSave.load(m_savesList.first().absoluteFilePath());

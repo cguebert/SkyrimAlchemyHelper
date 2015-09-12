@@ -36,6 +36,9 @@ public:
 	void setPossibleIngredients(const Ingredients& ingredients); // Set all ingredients to look for in the save
 	const Ingredients& listedIngredients() const; // Subset of the possible ingredients that are listed in this save
 
+	void setMaxValidIngredientCount(int count); // Everything higher than this is considered invalid (if 0, accept everything)
+	void setMinValidNbIngredients(int nb); // Ignore containers (and the player inventory) if there is less than nb different ingredients (if 0, accept everything)
+
 	using InventoryItem = std::pair<int, int>; // Index in listedIngredients, count
 	using Inventory = std::vector<InventoryItem>;
 	const Inventory& inventory() const;
@@ -106,6 +109,7 @@ protected:
 	Inventory m_inventory;
 	Inventories m_containers;
 	SearchHelper m_searchHelper;
+	int m_maxValidIngredientCount = 0, m_minValidNbIngredients = 0;
 };
 
 //****************************************************************************//
@@ -127,5 +131,11 @@ inline const Save::Inventory& Save::inventory() const
 
 inline const Save::Inventories& Save::containers() const
 { return m_containers; }
+
+inline void Save::setMaxValidIngredientCount(int count)
+{ m_maxValidIngredientCount = count; }
+
+inline void Save::setMinValidNbIngredients(int nb)
+{ m_minValidNbIngredients = nb; }
 
 } // namespace saveParser
