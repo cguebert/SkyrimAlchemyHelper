@@ -3,10 +3,10 @@
 #include <QString>
 #include <QVector>
 
-class Config
+class Settings
 {
 public:
-	static Config& instance();
+	static Settings& instance();
 
 	QString dataFolder,		// Skyrim data folder ([...]/Skyrim/Data)
 		savesFolder,		// Saves folder ([User documents]/My Games/Skyrim/Saves)
@@ -22,7 +22,7 @@ public:
 	void save();
 
 protected:
-	Config();
+	Settings();
 
 	bool m_isEmpty = false;
 };

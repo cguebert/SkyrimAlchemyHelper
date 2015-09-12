@@ -12,7 +12,6 @@ set(CMAKE_AUTORCC ON)
 add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 
 set(HEADER_FILES
-	Config.h
 	ConfigDialog.h
 	ConfigPane.h
 	EffectsList.h
@@ -32,11 +31,11 @@ set(HEADER_FILES
 	PotionsListWidget.h
 	SaveDialog.h
 	SelectorWidget.h
+	Settings.h
 )
 
 set(SOURCE_FILES
 	main.cpp
-	Config.cpp
 	ConfigDialog.cpp
 	ConfigPane.cpp
 	EffectsList.cpp
@@ -56,6 +55,7 @@ set(SOURCE_FILES
 	PotionsListWidget.cpp
 	SaveDialog.cpp
 	SelectorWidget.cpp
+	Settings.cpp
 )
 
 set(RESSOURCE_FILES SAH.qrc SAH.rc)

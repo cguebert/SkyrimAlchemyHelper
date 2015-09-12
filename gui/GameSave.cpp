@@ -4,9 +4,9 @@
 #include <QDir>
 #include <QFileInfo>
 
-#include "Config.h"
 #include "IngredientsList.h"
 #include "PluginsList.h"
+#include "Settings.h"
 
 int getIngredientId(const saveParser::Save::Ingredient& ing)
 {
@@ -77,17 +77,17 @@ void GameSave::loadSaveFromConfig()
 {
 	clear();
 
-	auto& config = Config::instance();
-	if (config.savesFolder.isEmpty())
+	auto& settings = Settings::instance();
+	if (settings.savesFolder.isEmpty())
 		return;
 
-	if (!config.loadMostRecentSave && !config.selectedSaveName.isEmpty() && QFileInfo::exists(config.selectedSaveName))
+	if (!settings.loadMostRecentSave && !settings.selectedSaveName.isEmpty() && QFileInfo::exists(settings.selectedSaveName))
 	{
-		load(config.selectedSaveName);
+		load(settings.selectedSaveName);
 		return;
 	}
 
-	QDir dir(config.savesFolder);
+	QDir dir(settings.savesFolder);
 	QStringList filters;
 	filters << "*.ess";
 	auto saves = dir.entryInfoList(filters, QDir::Files, QDir::Time);

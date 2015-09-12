@@ -4,10 +4,10 @@
 #include <sstream>
 
 #include "ConfigPane.h"
-#include "Config.h"
 #include "EffectsList.h"
 #include "IngredientsList.h"
 #include "PluginsList.h"
+#include "Settings.h"
 
 #include <modParser/ModParser.h>
 
@@ -83,21 +83,21 @@ ConfigPane::ConfigPane(IngredientsList& ingredientsList,
 
 void ConfigPane::loadConfig()
 {
-	auto& config = Config::instance();
-	if (config.isEmpty())
+	auto& settings = Settings::instance();
+	if (settings.isEmpty())
 	{
 		defaultConfig();
 		return;
 	}
 
-	m_useModOrganizerCheckBox->setCheckState(config.useModOrganizer ? Qt::Checked : Qt::Unchecked);
-	m_modOrganizerPathEdit->setEnabled(config.useModOrganizer);
-	m_modOrganizerPathButton->setEnabled(config.useModOrganizer);
+	m_useModOrganizerCheckBox->setCheckState(settings.useModOrganizer ? Qt::Checked : Qt::Unchecked);
+	m_modOrganizerPathEdit->setEnabled(settings.useModOrganizer);
+	m_modOrganizerPathButton->setEnabled(settings.useModOrganizer);
 
-	m_dataFolderEdit->setText(config.dataFolder);
-	m_pluginsListPathEdit->setText(config.pluginsListPath);
-	m_savesFolderEdit->setText(config.savesFolder);
-	m_modOrganizerPathEdit->setText(config.modOrganizerPath);
+	m_dataFolderEdit->setText(settings.dataFolder);
+	m_pluginsListPathEdit->setText(settings.pluginsListPath);
+	m_savesFolderEdit->setText(settings.savesFolder);
+	m_modOrganizerPathEdit->setText(settings.modOrganizerPath);
 }
 
 std::string loadFile(const std::string& fileName)
@@ -273,12 +273,12 @@ bool ConfigPane::testConfig()
 
 void ConfigPane::saveConfig()
 {
-	auto& config = Config::instance();
-	config.useModOrganizer = m_useModOrganizerCheckBox->checkState() == Qt::Checked;
-	config.dataFolder = m_dataFolderEdit->text();
-	config.pluginsListPath = m_pluginsListPathEdit->text();
-	config.savesFolder = m_savesFolderEdit->text();
-	config.modOrganizerPath = m_modOrganizerPathEdit->text();
+	auto& settings = Settings::instance();
+	settings.useModOrganizer = m_useModOrganizerCheckBox->checkState() == Qt::Checked;
+	settings.dataFolder = m_dataFolderEdit->text();
+	settings.pluginsListPath = m_pluginsListPathEdit->text();
+	settings.savesFolder = m_savesFolderEdit->text();
+	settings.modOrganizerPath = m_modOrganizerPathEdit->text();
 }
 
 bool ConfigPane::getModsPaths(std::vector<std::string>& modsPathList)

@@ -1,24 +1,24 @@
-#include "Config.h"
+#include "Settings.h"
 
 #include <QSettings>
 
-Config& Config::instance()
+Settings& Settings::instance()
 {
-	static Config effects;
+	static Settings effects;
 	return effects;
 }
 
-Config::Config()
+Settings::Settings()
 {
 	load();
 }
 
-bool Config::isEmpty()
+bool Settings::isEmpty()
 {
 	return m_isEmpty;
 }
 
-void Config::load()
+void Settings::load()
 {
 	QSettings settings("SAH.ini", QSettings::IniFormat);
 
@@ -34,7 +34,7 @@ void Config::load()
 	loadMostRecentSave = settings.value("loadMostRecentSave").toBool();
 }
 
-void Config::save()
+void Settings::save()
 {
 	QSettings settings("SAH.ini", QSettings::IniFormat);
 

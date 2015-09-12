@@ -4,12 +4,12 @@
 #include "ConfigDialog.h"
 #include "SaveDialog.h"
 
-#include "Config.h"
 #include "EffectsSelector.h"
 #include "FiltersWidget.h"
 #include "IngredientsSelector.h"
 #include "PotionsListWidget.h"
 #include "PotionsList.h"
+#include "Settings.h"
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -103,7 +103,7 @@ void MainWindow::readSettings()
 	restoreGeometry(settings.value("geometry").toByteArray());
 	restoreState(settings.value("state").toByteArray());
 
-	Config::instance().load();
+	Settings::instance().load();
 }
 
 void MainWindow::writeSettings()
@@ -112,7 +112,7 @@ void MainWindow::writeSettings()
 	settings.setValue("geometry", saveGeometry());
 	settings.setValue("state", saveState());
 
-	Config::instance().save();
+	Settings::instance().save();
 }
 
 void MainWindow::editConfig()
@@ -131,7 +131,7 @@ void MainWindow::editConfig()
 
 void MainWindow::afterLaunch()
 {
-	if (Config::instance().isEmpty())
+	if (Settings::instance().isEmpty())
 	{
 		QMessageBox::information(this, tr("First launch"), tr("Please verify the configuration"));
 		ConfigDialog dlg(this, true);
