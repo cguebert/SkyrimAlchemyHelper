@@ -13,6 +13,7 @@ GameSave::GameSave()
 	const auto& settings = Settings::instance();
 	m_maxValidIngredientCount = settings.maxValidIngredientCount;
 	m_minValidNbIngredients = settings.minValidNbIngredients;
+	m_minTotalIngredientsCount = settings.minTotalIngredientsCount;
 }
 
 int getIngredientId(const saveParser::Save::Ingredient& ing)
@@ -44,6 +45,7 @@ void GameSave::load(QString fileName)
 	save.setPossibleIngredients(possibleIngredients);
 	save.setMaxValidIngredientCount(m_maxValidIngredientCount);
 	save.setMinValidNbIngredients(m_minValidNbIngredients);
+	save.setMinTotalIngredientsCount(m_minTotalIngredientsCount);
 	m_isLoaded = save.parse(fileName.toStdString());
 	if (!m_isLoaded)
 		return;

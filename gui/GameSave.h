@@ -22,6 +22,7 @@ public:
 
 	void setMaxValidIngredientCount(int count); // Everything higher than this is considered invalid (if 0, accept everything)
 	void setMinValidNbIngredients(int nb); // Ignore containers (and the player inventory) if there is less than nb different ingredients (if 0, accept everything)
+	void setMinTotalIngredientsCount(int count); // Ignore containers if there are less than total count ingredients of all types
 
 	QPixmap screenshot() const;
 
@@ -60,7 +61,7 @@ protected:
 	Inventory m_inventory;
 	Containers m_containers;
 	std::vector<int> m_ingredientsCount;
-	int m_maxValidIngredientCount, m_minValidNbIngredients;
+	int m_maxValidIngredientCount, m_minValidNbIngredients, m_minTotalIngredientsCount;
 };
 
 //****************************************************************************//
@@ -88,6 +89,9 @@ inline void GameSave::setMaxValidIngredientCount(int count)
 
 inline void GameSave::setMinValidNbIngredients(int nb)
 { m_minValidNbIngredients = nb; }
+
+inline void GameSave::setMinTotalIngredientsCount(int count)
+{ m_minTotalIngredientsCount = count; }
 
 inline const GameSave::Containers& GameSave::containers() const
 { return m_containers; }

@@ -53,13 +53,19 @@ SaveDialog::SaveDialog(QWidget *parent)
 	auto parseSettingsLayout = new QFormLayout(parseSettingsGroupBox);
 
 	m_maxValidIngredientCountEdit = new QLineEdit;
-	m_minValidNbIngredientsEdit = new QLineEdit;
-
 	m_maxValidIngredientCountEdit->setText(QString::number(settings.maxValidIngredientCount));
-	m_minValidNbIngredientsEdit->setText(QString::number(settings.minValidNbIngredients));
-
+	m_maxValidIngredientCountEdit->setToolTip(tr("Consider invalid an ingredient that has a count greater than this number."));
 	parseSettingsLayout->addRow(tr("Maximum valid ingredient count"), m_maxValidIngredientCountEdit);
-	parseSettingsLayout->addRow(tr("Minimum valid number of ingredients"), m_minValidNbIngredientsEdit);
+
+	m_minValidNbIngredientsEdit = new QLineEdit;
+	m_minValidNbIngredientsEdit->setText(QString::number(settings.minValidNbIngredients));
+	m_minValidNbIngredientsEdit->setToolTip(tr("Consider invalid a container that has less than this number of type of ingredients."));
+	parseSettingsLayout->addRow(tr("Minimum valid number of ingredients types"), m_minValidNbIngredientsEdit);
+
+	m_minTotalIngredientsCountEdit = new QLineEdit;
+	m_minTotalIngredientsCountEdit->setText(QString::number(settings.minTotalIngredientsCount));
+	m_minTotalIngredientsCountEdit->setToolTip(tr("Do not keep containers that have less than this total number of ingredients of all types."));
+	parseSettingsLayout->addRow(tr("Minimum total number of ingredients"), m_minTotalIngredientsCountEdit);
 
 	// Left layout
 	auto leftLayout = new QVBoxLayout;
@@ -176,6 +182,7 @@ void SaveDialog::copySave()
 	settings.selectedSavePath = m_selectedSavePath;
 	settings.maxValidIngredientCount = m_maxValidIngredientCountEdit->text().toInt();
 	settings.minValidNbIngredients = m_minValidNbIngredientsEdit->text().toInt();
+	settings.minTotalIngredientsCount = m_minTotalIngredientsCountEdit->text().toInt();
 }
 
 void SaveDialog::loadSave()
@@ -187,6 +194,7 @@ void SaveDialog::loadSave()
 
 	m_gameSave.setMaxValidIngredientCount(m_maxValidIngredientCountEdit->text().toInt());
 	m_gameSave.setMinValidNbIngredients(m_minValidNbIngredientsEdit->text().toInt());
+	m_gameSave.setMinTotalIngredientsCount(m_minTotalIngredientsCountEdit->text().toInt());
 
 	if (m_loadMostRecent && !m_savesList.empty())
 		m_gameSave.load(m_savesList.first().absoluteFilePath());

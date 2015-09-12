@@ -146,6 +146,12 @@ void Save::parseContainer(const ChangeForm& form)
 	Inventory inventory = searchForIngredients(form);
 	if (!inventory.empty())
 	{
+		int total = 0;
+		for (const auto& ing : inventory)
+			total += ing.second;
+		if (m_minTotalIngredientsCount > 0 && total < m_minTotalIngredientsCount)
+			return;
+
 		Container container;
 		container.id = form.formID;
 		container.inventory = inventory;

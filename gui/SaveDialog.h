@@ -37,5 +37,7 @@ protected:
 	QFileInfoList m_savesList;
 	bool m_modified = false, m_loadMostRecent;
 	QString m_selectedSavePath;
-	QLineEdit *m_maxValidIngredientCountEdit, *m_minValidNbIngredientsEdit;
+	QLineEdit *m_maxValidIngredientCountEdit, 
+		*m_minValidNbIngredientsEdit, 
+		*m_minTotalIngredientsCountEdit;
 };

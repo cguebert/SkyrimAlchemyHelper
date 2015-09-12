@@ -18,7 +18,8 @@ public:
 		loadMostRecentSave = true;	// Always load the most recent save instead of a user chosen one
 
 	int maxValidIngredientCount = 1000, // When parsing a save, an ingredient count higher than this is considered invalid (if 0, accept everything)
-		minValidNbIngredients = 5; // When parsing a save, ignore containers and the player inventory if there is less than this number of different ingredients (if 0, accept everything)
+		minValidNbIngredients = 5, // When parsing a save, ignore containers and the player inventory if there is less than this number of different ingredients (if 0, accept everything)
+		minTotalIngredientsCount = 10; // When parsing a save, ignore containers that have less than this total number of ingredients
 
 	bool isEmpty();
 	void load();
