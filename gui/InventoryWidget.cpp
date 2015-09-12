@@ -4,16 +4,16 @@
 #include "IngredientsList.h"
 #include "GameSave.h"
 
-InventoryModel::InventoryModel(GameSave& gamesave, QObject* parent)
+InventoryModel::InventoryModel(const std::vector<std::pair<int, int>>& inventory, QObject* parent)
 	: QAbstractTableModel(parent)
 	, m_ingredientsList(IngredientsList::instance())
-	, m_gameSave(gamesave)
+	, m_inventory(inventory)
 {
 }
 
 int InventoryModel::rowCount(const QModelIndex& /*parent*/) const
 {
-	return m_gameSave.inventory().size();
+	return m_inventory.size();
 }
 
 int InventoryModel::columnCount(const QModelIndex& /*parent*/) const
@@ -25,7 +25,7 @@ QVariant InventoryModel::data(const QModelIndex& index, int role) const
 {
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		const auto& item = m_gameSave.inventory()[index.row()];
+		const auto& item = m_inventory[index.row()];
 		switch (index.column())
 		{
 		case 0: return m_ingredientsList.ingredients()[item.first].name;
@@ -61,14 +61,14 @@ void InventoryModel::endReset()
 
 //****************************************************************************//
 
-InventoryWidget::InventoryWidget(GameSave& gamesave, QWidget* parent)
+InventoryWidget::InventoryWidget(const std::vector<std::pair<int, int>>& inventory, QWidget* parent)
 	: QWidget(parent)
 {
 	QVBoxLayout* vLayout = new QVBoxLayout;
 
 	auto m_view = new QTableView(this);
 	m_view->setSortingEnabled(true);
-	m_model = new InventoryModel(gamesave, this);
+	m_model = new InventoryModel(inventory, this);
 	auto proxyModel = new QSortFilterProxyModel(this);
 	proxyModel->setSourceModel(m_model);
 	proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);

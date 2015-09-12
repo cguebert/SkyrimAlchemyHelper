@@ -10,7 +10,7 @@ class IngredientsList;
 class InventoryModel : public QAbstractTableModel
 {
 public:
-	InventoryModel(GameSave& gamesave, QObject* parent = nullptr);
+	InventoryModel(const std::vector<std::pair<int, int>>& inventory, QObject* parent = nullptr);
 
 	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -22,7 +22,7 @@ public:
 
 protected:
 	IngredientsList& m_ingredientsList;
-	GameSave& m_gameSave;
+	const std::vector<std::pair<int, int>>& m_inventory;
 };
 
 //****************************************************************************//
@@ -31,7 +31,7 @@ class InventoryWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit InventoryWidget(GameSave& gamesave, QWidget* parent = nullptr);
+	explicit InventoryWidget(const std::vector<std::pair<int, int>>& inventory, QWidget* parent = nullptr);
 
 public slots:
 	void beginReset();

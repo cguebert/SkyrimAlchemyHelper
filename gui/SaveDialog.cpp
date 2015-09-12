@@ -85,7 +85,7 @@ SaveDialog::SaveDialog(QWidget *parent)
 	m_knownIngredientsWidget = new KnownIngredientsWidget(m_gameSave);
 	tabWidget->addTab(m_knownIngredientsWidget, tr("Known ingredients effects"));
 
-	m_inventoryWidget = new InventoryWidget(m_gameSave);
+	m_inventoryWidget = new InventoryWidget(m_gameSave.inventory()); // We keep the pointer to the vector inside GameSave
 	tabWidget->addTab(m_inventoryWidget, tr("Inventory"));
 
 	m_containersWidget = new ContainersWidget(m_gameSave);
@@ -183,6 +183,7 @@ void SaveDialog::loadSave()
 	m_modified = true;
 	m_inventoryWidget->beginReset();
 	m_knownIngredientsWidget->beginReset();
+	m_containersWidget->clear();
 
 	m_gameSave.setMaxValidIngredientCount(m_maxValidIngredientCountEdit->text().toInt());
 	m_gameSave.setMinValidNbIngredients(m_minValidNbIngredientsEdit->text().toInt());
