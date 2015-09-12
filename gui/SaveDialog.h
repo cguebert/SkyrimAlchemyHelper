@@ -21,6 +21,8 @@ public:
 public slots:
 	void loadSave();
 	void copySave();
+	void saveSelected(int index);
+	void setLoadMostRecent(int state);
 
 protected:
 	void refreshInformation();
@@ -29,5 +31,7 @@ protected:
 	InventoryWidget* m_inventoryWidget;
 	KnownIngredientsWidget* m_knownIngredientsWidget;
 	GameSave m_gameSave;
-	bool m_modified = false;
+	QFileInfoList m_savesList;
+	bool m_modified = false, m_loadMostRecent;
+	QString m_selectedSavePath;
 };

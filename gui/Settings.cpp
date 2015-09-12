@@ -28,7 +28,7 @@ void Settings::load()
 	savesFolder = settings.value("savesFolder").toString();
 	pluginsListPath = settings.value("pluginsListFile").toString();
 	modOrganizerPath = settings.value("modOrganizerPath").toString();
-	selectedSaveName = settings.value("selectedSaveName").toString();
+	selectedSavePath = settings.value("selectedSavePath").toString();
 
 	useModOrganizer = settings.value("useModOrganizer").toBool();
 	loadMostRecentSave = settings.value("loadMostRecentSave").toBool();
@@ -42,7 +42,7 @@ void Settings::save()
 	settings.setValue("savesFolder", savesFolder);
 	settings.setValue("pluginsListFile", pluginsListPath);
 	settings.setValue("modOrganizerPath", modOrganizerPath);
-	settings.setValue("selectedSaveName", selectedSaveName);
+	settings.setValue("selectedSavePath", selectedSavePath);
 
 	settings.setValue("useModOrganizer", useModOrganizer);
 	settings.setValue("loadMostRecentSave", loadMostRecentSave);

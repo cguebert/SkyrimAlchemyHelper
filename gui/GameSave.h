@@ -2,6 +2,7 @@
 
 #include <QString>
 #include <QPixmap>
+#include <QFileInfo>
 
 #include <array>
 #include <vector>
@@ -12,8 +13,8 @@ public:
 	static GameSave& instance() // Not a singleton, just the one everyone use
 	{ static GameSave save; return save; }
 
+	QFileInfoList savesList();
 	void loadSaveFromConfig();
-
 	void load(QString fileName);
 	bool isLoaded() const;
 

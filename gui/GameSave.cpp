@@ -84,9 +84,9 @@ void GameSave::loadSaveFromConfig()
 	if (settings.savesFolder.isEmpty())
 		return;
 
-	if (!settings.loadMostRecentSave && !settings.selectedSaveName.isEmpty() && QFileInfo::exists(settings.selectedSaveName))
+	if (!settings.loadMostRecentSave && !settings.selectedSavePath.isEmpty() && QFileInfo::exists(settings.selectedSavePath))
 	{
-		load(settings.selectedSaveName);
+		load(settings.selectedSavePath);
 		return;
 	}
 
@@ -108,4 +108,16 @@ void GameSave::clear()
 	m_knownIngredients.clear();
 	m_inventory.clear();
 	m_ingredientsCount.clear();
+}
+
+QFileInfoList GameSave::savesList()
+{
+	auto& settings = Settings::instance();
+	if (settings.savesFolder.isEmpty())
+		return QFileInfoList();
+
+	QDir dir(settings.savesFolder);
+	QStringList filters;
+	filters << "*.ess";
+	return dir.entryInfoList(filters, QDir::Files, QDir::Time);
 }
