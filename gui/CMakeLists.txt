@@ -14,6 +14,7 @@ add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 set(HEADER_FILES
 	ConfigDialog.h
 	ConfigPane.h
+	ContainersWidget.h
 	EffectsList.h
 	EffectsListWidget.h
 	EffectsSelector.h
@@ -39,6 +40,7 @@ set(SOURCE_FILES
 	main.cpp
 	ConfigDialog.cpp
 	ConfigPane.cpp
+	ContainersWidget.cpp
 	EffectsList.cpp
 	EffectsListWidget.cpp
 	EffectsSelector.cpp

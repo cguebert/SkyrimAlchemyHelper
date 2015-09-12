@@ -8,6 +8,7 @@ class QWidget;
 class QLineEdit;
 class InventoryWidget;
 class KnownIngredientsWidget;
+class ContainersWidget;
 
 class SaveDialog : public QDialog
 {
@@ -31,6 +32,7 @@ protected:
 	QWidget* m_saveInfoContainer;
 	InventoryWidget* m_inventoryWidget;
 	KnownIngredientsWidget* m_knownIngredientsWidget;
+	ContainersWidget* m_containersWidget;
 	GameSave m_gameSave;
 	QFileInfoList m_savesList;
 	bool m_modified = false, m_loadMostRecent;

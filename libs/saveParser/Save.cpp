@@ -85,9 +85,9 @@ void Save::parseChangeForms()
 		
 		if (form.formType == 0) // Container
 		{
-			form.ignore();
-		//	form.loadData();
-		//	parseContainer(form);
+		//	form.ignore();
+			form.loadData();
+			parseContainer(form);
 		}
 		else if (form.formType == 1) // Actor
 		{
@@ -143,9 +143,14 @@ void Save::parsePlayer(const ChangeForm& form)
 
 void Save::parseContainer(const ChangeForm& form)
 {
-	Inventory container = searchForIngredients(form);
-	if (!container.empty())
+	Inventory inventory = searchForIngredients(form);
+	if (!inventory.empty())
+	{
+		Container container;
+		container.id = form.formID;
+		container.inventory = inventory;
 		m_containers.push_back(container);
+	}
 }
 
 Save::Inventory Save::searchForIngredients(const ChangeForm& form)
@@ -229,6 +234,9 @@ Save::Inventory Save::searchForIngredients(const ChangeForm& form)
 	}
 
 	const auto& maxRange = ranges[maxId];
+	if (m_minValidNbIngredients > 0 && maxLen < m_minValidNbIngredients)
+		return Inventory();
+
 	return Inventory(maxRange.first, maxRange.second);
 }
 

@@ -29,6 +29,9 @@ public:
 	};
 	using Ingredients = std::vector<Ingredient>;
 
+	using StringsList = std::vector<std::string>;
+	const StringsList& masters() const;
+
 	using KnownIngredient = std::pair<Ingredient, std::array<bool, 4>>; // Index in listedIngredients, bool for each effect of the ingredient
 	using KnownIngredients = std::vector<KnownIngredient>;
 	const KnownIngredients& knownIngredients() const;
@@ -43,8 +46,13 @@ public:
 	using Inventory = std::vector<InventoryItem>;
 	const Inventory& inventory() const;
 
-	using Inventories = std::vector<Inventory>;
-	const Inventories& containers() const;
+	struct Container
+	{
+		uint32_t id;
+		Inventory inventory;
+	};
+	using Containers = std::vector<Container>;
+	const Containers& containers() const;
 	
 protected:
 	void doParse();
@@ -101,13 +109,13 @@ protected:
 	parser::Parser in;
 	uint32_t m_formIDArrayCountOffset, m_changeFormCount, m_changeFormsOffset;
 	std::vector<uint32_t> m_formIDArray;
-	std::vector<std::string> m_plugins;
+	StringsList m_plugins;
 	Header m_header;
 	Ingredients m_possibleIngredients, m_listedIngredients;
 	RefIDs m_ingredientsRefID;
 	KnownIngredients m_knownIngredients;
 	Inventory m_inventory;
-	Inventories m_containers;
+	Containers m_containers;
 	SearchHelper m_searchHelper;
 	int m_maxValidIngredientCount = 0, m_minValidNbIngredients = 0;
 };
@@ -129,7 +137,7 @@ inline const Save::Ingredients& Save::listedIngredients() const
 inline const Save::Inventory& Save::inventory() const
 { return m_inventory; }
 
-inline const Save::Inventories& Save::containers() const
+inline const Save::Containers& Save::containers() const
 { return m_containers; }
 
 inline void Save::setMaxValidIngredientCount(int count)
@@ -137,5 +145,8 @@ inline void Save::setMaxValidIngredientCount(int count)
 
 inline void Save::setMinValidNbIngredients(int nb)
 { m_minValidNbIngredients = nb; }
+
+inline const Save::StringsList& Save::masters() const
+{ return m_plugins; }
 
 } // namespace saveParser

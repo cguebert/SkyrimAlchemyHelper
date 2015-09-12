@@ -40,6 +40,14 @@ public:
 	using Inventory = std::vector<InventoryItem>;
 	const Inventory& inventory() const;
 
+	struct Container
+	{
+		quint32 id;
+		Inventory inventory;
+	};
+	using Containers = std::vector<Container>;
+	const Containers& containers() const;
+
 	const std::vector<int> ingredientsCount() const; // Same as inventory, but more direct and with the 0-count ingredients
 
 protected:
@@ -50,6 +58,7 @@ protected:
 	Header m_header;
 	KnownIngredients m_knownIngredients;
 	Inventory m_inventory;
+	Containers m_containers;
 	std::vector<int> m_ingredientsCount;
 	int m_maxValidIngredientCount, m_minValidNbIngredients;
 };
@@ -79,3 +88,6 @@ inline void GameSave::setMaxValidIngredientCount(int count)
 
 inline void GameSave::setMinValidNbIngredients(int nb)
 { m_minValidNbIngredients = nb; }
+
+inline const GameSave::Containers& GameSave::containers() const
+{ return m_containers; }

@@ -2,6 +2,8 @@
 
 #include "SaveDialog.h"
 #include "Settings.h"
+
+#include "ContainersWidget.h"
 #include "InventoryWidget.h"
 #include "KnownIngredientsWidget.h"
 
@@ -72,8 +74,11 @@ SaveDialog::SaveDialog(QWidget *parent)
 	auto informationLayout = new QHBoxLayout;
 	informationLayout->addLayout(leftLayout);
 	informationLayout->addWidget(m_saveInfoContainer);
+	auto outerInformationLayout = new QVBoxLayout;
+	outerInformationLayout->addLayout(informationLayout);
+	outerInformationLayout->addStretch();
 	auto informationWidget = new QWidget;
-	informationWidget->setLayout(informationLayout);
+	informationWidget->setLayout(outerInformationLayout);
 	tabWidget->addTab(informationWidget, tr("General"));
 
 	// Other tabs
@@ -82,6 +87,13 @@ SaveDialog::SaveDialog(QWidget *parent)
 
 	m_inventoryWidget = new InventoryWidget(m_gameSave);
 	tabWidget->addTab(m_inventoryWidget, tr("Inventory"));
+
+	m_containersWidget = new ContainersWidget(m_gameSave);
+	auto containersScrollArea = new QScrollArea(this);
+	containersScrollArea->setWidget(m_containersWidget);
+	containersScrollArea->setFrameStyle(QFrame::NoFrame);
+	containersScrollArea->setWidgetResizable(true);
+	tabWidget->addTab(containersScrollArea, tr("Containers"));
 
 	QPushButton* okButton = new QPushButton(tr("Ok"), this);
 	connect(okButton, SIGNAL(clicked()), this, SLOT(accept()));
@@ -129,7 +141,6 @@ void SaveDialog::refreshInformation()
 	if (!loaded)
 	{
 		layout->addWidget(screenshotLabel);
-		layout->addStretch();
 		return;
 	}
 
@@ -155,7 +166,6 @@ void SaveDialog::refreshInformation()
 	int nbIng = knownIng.size();
 	auto ingLabel = new QLabel(QString(tr("%1 known ingredients, with %2% of discovered effects")).arg(nbIng).arg(nbIng ? knownEffects * 25 / nbIng : 0));
 	layout->addWidget(ingLabel);
-	layout->addStretch();
 }
 
 void SaveDialog::copySave()
@@ -185,6 +195,7 @@ void SaveDialog::loadSave()
 
 	m_inventoryWidget->endReset();
 	m_knownIngredientsWidget->endReset();
+	m_containersWidget->refreshList();
 }
 
 void SaveDialog::saveSelected(int index)

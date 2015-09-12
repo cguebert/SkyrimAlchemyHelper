@@ -83,6 +83,25 @@ void GameSave::load(QString fileName)
 		m_inventory.emplace_back(ingId, ing.second);
 		m_ingredientsCount[ingId] = ing.second;
 	}
+
+	// Convert all containers
+	const auto saveContainers = save.containers();
+	m_containers.reserve(saveContainers.size());
+	for (const auto& sc : saveContainers)
+	{
+		Container container;
+		container.id = sc.id;
+		for (const auto& ing : sc.inventory)
+		{
+			auto ingId = getIngredientId(saveIngredients[ing.first]);
+			if (ingId == -1)
+				continue;
+
+			container.inventory.emplace_back(ingId, ing.second);
+		}
+
+		m_containers.push_back(std::move(container));
+	}
 }
 
 void GameSave::loadSaveFromConfig()
@@ -117,6 +136,7 @@ void GameSave::clear()
 	m_knownIngredients.clear();
 	m_inventory.clear();
 	m_ingredientsCount.clear();
+	m_containers.clear();
 }
 
 QFileInfoList GameSave::savesList()
