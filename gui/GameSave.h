@@ -27,9 +27,8 @@ public:
 
 	Header header() const;
 
-	using KnownIngredient = std::pair<int, std::array<bool, 4>>; // Ingredient index in IngredientsList, bool for each magical effect
-	using KnownIngredients = std::vector<KnownIngredient>;
-	const KnownIngredients& knownIngredients() const;
+	using KnownIngredients = std::vector<std::array<bool, 4>>;
+	const KnownIngredients& knownIngredients() const; // Bool for each magical effect
 
 	using InventoryItem = std::pair<int, int>; // Ingredient index in IngredientsList, number of ingredients
 	using Inventory = std::vector<InventoryItem>;

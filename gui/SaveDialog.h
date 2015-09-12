@@ -6,6 +6,7 @@
 
 class QWidget;
 class InventoryWidget;
+class KnownIngredientsWidget;
 
 class SaveDialog : public QDialog
 {
@@ -26,6 +27,7 @@ protected:
 
 	QWidget* m_saveInfoContainer;
 	InventoryWidget* m_inventoryWidget;
+	KnownIngredientsWidget* m_knownIngredientsWidget;
 	GameSave m_gameSave;
 	bool m_modified = false;
 };

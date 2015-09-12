@@ -22,6 +22,7 @@ void GameSave::load(QString fileName)
 
 	const auto& plugins = PluginsList::instance().plugins();
 	const auto& ingredients = IngredientsList::instance().ingredients();
+	const int nbIngredients = ingredients.size();
 
 	saveParser::Save::Ingredients possibleIngredients;
 	for (const auto& ing : ingredients)
@@ -50,17 +51,19 @@ void GameSave::load(QString fileName)
 	m_header.saveNumber = header.saveNumber;
 
 	// Convert known ingredients
+	std::array<bool, 4> unknownIngredient = { false, false, false, false };
+	m_knownIngredients.assign(nbIngredients, unknownIngredient);
 	for (const auto& ing : save.knownIngredients())
 	{
 		auto ingId = getIngredientId(ing.first);
 		if (ingId == -1)
 			continue;
 
-		m_knownIngredients.emplace_back(ingId, ing.second);
+		m_knownIngredients[ingId] = ing.second;
 	}
 
 	// Convert inventory
-	m_ingredientsCount.resize(ingredients.size());
+	m_ingredientsCount.resize(nbIngredients);
 	const auto& saveIngredients = save.listedIngredients();
 	for (const auto& ing : save.inventory())
 	{

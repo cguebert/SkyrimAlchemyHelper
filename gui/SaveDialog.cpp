@@ -2,6 +2,7 @@
 
 #include "SaveDialog.h"
 #include "InventoryWidget.h"
+#include "KnownIngredientsWidget.h"
 
 SaveDialog::SaveDialog(QWidget *parent)
 	: QDialog(parent)
@@ -20,6 +21,9 @@ SaveDialog::SaveDialog(QWidget *parent)
 
 	m_inventoryWidget = new InventoryWidget(m_gameSave);
 	tabWidget->addTab(m_inventoryWidget, "Inventory");
+
+	m_knownIngredientsWidget = new KnownIngredientsWidget(m_gameSave);
+	tabWidget->addTab(m_knownIngredientsWidget, "Known ingredients effects");
 
 	QPushButton* okButton = new QPushButton(tr("Ok"), this);
 	connect(okButton, SIGNAL(clicked()), this, SLOT(accept()));
@@ -83,7 +87,7 @@ void SaveDialog::refreshInformation()
 	for (auto ing : knownIng)
 	{
 		for (int i = 0; i < 4; ++i)
-			if (ing.second[i])
+			if (ing[i])
 				++knownEffects;
 	}
 
@@ -102,7 +106,11 @@ void SaveDialog::loadSave()
 {
 	m_modified = true;
 	m_inventoryWidget->beginReset();
+	m_knownIngredientsWidget->beginReset();
+
 	m_gameSave.loadSaveFromConfig();
 	refreshInformation();
+
 	m_inventoryWidget->endReset();
+	m_knownIngredientsWidget->endReset();
 }
