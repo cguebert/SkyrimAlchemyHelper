@@ -19,18 +19,40 @@ PotionsListWidget::PotionsListWidget(QWidget* parent)
 	refreshList();
 }
 
-int nbCraftable(const PotionsList::Potion& potion, const GameSave::IngredientsCount& ingredientsCount)
+void PotionsListWidget::nbCraftable(int potionId, QString& text, QString& tooltip)
 {
-	int nb = std::min(ingredientsCount[potion.ingredients[0]], ingredientsCount[potion.ingredients[1]]);
-	if (potion.ingredients[2] != -1)
-		nb = std::min(nb, ingredientsCount[potion.ingredients[2]]);
-	return nb;
+	const auto& ingredients = IngredientsList::instance().ingredients();
+	const auto& potions = PotionsList::instance().allPotions();
+	const auto& potionsId = PotionsList::instance().sortedPotions();
+	const auto& ingredientsCount = GameSave::instance().ingredientsCount();
+
+	const auto& potion = potions[potionId];
+	int ing0 = potion.ingredients[0], ing1 = potion.ingredients[1], ing2 = potion.ingredients[2];
+	int nb0 = ingredientsCount[ing0], nb1 = ingredientsCount[ing1];
+	int minNb = std::min(nb0, nb1);
+	tooltip = QString("%1 - %2\n%3 - %4").arg(ingredients[ing0].name).arg(nb0)
+		.arg(ingredients[ing1].name).arg(nb1);
+	if (ing2 != -1)
+	{
+		int nb2 = ingredientsCount[ing2];
+		minNb = std::min(minNb, nb2);
+		tooltip += QString("\n%1 - %2").arg(ingredients[ing2].name).arg(nb2);
+	}
+
+	if (!minNb)				text = tr("Cannot craft this potion");
+	else if (minNb == 1)	text = tr("Can craft 1 potion");
+	else					text = tr("Can craft %1 potions").arg(minNb);
 }
 
-int nbDiscoveredEffects(const PotionsList::Potion& potion, 
-	const IngredientsList::Ingredients& ingredients,
-	const GameSave::KnownIngredients& knownIngredients)
+void PotionsListWidget::nbDiscoveredEffects(int potionId, QString& text, QString& tooltip)
 {
+	const auto& ingredients = IngredientsList::instance().ingredients();
+	const auto& effects = EffectsList::instance().effects();
+	const auto& potions = PotionsList::instance().allPotions();
+	const auto& knownIngredients = GameSave::instance().knownIngredients();
+
+	tooltip = "";
+	const auto& potion = potions[potionId];
 	int nbDiscovered = 0;
 	for (auto ingId : potion.ingredients)
 	{
@@ -48,14 +70,19 @@ int nbDiscoveredEffects(const PotionsList::Potion& potion,
 				if (effData.effectId == effId)
 				{
 					if (!knownIngredients[ingId][i])
+					{
 						++nbDiscovered;
+						tooltip += QString("%1 - %2\n").arg(ing.name).arg(effects[effId].name);
+					}
 				}
 			}
 		}
 	}
 	
-
-	return nbDiscovered;
+	tooltip = tooltip.trimmed();
+	if (!nbDiscovered)			text = tr("All effects known");
+	else if (nbDiscovered == 1)	text = tr("1 undiscovered effect");
+	else						text = tr("%1 undiscovered effects").arg(nbDiscovered);
 }
 
 void PotionsListWidget::refreshList()
@@ -86,7 +113,8 @@ void PotionsListWidget::refreshList()
 
 	for (int i = 0, nb = std::min(showNbPotions, nbPotions); i < nb; ++i)
 	{
-		const auto& potion = potions[potionsId[i]];
+		const auto potionId = potionsId[i];
+		const auto& potion = potions[potionId];
 		auto potionWidget = new QFrame;
 		potionWidget->setFrameShape(QFrame::Box);
 		auto potionLayout = new QHBoxLayout(potionWidget);
@@ -156,20 +184,15 @@ void PotionsListWidget::refreshList()
 
 		if (GameSave::instance().isLoaded())
 		{
-			int nbCraftablePotions = nbCraftable(potion, ingredientsCount);
-			QString nbCraftableText;
-			if (!nbCraftablePotions)			nbCraftableText = tr("Cannot craft this potion");
-			else if (nbCraftablePotions == 1)	nbCraftableText = tr("Can craft 1 potion");
-			else								nbCraftableText = tr("Can craft %1 potions").arg(nbCraftablePotions);
-			auto nbCraftableLabel = new QLabel(nbCraftableText);
+			QString text, tooltip;
+			nbCraftable(potionId, text, tooltip);
+			auto nbCraftableLabel = new QLabel(text);
+			nbCraftableLabel->setToolTip(tooltip);
 			infoLayout->addWidget(nbCraftableLabel);
 
-			int nbDiscovered = nbDiscoveredEffects(potion, ingredients, knownIngredients);
-			QString discoveredText;
-			if (!nbDiscovered)			discoveredText = tr("All effects known");
-			else if (nbDiscovered == 1)	discoveredText = tr("1 undiscovered effect");
-			else						discoveredText = tr("%1 undiscovered effects").arg(nbDiscovered);
-			auto discoveredLabel = new QLabel(discoveredText);
+			nbDiscoveredEffects(potionId, text, tooltip);	
+			auto discoveredLabel = new QLabel(text);
+			discoveredLabel->setToolTip(tooltip);
 			infoLayout->addWidget(discoveredLabel);
 		}
 
