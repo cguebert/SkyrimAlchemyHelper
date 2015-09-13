@@ -49,7 +49,8 @@ public:
 	using Containers = std::vector<Container>;
 	const Containers& containers() const; // Player inventory, and all containers depending on the parse parameters
 
-	const std::vector<int>& ingredientsCount() const; // Same as inventory, but more direct and with the 0-count ingredients
+	using IngredientsCount = std::vector<int>;
+	const IngredientsCount& ingredientsCount() const; // Same as inventory, but more direct and with the 0-count ingredients
 
 protected:
 	void clear();

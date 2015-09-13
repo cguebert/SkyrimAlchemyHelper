@@ -5,6 +5,7 @@
 #include "EffectsList.h"
 #include "IngredientsList.h"
 #include "PotionsList.h"
+#include "GameSave.h"
 
 PotionsListWidget::PotionsListWidget(QWidget* parent)
 	: QFrame(parent)
@@ -18,6 +19,45 @@ PotionsListWidget::PotionsListWidget(QWidget* parent)
 	refreshList();
 }
 
+int nbCraftable(const PotionsList::Potion& potion, const GameSave::IngredientsCount& ingredientsCount)
+{
+	int nb = std::min(ingredientsCount[potion.ingredients[0]], ingredientsCount[potion.ingredients[1]]);
+	if (potion.ingredients[2] != -1)
+		nb = std::min(nb, ingredientsCount[potion.ingredients[2]]);
+	return nb;
+}
+
+int nbDiscoveredEffects(const PotionsList::Potion& potion, 
+	const IngredientsList::Ingredients& ingredients,
+	const GameSave::KnownIngredients& knownIngredients)
+{
+	int nbDiscovered = 0;
+	for (auto ingId : potion.ingredients)
+	{
+		if (ingId == -1)
+			break;
+		const auto& ing = ingredients[ingId];
+		for (int i = 0; i < IngredientsList::nbEffectsPerIngredient; ++i)
+		{
+			const auto& effData = ing.effects[i];
+			for (auto effId : potion.effects)
+			{
+				if (effId == -1)
+					break;
+
+				if (effData.effectId == effId)
+				{
+					if (!knownIngredients[ingId][i])
+						++nbDiscovered;
+				}
+			}
+		}
+	}
+	
+
+	return nbDiscovered;
+}
+
 void PotionsListWidget::refreshList()
 {
 	auto l = layout();
@@ -28,6 +68,8 @@ void PotionsListWidget::refreshList()
 	const auto& effects = EffectsList::instance().effects();
 	const auto& potions = PotionsList::instance().allPotions();
 	const auto& potionsId = PotionsList::instance().sortedPotions();
+	const auto& ingredientsCount = GameSave::instance().ingredientsCount();
+	const auto& knownIngredients = GameSave::instance().knownIngredients();
 	int nbPotions = potionsId.size();
 	const int showNbPotions = 50;
 
@@ -107,9 +149,30 @@ void PotionsListWidget::refreshList()
 		potionLayout->addLayout(effectsLayout);
 		potionLayout->addLayout(strengthLayout);
 
+		// Last column
 		auto infoLayout = new QVBoxLayout;
 		auto goldLabel = new QLabel(QString("%1 gold").arg(static_cast<int>(potion.goldCost)));
 		infoLayout->addWidget(goldLabel);
+
+		if (GameSave::instance().isLoaded())
+		{
+			int nbCraftablePotions = nbCraftable(potion, ingredientsCount);
+			QString nbCraftableText;
+			if (!nbCraftablePotions)			nbCraftableText = tr("Cannot craft this potion");
+			else if (nbCraftablePotions == 1)	nbCraftableText = tr("Can craft 1 potion");
+			else								nbCraftableText = tr("Can craft %1 potions").arg(nbCraftablePotions);
+			auto nbCraftableLabel = new QLabel(nbCraftableText);
+			infoLayout->addWidget(nbCraftableLabel);
+
+			int nbDiscovered = nbDiscoveredEffects(potion, ingredients, knownIngredients);
+			QString discoveredText;
+			if (!nbDiscovered)			discoveredText = tr("All effects known");
+			else if (nbDiscovered == 1)	discoveredText = tr("1 undiscovered effect");
+			else						discoveredText = tr("%1 undiscovered effects").arg(nbDiscovered);
+			auto discoveredLabel = new QLabel(discoveredText);
+			infoLayout->addWidget(discoveredLabel);
+		}
+
 		potionLayout->addLayout(infoLayout);
 
 		vLayout->addWidget(potionWidget);
