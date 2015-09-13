@@ -39,7 +39,7 @@ public:
 
 	using InventoryItem = std::pair<int, int>; // Ingredient index in IngredientsList, number of ingredients
 	using Inventory = std::vector<InventoryItem>;
-	const Inventory& inventory() const;
+	const Inventory& inventory() const; // Total of all containers
 
 	struct Container
 	{
@@ -47,9 +47,9 @@ public:
 		Inventory inventory;
 	};
 	using Containers = std::vector<Container>;
-	const Containers& containers() const;
+	const Containers& containers() const; // Player inventory, and all containers depending on the parse parameters
 
-	const std::vector<int> ingredientsCount() const; // Same as inventory, but more direct and with the 0-count ingredients
+	const std::vector<int>& ingredientsCount() const; // Same as inventory, but more direct and with the 0-count ingredients
 
 protected:
 	void clear();
@@ -81,7 +81,7 @@ inline const GameSave::KnownIngredients& GameSave::knownIngredients() const
 inline const GameSave::Inventory& GameSave::inventory() const
 { return m_inventory; }
 
-inline const std::vector<int> GameSave::ingredientsCount() const
+inline const std::vector<int>& GameSave::ingredientsCount() const
 { return m_ingredientsCount; }
 
 inline void GameSave::setMaxValidIngredientCount(int count)

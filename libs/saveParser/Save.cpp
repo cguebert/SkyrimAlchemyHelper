@@ -85,7 +85,6 @@ void Save::parseChangeForms()
 		
 		if (form.formType == 0) // Container
 		{
-		//	form.ignore();
 			form.loadData();
 			parseContainer(form);
 		}
@@ -138,7 +137,15 @@ void Save::parseKnownIngredient(const ChangeForm& form)
 
 void Save::parsePlayer(const ChangeForm& form)
 {
-	m_inventory = searchForIngredients(form);
+	// Same as parseContainer, but don't filter if there is a low number of ingredients
+	Inventory inventory = searchForIngredients(form);
+	if (!inventory.empty())
+	{
+		Container container;
+		container.id = form.formID;
+		container.inventory = inventory;
+		m_containers.push_back(container);
+	}
 }
 
 void Save::parseContainer(const ChangeForm& form)

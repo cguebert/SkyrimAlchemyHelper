@@ -36,8 +36,10 @@ void ContainersWidget::refreshList()
 	QString containersCountText;
 	if (!nbContainers)
 		containersCountText = tr("No containers corresponding to these parameters");
+	else if (nbContainers == 1)
+		containersCountText = tr("Showing 1 container");
 	else
-		containersCountText = tr("Showing all %1 containers").arg(nbContainers);
+		containersCountText = tr("Showing %1 containers").arg(nbContainers);
 	auto label = new QLabel(containersCountText);
 	vLayout->addWidget(label);
 

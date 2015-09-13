@@ -45,8 +45,6 @@ public:
 
 	using InventoryItem = std::pair<int, int>; // Index in listedIngredients, count
 	using Inventory = std::vector<InventoryItem>;
-	const Inventory& inventory() const;
-
 	struct Container
 	{
 		uint32_t id;
@@ -115,7 +113,6 @@ protected:
 	Ingredients m_possibleIngredients, m_listedIngredients;
 	RefIDs m_ingredientsRefID;
 	KnownIngredients m_knownIngredients;
-	Inventory m_inventory;
 	Containers m_containers;
 	SearchHelper m_searchHelper;
 	int m_maxValidIngredientCount = 0, m_minValidNbIngredients = 0, m_minTotalIngredientsCount = 0;
@@ -134,9 +131,6 @@ inline void Save::setPossibleIngredients(const Ingredients& ingredients)
 
 inline const Save::Ingredients& Save::listedIngredients() const
 { return m_listedIngredients; }
-
-inline const Save::Inventory& Save::inventory() const
-{ return m_inventory; }
 
 inline const Save::Containers& Save::containers() const
 { return m_containers; }

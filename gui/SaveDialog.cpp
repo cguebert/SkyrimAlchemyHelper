@@ -161,16 +161,24 @@ void SaveDialog::refreshInformation()
 
 	// Information about the known ingredients
 	auto knownIng = m_gameSave.knownIngredients();
-	int knownEffects = 0;
+	int knownEffects = 0, knownIngredients = 0;
 	for (auto ing : knownIng)
 	{
+		bool known = false;
 		for (int i = 0; i < 4; ++i)
 			if (ing[i])
+			{
 				++knownEffects;
+				known = true;
+			}
+
+		if (known)
+			++knownIngredients;
 	}
 
 	int nbIng = knownIng.size();
-	auto ingLabel = new QLabel(QString(tr("%1 known ingredients, with %2% of discovered effects")).arg(nbIng).arg(nbIng ? knownEffects * 25 / nbIng : 0));
+	auto ingLabel = new QLabel(QString(tr("%1 known ingredients, with %2% of discovered effects"))
+		.arg(knownIngredients).arg(knownIngredients ? knownEffects * 25 / knownIngredients : 0));
 	layout->addWidget(ingLabel);
 }
 

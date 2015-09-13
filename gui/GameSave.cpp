@@ -73,22 +73,11 @@ void GameSave::load(QString fileName)
 		m_knownIngredients[ingId] = ing.second;
 	}
 
-	// Convert inventory
-	m_ingredientsCount.resize(nbIngredients);
-	const auto& saveIngredients = save.listedIngredients();
-	for (const auto& ing : save.inventory())
-	{
-		auto ingId = getIngredientId(saveIngredients[ing.first]);
-		if (ingId == -1)
-			continue;
-
-		m_inventory.emplace_back(ingId, ing.second);
-		m_ingredientsCount[ingId] = ing.second;
-	}
-
 	// Convert all containers
+	const auto& saveIngredients = save.listedIngredients();
 	const auto saveContainers = save.containers();
 	m_containers.reserve(saveContainers.size());
+	m_ingredientsCount.assign(nbIngredients, 0);
 	for (const auto& sc : saveContainers)
 	{
 		Container container;
@@ -100,9 +89,18 @@ void GameSave::load(QString fileName)
 				continue;
 
 			container.inventory.emplace_back(ingId, ing.second);
+			m_ingredientsCount[ingId] += ing.second;
 		}
 
 		m_containers.push_back(std::move(container));
+	}
+
+	// Compute inventory (remove ingredients with a count of zero)
+	m_inventory.clear();
+	for (int i = 0; i < nbIngredients; ++i)
+	{
+		if (m_ingredientsCount[i])
+			m_inventory.emplace_back(i, m_ingredientsCount[i]);
 	}
 }
 
