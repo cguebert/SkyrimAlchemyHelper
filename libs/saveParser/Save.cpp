@@ -29,6 +29,7 @@ bool Save::parse(const std::string& fileName)
 void Save::doParse()
 {
 	parseHeader();
+	getPlayerLocation();
 	parseFormIDArray();
 	computeIngredientsRefIDs();
 	parseChangeForms();
@@ -67,9 +68,13 @@ void Save::parseHeader()
 		m_plugins.push_back(in.readWString());
 
 	in >> m_formIDArrayCountOffset;
-	in.jump(12);
+	in.jump(4);
+	in >> m_globalDataTable1Offset;
+	in.jump(4);
 	in >> m_changeFormsOffset;
-	in.jump(16);
+	in.jump(4);
+	in >> m_globalDataTable1Count;
+	in.jump(8);
 	in >> m_changeFormCount;
 }
 
@@ -118,6 +123,27 @@ void Save::parseFormIDArray()
 
 	m_formIDArray.resize(count);
 	in >> m_formIDArray;
+}
+
+void Save::getPlayerLocation()
+{
+	in.seekg(m_globalDataTable1Offset);
+	for (uint32_t i = 0; i < m_globalDataTable1Count; ++i)
+	{
+		uint32_t type, length;
+		in >> type >> length;
+		if (type != 1)
+			in.jump(length);
+		else
+		{
+			in.jump(4);
+			RefID ws1, ws2;
+			in >> ws1 >> m_header.coorX >> m_header.coorY >> ws2;
+			m_header.worldSpace1 = getFormID(ws1);
+			m_header.worldSpace2 = getFormID(ws2);
+			return;
+		}
+	}
 }
 
 void Save::parseKnownIngredient(const ChangeForm& form)

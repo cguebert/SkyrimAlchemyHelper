@@ -19,6 +19,9 @@ public:
 
 		std::string playerName, playerLocation;
 		uint32_t playerLevel = 0;
+
+		uint32_t worldSpace1 = 0, worldSpace2 = 0;
+		int32_t coorX = 0, coorY = 0;
 	};
 	const Header& header() const;
 
@@ -97,6 +100,7 @@ protected:
 		std::vector<uint16_t> data; // Storing something like a tree in an array
 	};
 
+	void getPlayerLocation();
 	void parseKnownIngredient(const ChangeForm& form);
 	void parsePlayer(const ChangeForm& form);
 	void parseContainer(const ChangeForm& form);
@@ -106,7 +110,9 @@ protected:
 	RefID getRefID(uint32_t formID);
 
 	parser::Parser in;
-	uint32_t m_formIDArrayCountOffset, m_changeFormCount, m_changeFormsOffset;
+	uint32_t m_formIDArrayCountOffset, 
+		m_globalDataTable1Offset, m_globalDataTable1Count, 
+		m_changeFormsOffset, m_changeFormCount;
 	std::vector<uint32_t> m_formIDArray;
 	StringsList m_plugins;
 	Header m_header;

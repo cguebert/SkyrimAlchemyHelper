@@ -8,20 +8,30 @@
 #include "PluginsList.h"
 #include "Settings.h"
 
+namespace
+{
+
+QString convert(const std::string& text)
+{
+	return QString::fromLatin1(text.c_str());
+}
+
+int getIngredientId(const saveParser::Save::Ingredient& ing)
+{
+	auto pluginId = PluginsList::instance().find(convert(ing.mod));
+	if (pluginId == -1)
+		return -1;
+	return IngredientsList::instance().find(pluginId, ing.id);
+}
+
+}
+
 GameSave::GameSave()
 {
 	const auto& settings = Settings::instance();
 	m_maxValidIngredientCount = settings.maxValidIngredientCount;
 	m_minValidNbIngredients = settings.minValidNbIngredients;
 	m_minTotalIngredientsCount = settings.minTotalIngredientsCount;
-}
-
-int getIngredientId(const saveParser::Save::Ingredient& ing)
-{
-	auto pluginId = PluginsList::instance().find(ing.mod.c_str());
-	if (pluginId == -1)
-		return -1;
-	return IngredientsList::instance().find(pluginId, ing.id);
 }
 
 void GameSave::load(QString fileName)
@@ -56,8 +66,8 @@ void GameSave::load(QString fileName)
 	m_screenshot.convertFromImage(img);
 
 	// Copy the header
-	m_header.playerLocation = header.playerLocation.c_str();
-	m_header.playerName = header.playerName.c_str();
+	m_header.playerLocation = convert(header.playerLocation);
+	m_header.playerName = convert(header.playerName);
 	m_header.playerLevel = header.playerLevel;
 	m_header.saveNumber = header.saveNumber;
 
