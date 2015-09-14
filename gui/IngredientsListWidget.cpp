@@ -124,8 +124,7 @@ IngredientsListWidget::IngredientsListWidget(IngredientsList& ingredientsList,
 	proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);
 	m_view->setModel(proxyModel);
 	m_view->sortByColumn(0, Qt::AscendingOrder);
-	m_view->setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_view->setSelectionMode(QAbstractItemView::SingleSelection);
+	m_view->setSelectionMode(QAbstractItemView::NoSelection);
 //	m_view->hideColumn(1);
 	for(int i = 0; i < 4; ++i)
 	{

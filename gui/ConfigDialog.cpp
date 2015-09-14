@@ -56,7 +56,7 @@ ConfigDialog::ConfigDialog(QWidget *parent, bool firstLaunch)
 
 QSize ConfigDialog::sizeHint() const
 {
-	return QSize(700, 500);
+	return QSize(850, 500);
 }
 
 bool ConfigDialog::modified() const

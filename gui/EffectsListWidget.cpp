@@ -77,8 +77,7 @@ EffectsListWidget::EffectsListWidget(EffectsList& effectsList, QWidget* parent)
 	m_view->setModel(proxyModel);
 	m_view->sortByColumn(0, Qt::AscendingOrder);
 	m_view->horizontalHeader()->resizeSection(0, 250);
-	m_view->setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_view->setSelectionMode(QAbstractItemView::SingleSelection);
+	m_view->setSelectionMode(QAbstractItemView::NoSelection);
 	m_view->hideColumn(1);
 	vLayout->addWidget(m_view);
 
