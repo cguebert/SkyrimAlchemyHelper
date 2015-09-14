@@ -96,21 +96,28 @@ void DiscoverEffects::setSortingFunction()
 			for (int i = 0; i < IngredientsList::nbEffectsPerIngredient; ++i)
 			{
 				const auto& effData = ing.effects[i];
+				if (m_knownIngredients[ingId][i])
+					continue;
+
+				++nbUnknownEffects;
+
 				for (auto effId : potion.effects)
 				{
 					if (effId == -1)
 						break;
-					if (!m_knownIngredients[ingId][i])
-						++nbUnknownEffects;
-					if (effData.effectId == effId && !m_knownIngredients[ingId][i])
+					if (effData.effectId == effId)
 						++nbDiscoveredEffects;
 				}
 			}
-			score += nbDiscoveredEffects * nbDiscoveredEffects; // Give more importance for many unknown effects in a single ingredient
 			
-			// If there is only one ingredient of this type, prefer potions that reveal all remaining unknown effects
-			if (m_ingredientsCount[ingId] == 1 && nbUnknownEffects == nbDiscoveredEffects)
-				score += 10;
+			if (nbDiscoveredEffects)
+			{
+				score += nbDiscoveredEffects * nbDiscoveredEffects; // Give more importance for many unknown effects in a single ingredient
+
+				// If there is only one ingredient of this type, prefer potions that reveal all remaining unknown effects
+				if (m_ingredientsCount[ingId] == 1 && nbUnknownEffects == nbDiscoveredEffects)
+					score += 10;
+			}
 
 			// Prefer ingredients that have an higher count
 			score += std::min(20, m_ingredientsCount[ingId]) / 20.0;

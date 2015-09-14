@@ -7,7 +7,7 @@
 class DiscoverEffects
 {
 public:
-	static std::pair<PotionsList::PotionsId, PotionsList::PotionAdditionalDataList> selectPotions(int nb = 20);
+	static std::pair<PotionsList::PotionsId, PotionsList::PotionAdditionalDataList> selectPotions(int nb = 50);
 
 protected:
 	DiscoverEffects(int nbPotions);
