@@ -12,23 +12,21 @@ set(CMAKE_AUTORCC ON)
 add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 
 set(HEADER_FILES
+	Config.h
 	ConfigDialog.h
-	ConfigPane.h
+	ConfigModsParser.h
 	ContainersWidget.h
 	DiscoverEffects.h
-	EffectsList.h
 	EffectsListWidget.h
 	EffectsSelector.h
 	FiltersWidget.h
 	FlowLayout.h
 	GameSave.h
-	IngredientsList.h
 	IngredientsListWidget.h
 	IngredientsSelector.h
 	InventoryWidget.h
 	KnownIngredientsWidget.h
 	MainWindow.h
-	PluginsList.h
 	PluginsListWidget.h
 	PotionsList.h
 	PotionsListWidget.h
@@ -39,23 +37,21 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
 	main.cpp
+	Config.cpp
 	ConfigDialog.cpp
-	ConfigPane.cpp
+	ConfigModsParser.cpp
 	ContainersWidget.cpp
 	DiscoverEffects.cpp
-	EffectsList.cpp
 	EffectsListWidget.cpp
 	EffectsSelector.cpp
 	FiltersWidget.cpp
 	FlowLayout.cpp
 	GameSave.cpp
-	IngredientsList.cpp
 	IngredientsListWidget.cpp
 	IngredientsSelector.cpp
 	InventoryWidget.cpp
 	KnownIngredientsWidget.cpp
 	MainWindow.cpp
-	PluginsList.cpp
 	PluginsListWidget.cpp
 	PotionsList.cpp
 	PotionsListWidget.cpp

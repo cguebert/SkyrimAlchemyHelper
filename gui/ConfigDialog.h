@@ -3,11 +3,12 @@
 
 #include <QDialog>
 
-#include "EffectsList.h"
-#include "IngredientsList.h"
-#include "PluginsList.h"
+#include "Config.h"
 
-class ConfigPane;
+class QCheckBox;
+class QLineEdit;
+class QPushButton;
+class QTabWidget;
 
 class ConfigDialog : public QDialog
 {
@@ -21,15 +22,35 @@ public:
 
 public slots:
 	void onOk();
+	void editDataPath();
+	void editPluginsPath();
+	void editSavesPath();
+	void editModOrganizerPath();
+	void useModOrganizerChanged(int);
+	void parseMods();
+	void defaultConfig();
+
+signals:
+	void startModsParse();
+	void endModsParse();
 
 protected:
-	void copyLists();
+	QWidget* createConfigPane();
+	bool testConfig(); // Returns false if there is a problem with the current configuration
+	void saveConfig();
+	void loadConfig();
 
-	ConfigPane* m_configPane;
+	bool m_firstLaunch;
+	QLineEdit *m_dataFolderEdit,
+		*m_pluginsListPathEdit,
+		*m_savesFolderEdit,
+		*m_modOrganizerPathEdit,
+		*m_languageEdit;
+	QCheckBox *m_useModOrganizerCheckBox;
+	QPushButton *m_modOrganizerPathButton;
+	bool m_modified = false;
 
-	EffectsList m_effectsList;
-	IngredientsList m_ingredientsList;
-	PluginsList m_pluginsList;
+	Config m_config;
 };
 
 #endif // CONFIGDIALOG_H
