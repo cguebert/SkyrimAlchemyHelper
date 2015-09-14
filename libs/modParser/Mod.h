@@ -10,10 +10,10 @@ namespace modParser
 class Mod
 {
 public:
-	static void parse(const std::string& fileName, Config& config);
+	static void parse(const std::string& fileName, Config& config, const std::string& language = "english");
 	
 protected:
-	Mod(const std::string& fileName, Config& config);
+	Mod(const std::string& fileName, Config& config, const std::string& language);
 	void doParse();
 
 	using Type = std::array<char, 4>;
@@ -48,7 +48,7 @@ protected:
 		m_nbEffAdded = 0, m_nbEffModified = 0;
 
 	parser::Parser in;
-	std::string m_modFileName, m_modName;
+	std::string m_modFileName, m_modName, m_language;
 	Ingredient m_currentIngredient;
 	MagicalEffect m_currentMagicalEffect;
 	enum class RecordType { None, Plugin, Ingredient, MagicalEffect };

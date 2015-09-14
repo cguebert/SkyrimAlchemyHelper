@@ -191,7 +191,7 @@ Save::Inventory Save::searchForIngredients(const ChangeForm& form)
 	if (m_minValidNbIngredients > 0 && nb < m_minValidNbIngredients)
 		return Inventory();
 
-	if (nb <= 2) // Cannot filter errors with only 2 values
+//	if (nb <= 2) // Cannot filter errors with only 2 values
 		return inventory;
 	
 	// We cut the list into ranges of continuously increasing or decreasing refIDs
@@ -227,6 +227,7 @@ Save::Inventory Save::searchForIngredients(const ChangeForm& form)
 		{
 			ranges.back().second = it;
 			ranges.emplace_back(it, it);
+			progresssion = Progression::None;
 		}
 
 		prevIt = it;

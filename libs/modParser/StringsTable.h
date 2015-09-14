@@ -8,7 +8,7 @@ namespace modParser
 class StringsTable
 {
 public:
-	void load(const std::string& modFileName);
+	void load(const std::string& modFileName, const std::string& language = "english");
 	std::string get(uint32_t id);
 
 protected:

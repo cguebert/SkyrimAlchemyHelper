@@ -18,9 +18,9 @@ string getModName(const string& modFileName)
 	return modFileName.substr(p);
 }
 
-void Mod::parse(const string& fileName, Config& config)
+void Mod::parse(const string& fileName, Config& config, const std::string& language)
 {
-	Mod mod(fileName, config);
+	Mod mod(fileName, config, language);
 	mod.doParse();
 
 	if (mod.m_nbEffAdded || mod.m_nbEffModified)
@@ -35,8 +35,9 @@ void Mod::parse(const string& fileName, Config& config)
 	}
 }
 
-Mod::Mod(const string& fileName, Config& config)
+Mod::Mod(const string& fileName, Config& config, const std::string& language)
 	: m_modFileName(fileName)
+	, m_language(language)
 	, m_currentRecord(RecordType::None)
 	, m_config(config)
 {
@@ -128,7 +129,7 @@ void Mod::parsePluginInformation()
 
 	m_useStringsTable = (flags & 0x80) != 0;
 	if (m_useStringsTable)
-		m_stringsTable.load(m_modFileName);
+		m_stringsTable.load(m_modFileName, m_language);
 
 	auto start = in.tellg();
 	m_currentRecord = RecordType::Plugin;

@@ -14,11 +14,16 @@ void ModParser::setModsList(const StringsList& list)
 	m_modsList = list;
 }
 
+void ModParser::setLanguage(const std::string& language)
+{
+	m_language = language;
+}
+
 Config ModParser::parseConfig()
 {
 	Config config;
 	for (const auto& modPath : m_modsList)
-		Mod::parse(modPath, config);
+		Mod::parse(modPath, config, m_language);
 	return config;
 }
 

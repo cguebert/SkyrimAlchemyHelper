@@ -31,10 +31,10 @@ pair<string, string> getDirAndFile(const string& modFileName)
 	return result;
 }
 
-void StringsTable::load(const string& modFileName)
+void StringsTable::load(const string& modFileName, const std::string& language)
 {
 	auto df = getDirAndFile(modFileName);
-	string fileName = df.first + "/Strings/" + df.second + "_English.STRINGS";
+	string fileName = df.first + "/strings/" + df.second + "_" + language + ".strings";
 
 	ifstream stream;
 	stream.open(fileName, ios::binary | ios::in);
@@ -42,8 +42,13 @@ void StringsTable::load(const string& modFileName)
 	{
 		cerr << "Cannot open " << fileName << endl;
 		BSAFile bsa;
-		bsa.load(modFileName);
-		auto content = bsa.extract("Strings/" + df.second + "_English.STRINGS");
+		string modName = df.second;
+		transform(modName.begin(), modName.end(), modName.begin(), ::tolower);
+		if (modName == "skyrim")
+			bsa.load(df.first + "/Skyrim - Interface.bsa");
+		else
+			bsa.load(modFileName);
+		auto content = bsa.extract("strings/" + df.second + "_" + language + ".strings");
 
 		if (content.empty())
 		{
@@ -56,9 +61,6 @@ void StringsTable::load(const string& modFileName)
 			in.setStream(move(ss));
 			cout << "Sucessfully extracted the string table from the BSA file" << endl;
 		}
-
-	//	ofstream out(df.second + "_English.STRINGS", ios_base::binary);
-	//	out.write(&content[0], content.size());
 	}
 	else
 		in.setStream(move(stream));
