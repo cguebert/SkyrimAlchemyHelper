@@ -65,6 +65,14 @@ void FiltersWidget::clear()
 
 	m_effectsFilters.clear();
 	m_ingredientsFilters.clear();
+
+	const QSignalBlocker invBlocker(m_inventoryCheckBox);
+	const QSignalBlocker ingBlocker(m_ingredientsCountComboBox);
+	const QSignalBlocker purBlocker(m_purityComboBox);
+
+	m_inventoryCheckBox->setCheckState(Qt::Unchecked);
+	m_ingredientsCountComboBox->setCurrentIndex(0);
+	m_purityComboBox->setCurrentIndex(0);
 }
 
 bool FiltersWidget::updateExisting(std::vector<FilterItem>& list, FlowLayout *layout, FilterActionType action, int id)
@@ -274,6 +282,9 @@ void FiltersWidget::updatePotionsListFilters()
 	else if (purityChoice == 3)
 		filters.emplace_back(FilterType::PureNegative);
 
-	PotionsList::instance().setFilters(filters);
+	auto& potionsList = PotionsList::instance();
+	potionsList.setFilters(filters);
+	potionsList.applyFilters();
+	potionsList.sortPotions();
 	emit modified();
 }

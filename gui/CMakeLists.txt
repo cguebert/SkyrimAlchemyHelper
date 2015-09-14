@@ -15,6 +15,7 @@ set(HEADER_FILES
 	ConfigDialog.h
 	ConfigPane.h
 	ContainersWidget.h
+	DiscoverEffects.h
 	EffectsList.h
 	EffectsListWidget.h
 	EffectsSelector.h
@@ -41,6 +42,7 @@ set(SOURCE_FILES
 	ConfigDialog.cpp
 	ConfigPane.cpp
 	ContainersWidget.cpp
+	DiscoverEffects.cpp
 	EffectsList.cpp
 	EffectsListWidget.cpp
 	EffectsSelector.cpp

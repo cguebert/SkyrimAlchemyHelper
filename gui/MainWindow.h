@@ -23,6 +23,7 @@ public slots:
 	void editConfig();
 	void afterLaunch();
 	void gameSaveInformation();
+	void discoverEffects();
 
 protected:
 	void showEvent(QShowEvent* event);

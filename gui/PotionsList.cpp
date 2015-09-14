@@ -2,6 +2,7 @@
 #include "IngredientsList.h"
 #include "EffectsList.h"
 #include "GameSave.h"
+#include "DiscoverEffects.h"
 
 #include <algorithm>
 #include <iterator>
@@ -151,10 +152,7 @@ void PotionsList::saveList()
 void PotionsList::setFilters(const Filters& filters)
 {
 	m_currentFilters = filters;
-	applyFilters();
-
 	prepareDefaultSortFunctions();
-	sortPotions();
 }
 
 void PotionsList::applyFilters()
@@ -169,7 +167,18 @@ void PotionsList::applyFilters()
 		if (!defaultFilters(potion))
 			continue;
 
-		m_filteredPotions.push_back(i);
+		bool keep = true;
+		for (auto func : m_customFilterFunctions)
+		{
+			if (!func(potion))
+			{
+				keep = false;
+				break;
+			}
+		}
+
+		if (keep)
+			m_filteredPotions.push_back(i);
 	}
 }
 
@@ -180,9 +189,18 @@ void PotionsList::sortPotions()
 	std::vector<float> scores(m_allPotions.size(), 0.f);
 	const float factor = 2.0; // Give more importance to the firt criterion
 
-	for (auto func : m_defaultSortFunctions)
-		for (const auto id : m_sortedPotions)
-			scores[id] = scores[id] * factor + func(m_allPotions[id]);
+	if (m_customSortFunctions.empty())
+	{
+		for (auto func : m_defaultSortFunctions)
+			for (const auto id : m_sortedPotions)
+				scores[id] = scores[id] * factor + func(m_allPotions[id]);
+	}
+	else
+	{
+		for (auto func : m_customSortFunctions)
+			for (const auto id : m_sortedPotions)
+				scores[id] = scores[id] * factor + func(m_allPotions[id]);
+	}
 
 	std::sort(m_sortedPotions.begin(), m_sortedPotions.end(), [&scores](int lhs, int rhs){
 		return scores[lhs] > scores[rhs];
@@ -427,4 +445,9 @@ void PotionsList::prepareDefaultSortFunctions()
 	m_defaultSortFunctions.push_back([maxGold](const Potion& potion){
 		return potion.goldCost / maxGold;
 	});
+}
+
+void PotionsList::discoverEffects()
+{
+	m_sortedPotions = DiscoverEffects::selectPotions();
 }

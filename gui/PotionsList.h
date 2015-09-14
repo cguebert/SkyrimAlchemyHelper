@@ -20,6 +20,9 @@ public:
 	static PotionsList& instance();
 
 	void recomputeList();
+	void applyFilters();
+	void sortPotions();
+	void discoverEffects(); // Make a selection of the best potions to discover unknwown effects
 
 	static const int maxIngredientsPerPotion = 3;
 	static const int maxEffectsPerPotion = 6;
@@ -68,28 +71,34 @@ public:
 	void setFilters(const Filters& filters);
 	const Filters& filters() const;
 
-	using FilterFunc = std::function<bool(const Potion&)>; // Do we keep this potion or not
-	using SortFunc = std::function<float(const Potion&)>; // Score of this potion [0:1] (higher is first)
-	using SortFunctions = std::vector<SortFunc>;
+	using FilterFunction = std::function<bool(const Potion&)>; // Do we keep this potion or not
+	void addCustomFilter(FilterFunction func); // Apply this filter on top of the standard ones
+	void clearCustomFilters();
+
+	using SortFunction = std::function<float(const Potion&)>; // Score of this potion [0:1] (higher is first)
+	void addCustomSort(SortFunction func); // Replace the default ones
+	void clearCustomSorts();
 
 protected:
 	PotionsList();
 	bool loadList();
 	void saveList();
 
-	void applyFilters();
-	void sortPotions();
 	void computePotionsStrength();
 	void updateEffectsToxicity();
 
 	bool defaultFilters(const Potion& potion);
 	void prepareDefaultSortFunctions();
+
+	using FilterFunctions = std::vector<FilterFunction>;
+	using SortFunctions = std::vector<SortFunction>;
 	
 	Potions m_allPotions;
 	PotionsId m_filteredPotions, m_sortedPotions;
 	Filters m_currentFilters;
 	std::vector<bool> m_toxicity;
-	SortFunctions m_defaultSortFunctions;
+	FilterFunctions m_customFilterFunctions;
+	SortFunctions m_defaultSortFunctions, m_customSortFunctions;
 	float m_maxGoldPotion = 0;
 	std::vector<float> maxEffectMagnitude, maxEffectDuration;
 };
@@ -104,5 +113,17 @@ inline const PotionsList::PotionsId& PotionsList::sortedPotions() const
 
 inline const PotionsList::Filters& PotionsList::filters() const
 { return m_currentFilters; }
+
+inline void PotionsList::addCustomFilter(FilterFunction func)
+{ m_customFilterFunctions.push_back(func); }
+
+inline void PotionsList::clearCustomFilters()
+{ m_customFilterFunctions.clear(); }
+
+inline void PotionsList::addCustomSort(SortFunction func)
+{ m_customSortFunctions.push_back(func); }
+
+inline void PotionsList::clearCustomSorts()
+{ m_customSortFunctions.clear(); }
 
 #endif // POTIONSLIST_H

@@ -68,14 +68,18 @@ MainWindow::MainWindow(QWidget *parent)
 
 	QPushButton* okButton = new QPushButton(tr("Exit"), this);
 	connect(okButton, SIGNAL(clicked()), this, SLOT(close()));
-	QPushButton* configButton = new QPushButton(tr("Config"), this);
+	QPushButton* configButton = new QPushButton(tr("Configuration"), this);
 	connect(configButton, SIGNAL(clicked()), this, SLOT(editConfig()));
-	QPushButton* saveButton = new QPushButton(tr("Save"), this);
+	QPushButton* saveButton = new QPushButton(tr("Game save"), this);
 	connect(saveButton, SIGNAL(clicked()), this, SLOT(gameSaveInformation()));
+	QPushButton* discoverButton = new QPushButton(tr("Discover effects"), this);
+	connect(discoverButton, SIGNAL(clicked()), this, SLOT(discoverEffects()));
 	QHBoxLayout* buttonsLayout = new QHBoxLayout;
 	buttonsLayout->setContentsMargins(5, 5, 5, 5);
 	buttonsLayout->addWidget(configButton);
 	buttonsLayout->addWidget(saveButton);
+	buttonsLayout->addStretch();
+	buttonsLayout->addWidget(discoverButton);
 	buttonsLayout->addStretch();
 	buttonsLayout->addWidget(okButton);
 	vLayout->addLayout(buttonsLayout);
@@ -162,4 +166,11 @@ void MainWindow::gameSaveInformation()
 		PotionsList::instance().recomputeList();
 		m_potionsWidget->refreshList();
 	}
+}
+
+void MainWindow::discoverEffects()
+{
+	m_filtersWidget->clear();
+	PotionsList::instance().discoverEffects();
+	m_potionsWidget->refreshList();
 }
