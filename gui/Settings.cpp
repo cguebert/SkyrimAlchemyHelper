@@ -29,6 +29,7 @@ void Settings::load()
 	pluginsListPath = settings.value("pluginsListFile").toString();
 	modOrganizerPath = settings.value("modOrganizerPath").toString();
 	selectedSavePath = settings.value("selectedSavePath").toString();
+	language = settings.value("language", "english").toString();
 
 	useModOrganizer = settings.value("useModOrganizer").toBool();
 	loadMostRecentSave = settings.value("loadMostRecentSave").toBool();
@@ -47,6 +48,7 @@ void Settings::save()
 	settings.setValue("pluginsListFile", pluginsListPath);
 	settings.setValue("modOrganizerPath", modOrganizerPath);
 	settings.setValue("selectedSavePath", selectedSavePath);
+	settings.setValue("language", language);
 
 	settings.setValue("useModOrganizer", useModOrganizer);
 	settings.setValue("loadMostRecentSave", loadMostRecentSave);

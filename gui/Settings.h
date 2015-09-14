@@ -12,7 +12,8 @@ public:
 		savesFolder,		// Saves folder ([User documents]/My Games/Skyrim/Saves)
 		pluginsListPath,	// Path to the file containing the plugins list ([User Local App Data]/Skyrim/plugins.txt)
 		modOrganizerPath,	// Path to ModOrganizer (C:/Program files/Mod Organizer/Mor Organizer.exe)
-		selectedSavePath;	// File path of the game save to load
+		selectedSavePath,	// File path of the game save to load
+		language;			// When parsing mods, try to use the strings table for this language
 
 	bool useModOrganizer = false,	// Is Mod Organizer used to separate mods ?
 		loadMostRecentSave = true;	// Always load the most recent save instead of a user chosen one

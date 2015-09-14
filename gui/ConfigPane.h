@@ -51,7 +51,8 @@ protected:
 	QLineEdit *m_dataFolderEdit,
 		*m_pluginsListPathEdit, 
 		*m_savesFolderEdit, 
-		*m_modOrganizerPathEdit;
+		*m_modOrganizerPathEdit,
+		*m_languageEdit;
 	QCheckBox *m_useModOrganizerCheckBox;
 	QPushButton *m_modOrganizerPathButton;
 	bool m_modified = false;

@@ -11,6 +11,16 @@
 
 #include <modParser/ModParser.h>
 
+namespace
+{
+
+QString convert(const std::string& text) 
+{ 
+	return QString::fromLatin1(text.c_str()); 
+}
+
+}
+
 ConfigPane::ConfigPane(IngredientsList& ingredientsList,
 	EffectsList& effectsList,
 	PluginsList& pluginsList,
@@ -62,6 +72,11 @@ ConfigPane::ConfigPane(IngredientsList& ingredientsList,
 	gridLayout->addWidget(m_modOrganizerPathEdit, 4, 1);
 	gridLayout->addWidget(m_modOrganizerPathButton, 4, 2);
 
+	auto languageLabel = new QLabel(tr("Language"));
+	m_languageEdit = new QLineEdit;
+	gridLayout->addWidget(languageLabel, 5, 0);
+	gridLayout->addWidget(m_languageEdit, 5, 1);
+
 	auto buttonsLayout = new QHBoxLayout;
 	auto parseModsButton = new QPushButton(tr("Parse mods"));
 	connect(parseModsButton, SIGNAL(clicked()), this, SLOT(parseMods()));
@@ -70,11 +85,11 @@ ConfigPane::ConfigPane(IngredientsList& ingredientsList,
 	buttonsLayout->addWidget(parseModsButton);
 	buttonsLayout->addWidget(defaultConfigButton);
 	buttonsLayout->addStretch();
-	gridLayout->addLayout(buttonsLayout, 5, 0, 1, 3);
+	gridLayout->addLayout(buttonsLayout, 6, 0, 1, 3);
 
 	auto stretchLayout = new QVBoxLayout;
 	stretchLayout->addStretch();
-	gridLayout->addLayout(stretchLayout, 6, 0);
+	gridLayout->addLayout(stretchLayout, 7, 0);
 
 	setLayout(gridLayout);
 
@@ -98,6 +113,7 @@ void ConfigPane::loadConfig()
 	m_pluginsListPathEdit->setText(settings.pluginsListPath);
 	m_savesFolderEdit->setText(settings.savesFolder);
 	m_modOrganizerPathEdit->setText(settings.modOrganizerPath);
+	m_languageEdit->setText(settings.language);
 }
 
 std::string loadFile(const std::string& fileName)
@@ -156,7 +172,7 @@ void ConfigPane::defaultConfig()
 					replaceAll(folder, "\\\\", "/");
 
 					//   Find Skyrim
-					steamFolder = folder.c_str();
+					steamFolder = convert(folder);
 					if (QFileInfo::exists(steamFolder + "/steamapps/common/Skyrim/TESV.exe"))
 					{
 						m_dataFolderEdit->setText(steamFolder + "/steamapps/common/Skyrim/Data");
@@ -279,6 +295,7 @@ void ConfigPane::saveConfig()
 	settings.pluginsListPath = m_pluginsListPathEdit->text();
 	settings.savesFolder = m_savesFolderEdit->text();
 	settings.modOrganizerPath = m_modOrganizerPathEdit->text();
+	settings.language = m_languageEdit->text();
 }
 
 bool ConfigPane::getModsPaths(std::vector<std::string>& modsPathList)
@@ -331,6 +348,7 @@ void ConfigPane::parseMods()
 
 	modParser::ModParser modParser;
 	modParser.setModsList(modsPathList);
+	modParser.setLanguage(m_languageEdit->text().toStdString());
 	auto config = modParser.parseConfig();
 
 	if (config.ingredientsList.empty())
@@ -399,7 +417,7 @@ bool ConfigPane::findRealPaths(std::vector<std::string>& paths)
 	// Convert to a QStringList
 	QStringList pathsList;
 	for (const auto& path : paths)
-		pathsList.push_back(path.c_str());
+		pathsList.push_back(convert(path));
 	paths.clear();
 
 	// Get the current profile
@@ -505,7 +523,7 @@ void ConfigPane::convertConfig(const modParser::Config& config)
 
 	// Add plugins
 	for (const auto& inMod : config.modsList)
-		plugins.emplace_back(inMod.c_str());
+		plugins.emplace_back(convert(inMod));
 
 	// Sort the plugins list by name
 	std::sort(plugins.begin(), plugins.end(), [](const PluginsList::Plugin& lhs, const PluginsList::Plugin& rhs){
@@ -519,8 +537,8 @@ void ConfigPane::convertConfig(const modParser::Config& config)
 		effect.code = inEffect.id;
 		effect.flags = inEffect.flags;
 		effect.baseCost = inEffect.baseCost;
-		effect.name = inEffect.name.c_str();
-		effect.description = inEffect.description.c_str();
+		effect.name = convert(inEffect.name);
+		effect.description = convert(inEffect.description);
 		effects.push_back(effect);
 	}
 
@@ -534,8 +552,8 @@ void ConfigPane::convertConfig(const modParser::Config& config)
 	{
 		IngredientsList::Ingredient ingredient;
 		ingredient.code = inIng.id;
-		ingredient.name = inIng.name.c_str();
-		ingredient.pluginId = indexOf(plugins, inIng.modName.c_str());
+		ingredient.name = convert(inIng.name);
+		ingredient.pluginId = indexOf(plugins, convert(inIng.modName));
 		if (ingredient.pluginId == -1)
 			continue;
 		++plugins[ingredient.pluginId].nbIngredients;
