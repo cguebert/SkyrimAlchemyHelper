@@ -3,11 +3,11 @@
 #include "GameSave.h"
 #include "PotionsList.h"
 
-std::vector<int> DiscoverEffects::selectPotions(int nb)
+std::pair<PotionsList::PotionsId, PotionsList::PotionAdditionalDataList> DiscoverEffects::selectPotions(int nb)
 {
 	DiscoverEffects de(nb);
 	de.doComputation();
-	return de.m_selectedPotions;
+	return std::make_pair(de.m_selectedPotions, de.m_additionalData);
 }
 
 DiscoverEffects::DiscoverEffects(int nbPotions)
@@ -32,6 +32,7 @@ void DiscoverEffects::prepare()
 	m_ingredientsCount = save.ingredientsCount();
 	m_knownIngredients = save.knownIngredients();
 	m_selectedPotions.clear();
+	m_additionalData.clear();
 
 	auto& potionsList = PotionsList::instance();
 	PotionsList::Filters emptyFilters;
@@ -106,9 +107,13 @@ void DiscoverEffects::setSortingFunction()
 				}
 			}
 			score += nbDiscoveredEffects * nbDiscoveredEffects; // Give more importance for many unknown effects in a single ingredient
+			
 			// If there is only one ingredient of this type, prefer potions that reveal all remaining unknown effects
 			if (m_ingredientsCount[ingId] == 1 && nbUnknownEffects == nbDiscoveredEffects)
 				score += 10;
+
+			// Prefer ingredients that have an higher count
+			score += std::min(20, m_ingredientsCount[ingId]) / 20.0;
 		}
 
 		// Prefer 2 ingredients potions if they have the same score
@@ -136,26 +141,36 @@ bool DiscoverEffects::selectOnePotion()
 	const auto& potion = potions[selection];
 	const auto& ingredients = IngredientsList::instance().ingredients();
 
-	for (auto ingId : potion.ingredients)
+	PotionsList::PotionAdditionalData addData;
+
+	for (int i = 0; i < PotionsList::maxIngredientsPerPotion; ++i)
 	{
+		const auto ingId = potion.ingredients[i];
 		if (ingId == -1)
 			break;
 
+		addData.ingredientsCount[i] = m_ingredientsCount[ingId];
 		--m_ingredientsCount[ingId]; // Use one of this ingredient
+		
 		const auto& ing = ingredients[ingId];
-		for (int i = 0; i < IngredientsList::nbEffectsPerIngredient; ++i)
+		for (int j = 0; j < IngredientsList::nbEffectsPerIngredient; ++j)
 		{
-			const auto& effData = ing.effects[i];
+			const auto& effData = ing.effects[j];
 			for (auto effId : potion.effects)
 			{
 				if (effId == -1)
 					break;
 
-				if (effData.effectId == effId)
-					m_knownIngredients[ingId][i] = true; // Discover all effects of this potion
+				if (effData.effectId == effId && !m_knownIngredients[ingId][j])
+				{
+					m_knownIngredients[ingId][j] = true; // Discover all effects of this potion
+					addData.discoveredEffects.emplace_back(ingId, effId);
+				}
 			}
 		}
 	}
+
+	m_additionalData.push_back(addData);
 
 	return true;
 }

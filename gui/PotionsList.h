@@ -48,6 +48,16 @@ public:
 	const Potions& allPotions() const;
 	const PotionsId& sortedPotions() const;
 
+	struct PotionAdditionalData
+	{
+		int ingredientsCount[maxIngredientsPerPotion];
+		using DiscoveredEffect = std::pair<int, int>; // Ingredient id, effect id
+		std::vector<DiscoveredEffect> discoveredEffects;
+	};
+	using PotionAdditionalDataList = std::vector<PotionAdditionalData>;
+	const PotionAdditionalDataList& additionalData() const; // Only for sorted potions
+	void setNbComputePotionsData(int nb); // Set the number of additional data that must be computed (at least for all potions shown in PotionsListWidget)
+
 	struct Filter
 	{
 		enum class FilterType
@@ -86,6 +96,7 @@ protected:
 
 	void computePotionsStrength();
 	void updateEffectsToxicity();
+	void computePotionsData();
 
 	bool defaultFilters(const Potion& potion);
 	void prepareDefaultSortFunctions();
@@ -96,11 +107,16 @@ protected:
 	Potions m_allPotions;
 	PotionsId m_filteredPotions, m_sortedPotions;
 	Filters m_currentFilters;
-	std::vector<bool> m_toxicity;
+	
 	FilterFunctions m_customFilterFunctions;
 	SortFunctions m_defaultSortFunctions, m_customSortFunctions;
+	
+	std::vector<bool> m_toxicity;
 	float m_maxGoldPotion = 0;
 	std::vector<float> maxEffectMagnitude, maxEffectDuration;
+
+	int m_nbComputePotionsData = 50;
+	PotionAdditionalDataList m_additionalData;
 };
 
 //****************************************************************************//
@@ -125,5 +141,11 @@ inline void PotionsList::addCustomSort(SortFunction func)
 
 inline void PotionsList::clearCustomSorts()
 { m_customSortFunctions.clear(); }
+
+inline const PotionsList::PotionAdditionalDataList& PotionsList::additionalData() const
+{ return m_additionalData; }
+
+inline void PotionsList::setNbComputePotionsData(int nb)
+{ m_nbComputePotionsData = nb; }
 
 #endif // POTIONSLIST_H

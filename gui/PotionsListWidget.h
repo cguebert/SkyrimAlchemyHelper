@@ -13,8 +13,8 @@ public slots:
 	void refreshList();
 
 protected:
-	void nbCraftable(int potionId, QString& text, QString& tooltip);
-	void nbDiscoveredEffects(int potionId, QString& text, QString& tooltip);
+	void nbCraftable(int id, QString& text, QString& tooltip);
+	void nbDiscoveredEffects(int id, QString& text, QString& tooltip);
 
 	QColor m_positiveColor, m_negativeColor;
 };

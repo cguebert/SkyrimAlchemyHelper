@@ -19,22 +19,23 @@ PotionsListWidget::PotionsListWidget(QWidget* parent)
 	refreshList();
 }
 
-void PotionsListWidget::nbCraftable(int potionId, QString& text, QString& tooltip)
+void PotionsListWidget::nbCraftable(int id, QString& text, QString& tooltip)
 {
+	const auto& potionsList = PotionsList::instance();
 	const auto& ingredients = IngredientsList::instance().ingredients();
-	const auto& potions = PotionsList::instance().allPotions();
-	const auto& potionsId = PotionsList::instance().sortedPotions();
-	const auto& ingredientsCount = GameSave::instance().ingredientsCount();
+	const auto& potions = potionsList.allPotions();
+	const auto& potionsId = potionsList.sortedPotions();
+	const auto& ingredientsCount = potionsList.additionalData()[id].ingredientsCount;
 
-	const auto& potion = potions[potionId];
+	const auto& potion = potions[potionsId[id]];
 	int ing0 = potion.ingredients[0], ing1 = potion.ingredients[1], ing2 = potion.ingredients[2];
-	int nb0 = ingredientsCount[ing0], nb1 = ingredientsCount[ing1];
+	int nb0 = ingredientsCount[0], nb1 = ingredientsCount[1];
 	int minNb = std::min(nb0, nb1);
 	tooltip = QString("%1 - %2\n%3 - %4").arg(ingredients[ing0].name).arg(nb0)
 		.arg(ingredients[ing1].name).arg(nb1);
 	if (ing2 != -1)
 	{
-		int nb2 = ingredientsCount[ing2];
+		int nb2 = ingredientsCount[2];
 		minNb = std::min(minNb, nb2);
 		tooltip += QString("\n%1 - %2").arg(ingredients[ing2].name).arg(nb2);
 	}
@@ -44,42 +45,18 @@ void PotionsListWidget::nbCraftable(int potionId, QString& text, QString& toolti
 	else					text = tr("Can craft %1 potions").arg(minNb);
 }
 
-void PotionsListWidget::nbDiscoveredEffects(int potionId, QString& text, QString& tooltip)
+void PotionsListWidget::nbDiscoveredEffects(int id, QString& text, QString& tooltip)
 {
 	const auto& ingredients = IngredientsList::instance().ingredients();
 	const auto& effects = EffectsList::instance().effects();
-	const auto& potions = PotionsList::instance().allPotions();
-	const auto& knownIngredients = GameSave::instance().knownIngredients();
+	const auto& discoveredEffects = PotionsList::instance().additionalData()[id].discoveredEffects;
 
 	tooltip = "";
-	const auto& potion = potions[potionId];
-	int nbDiscovered = 0;
-	for (auto ingId : potion.ingredients)
-	{
-		if (ingId == -1)
-			break;
-		const auto& ing = ingredients[ingId];
-		for (int i = 0; i < IngredientsList::nbEffectsPerIngredient; ++i)
-		{
-			const auto& effData = ing.effects[i];
-			for (auto effId : potion.effects)
-			{
-				if (effId == -1)
-					break;
-
-				if (effData.effectId == effId)
-				{
-					if (!knownIngredients[ingId][i])
-					{
-						++nbDiscovered;
-						tooltip += QString("%1 - %2\n").arg(ing.name).arg(effects[effId].name);
-					}
-				}
-			}
-		}
-	}
-	
+	for (auto discovered : discoveredEffects)
+		tooltip += QString("%1 - %2\n").arg(ingredients[discovered.first].name).arg(effects[discovered.second].name);
 	tooltip = tooltip.trimmed();
+
+	const auto nbDiscovered = discoveredEffects.size();
 	if (!nbDiscovered)			text = tr("All effects known");
 	else if (nbDiscovered == 1)	text = tr("1 undiscovered effect");
 	else						text = tr("%1 undiscovered effects").arg(nbDiscovered);
@@ -185,12 +162,12 @@ void PotionsListWidget::refreshList()
 		if (GameSave::instance().isLoaded())
 		{
 			QString text, tooltip;
-			nbCraftable(potionId, text, tooltip);
+			nbCraftable(i, text, tooltip);
 			auto nbCraftableLabel = new QLabel(text);
 			nbCraftableLabel->setToolTip(tooltip);
 			infoLayout->addWidget(nbCraftableLabel);
 
-			nbDiscoveredEffects(potionId, text, tooltip);	
+			nbDiscoveredEffects(i, text, tooltip);	
 			auto discoveredLabel = new QLabel(text);
 			discoveredLabel->setToolTip(tooltip);
 			infoLayout->addWidget(discoveredLabel);

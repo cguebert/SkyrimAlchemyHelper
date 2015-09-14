@@ -205,6 +205,8 @@ void PotionsList::sortPotions()
 	std::sort(m_sortedPotions.begin(), m_sortedPotions.end(), [&scores](int lhs, int rhs){
 		return scores[lhs] > scores[rhs];
 	});
+
+	computePotionsData();
 }
 
 bool PotionsList::defaultFilters(const Potion& potion)
@@ -447,7 +449,49 @@ void PotionsList::prepareDefaultSortFunctions()
 	});
 }
 
+void PotionsList::computePotionsData()
+{
+	const auto& ingredients = IngredientsList::instance().ingredients();
+	const auto& ingredientsCount = GameSave::instance().ingredientsCount();
+	const auto& knownIngredients = GameSave::instance().knownIngredients();
+
+	m_additionalData.clear();
+
+	int nb = std::min(static_cast<int>(m_sortedPotions.size()), m_nbComputePotionsData);
+	m_additionalData.reserve(nb);
+
+	for (int i = 0; i < nb; ++i)
+	{
+		const auto& potion = m_allPotions[m_sortedPotions[i]];
+		PotionAdditionalData addData;
+
+		for (int j = 0; j < maxIngredientsPerPotion; ++j)
+		{
+			int ingId = potion.ingredients[j];
+			addData.ingredientsCount[j] = (ingId != -1 ? ingredientsCount[ingId] : 0);
+
+			if (ingId == -1)
+				break;
+			const auto& ing = ingredients[ingId];
+			for (int i = 0; i < IngredientsList::nbEffectsPerIngredient; ++i)
+			{
+				const auto& effData = ing.effects[i];
+				for (auto effId : potion.effects)
+				{
+					if (effId == -1)
+						break;
+
+					if (effData.effectId == effId && !knownIngredients[ingId][i])
+						addData.discoveredEffects.emplace_back(ingId, effId);
+				}
+			}
+		}
+
+		m_additionalData.push_back(addData);
+	}
+}
+
 void PotionsList::discoverEffects()
 {
-	m_sortedPotions = DiscoverEffects::selectPotions();
+	std::tie(m_sortedPotions, m_additionalData) = DiscoverEffects::selectPotions();
 }
