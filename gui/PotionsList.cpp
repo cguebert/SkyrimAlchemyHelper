@@ -1,6 +1,5 @@
 #include "PotionsList.h"
-#include "IngredientsList.h"
-#include "EffectsList.h"
+#include "Config.h"
 #include "GameSave.h"
 #include "DiscoverEffects.h"
 
@@ -32,8 +31,8 @@ void PotionsList::recomputeList()
 {
 	m_allPotions.clear();
 
-	const auto& ingredients = IngredientsList::instance().ingredients();
-	const auto& effects = EffectsList::instance().effects();
+	const auto& ingredients = Config::main().ingredients;
+	const auto& effects = Config::main().effects;
 
 	const int nbIng = ingredients.size();
 	const int nbEff = effects.size();
@@ -55,10 +54,10 @@ void PotionsList::recomputeList()
 			potion.ingredients[1] = id2;
 
 			int nbEffects = 0;
-			for (int i = 0; i < IngredientsList::nbEffectsPerIngredient; ++i)
+			for (int i = 0; i < Config::nbEffectsPerIngredient; ++i)
 			{
 				auto effect1 = ing1.sortedEffects[i].effectId;
-				for (int j = 0; j < IngredientsList::nbEffectsPerIngredient; ++j)
+				for (int j = 0; j < Config::nbEffectsPerIngredient; ++j)
 				{
 					if (effect1 == ing2.sortedEffects[j].effectId)
 						potion.effects[nbEffects++] = effect1;
@@ -318,8 +317,8 @@ bool PotionsList::defaultFilters(const Potion& potion)
 
 void PotionsList::computePotionsStrength()
 {
-	const auto& ingredients = IngredientsList::instance().ingredients();
-	const auto& effects = EffectsList::instance().effects();
+	const auto& ingredients = Config::main().ingredients;
+	const auto& effects = Config::main().effects;
 	m_maxGoldPotion = 0;
 	maxEffectMagnitude.assign(effects.size(), 0);
 	maxEffectDuration.assign(effects.size(), 0);
@@ -391,7 +390,7 @@ void PotionsList::computePotionsStrength()
 
 void PotionsList::updateEffectsToxicity()
 {
-	const auto& effects = EffectsList::instance().effects();
+	const auto& effects = Config::main().effects;
 	int nb = effects.size();
 	m_toxicity.resize(nb);
 
@@ -405,7 +404,7 @@ void PotionsList::updateEffectsToxicity()
 void PotionsList::prepareDefaultSortFunctions()
 {
 	m_defaultSortFunctions.clear();
-	const auto& effects = EffectsList::instance().effects();
+	const auto& effects = Config::main().effects;
 
 	bool hasEffectFilter = false;
 	for (const auto& filter : m_currentFilters)
@@ -451,7 +450,7 @@ void PotionsList::prepareDefaultSortFunctions()
 
 void PotionsList::computePotionsData()
 {
-	const auto& ingredients = IngredientsList::instance().ingredients();
+	const auto& ingredients = Config::main().ingredients;
 	const auto& ingredientsCount = GameSave::instance().ingredientsCount();
 	const auto& knownIngredients = GameSave::instance().knownIngredients();
 
@@ -473,7 +472,7 @@ void PotionsList::computePotionsData()
 			if (ingId == -1)
 				break;
 			const auto& ing = ingredients[ingId];
-			for (int i = 0; i < IngredientsList::nbEffectsPerIngredient; ++i)
+			for (int i = 0; i < Config::nbEffectsPerIngredient; ++i)
 			{
 				const auto& effData = ing.effects[i];
 				for (auto effId : potion.effects)

@@ -4,17 +4,12 @@
 #include <QAbstractTableModel>
 
 class QTableView;
-class IngredientsList;
-class EffectsList;
-class PluginsList;
+class Config;
 
 class IngredientsListModel : public QAbstractTableModel
 {
 public:
-	IngredientsListModel(IngredientsList& ingredientsList,
-		EffectsList& effectsList,
-		PluginsList& pluginsList,
-		QObject* parent = nullptr);
+	IngredientsListModel(Config& config, QObject* parent = nullptr);
 
 	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -25,9 +20,7 @@ public:
 	void endReset();
 
 protected:
-	IngredientsList& m_ingredientsList;
-	EffectsList& m_effectsList;
-	PluginsList& m_pluginsList;
+	Config& m_config;
 };
 
 //****************************************************************************//
@@ -36,10 +29,7 @@ class IngredientsListWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit IngredientsListWidget(IngredientsList& ingredientsList, 
-		EffectsList& effectsList, 
-		PluginsList& pluginsList, 
-		QWidget* parent = nullptr);
+	explicit IngredientsListWidget(Config& config, QWidget* parent = nullptr);
 
 public slots:
 	void beginReset();

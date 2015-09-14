@@ -4,8 +4,7 @@
 #include <QDir>
 #include <QFileInfo>
 
-#include "IngredientsList.h"
-#include "PluginsList.h"
+#include "Config.h"
 #include "Settings.h"
 
 namespace
@@ -18,10 +17,11 @@ QString convert(const std::string& text)
 
 int getIngredientId(const saveParser::Save::Ingredient& ing)
 {
-	auto pluginId = PluginsList::instance().find(convert(ing.mod));
+	const auto& config = Config::main();
+	auto pluginId = config.indexOfPlugin(convert(ing.mod));
 	if (pluginId == -1)
 		return -1;
-	return IngredientsList::instance().find(pluginId, ing.id);
+	return config.indexOfIngredient(pluginId, ing.id);
 }
 
 }
@@ -38,8 +38,9 @@ void GameSave::load(QString fileName)
 {
 	clear();
 
-	const auto& plugins = PluginsList::instance().plugins();
-	const auto& ingredients = IngredientsList::instance().ingredients();
+	const auto& config = Config::main();
+	const auto& plugins = config.plugins;
+	const auto& ingredients = config.ingredients;
 	const int nbIngredients = ingredients.size();
 
 	saveParser::Save::Ingredients possibleIngredients;

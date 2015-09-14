@@ -1,20 +1,18 @@
 #include <QtWidgets>
 
 #include "PluginsListWidget.h"
-#include "PluginsList.h"
+#include "Config.h"
 
-PluginsListModel::PluginsListModel(PluginsList& pluginsList, QObject* parent)
+PluginsListModel::PluginsListModel(Config& config, QObject* parent)
 	: QAbstractTableModel(parent)
-	, m_pluginsList(pluginsList)
+	, m_config(config)
 {
-
 }
 
 int PluginsListModel::rowCount(const QModelIndex& /*parent*/) const
 {
-	return m_pluginsList.size();
+	return m_config.plugins.size();
 }
-
 
 int PluginsListModel::columnCount(const QModelIndex& /*parent*/) const
 {
@@ -28,7 +26,7 @@ QVariant PluginsListModel::data(const QModelIndex& index, int role) const
 	case Qt::DisplayRole:
 	case Qt::EditRole:
 	{
-		const auto& plugin = m_pluginsList.plugins()[index.row()];
+		const auto& plugin = m_config.plugins[index.row()];
 		switch (index.column())
 		{
 		case 0: return plugin.name;
@@ -65,14 +63,14 @@ void PluginsListModel::endReset()
 
 //****************************************************************************//
 
-PluginsListWidget::PluginsListWidget(PluginsList& pluginsList, QWidget* parent) 
+PluginsListWidget::PluginsListWidget(Config& config, QWidget* parent)
 	: QWidget(parent)
 {
 	QVBoxLayout* vLayout = new QVBoxLayout;
 
 	m_view = new QTableView(this);
 	m_view->setSortingEnabled(true);
-	m_model = new PluginsListModel(pluginsList, this);
+	m_model = new PluginsListModel(config, this);
 	auto proxyModel = new QSortFilterProxyModel(this);
 	proxyModel->setSourceModel(m_model);
 	proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);

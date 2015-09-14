@@ -1,7 +1,7 @@
 #include <QtWidgets>
 
 #include "ContainersWidget.h"
-#include "IngredientsList.h"
+#include "Config.h"
 #include "InventoryWidget.h"
 #include "GameSave.h"
 
@@ -25,7 +25,7 @@ void ContainersWidget::refreshList()
 {
 	clear();
 
-	const auto& ingredients = IngredientsList::instance().ingredients();
+	const auto& ingredients = Config::main().ingredients;
 	const auto& containers = m_gameSave.containers();
 	int nbContainers = containers.size();
 

@@ -1,10 +1,8 @@
 #include "MainWindow.h"
 #include <QApplication>
 
-#include "EffectsList.h"
+#include "Config.h"
 #include "GameSave.h"
-#include "IngredientsList.h"
-#include "PluginsList.h"
 
 int main(int argc, char *argv[])
 {
@@ -13,9 +11,7 @@ int main(int argc, char *argv[])
 	app.setApplicationName("SkyrimAlchemyHelper");
 
 	// The order is important
-	PluginsList::instance().loadList();
-	EffectsList::instance().loadList();
-	IngredientsList::instance().loadList();
+	Config::main().load();
 	GameSave::instance().loadSaveFromConfig();
 
 	MainWindow window;

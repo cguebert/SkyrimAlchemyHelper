@@ -1,12 +1,10 @@
 #include <QtWidgets>
 
 #include "InventoryWidget.h"
-#include "IngredientsList.h"
-#include "GameSave.h"
+#include "Config.h"
 
 InventoryModel::InventoryModel(const std::vector<std::pair<int, int>>& inventory, QObject* parent)
 	: QAbstractTableModel(parent)
-	, m_ingredientsList(IngredientsList::instance())
 	, m_inventory(inventory)
 {
 }
@@ -28,7 +26,7 @@ QVariant InventoryModel::data(const QModelIndex& index, int role) const
 		const auto& item = m_inventory[index.row()];
 		switch (index.column())
 		{
-		case 0: return m_ingredientsList.ingredients()[item.first].name;
+		case 0: return Config::main().ingredients[item.first].name;
 		case 1: return item.second;
 		}
 		return QVariant();

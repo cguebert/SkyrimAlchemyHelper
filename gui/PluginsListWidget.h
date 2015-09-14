@@ -5,13 +5,13 @@
 
 class QPushButton;
 class QTableView;
-class PluginsList;
+class Config;
 
 class PluginsListModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	PluginsListModel(PluginsList& pluginsList, QObject* parent = nullptr);
+	PluginsListModel(Config& config, QObject* parent = nullptr);
 
 	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -22,7 +22,7 @@ public:
 	void endReset();
 
 protected:
-	PluginsList& m_pluginsList;
+	Config& m_config;
 };
 
 //****************************************************************************//
@@ -31,7 +31,7 @@ class PluginsListWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit PluginsListWidget(PluginsList& pluginsList, QWidget* parent = nullptr);
+	explicit PluginsListWidget(Config& config, QWidget* parent = nullptr);
 
 public slots:
 	void beginReset();

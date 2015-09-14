@@ -1,6 +1,5 @@
 #include "EffectsSelector.h"
-#include "EffectsList.h"
-#include "IngredientsList.h"
+#include "Config.h"
 
 EffectsSelector::EffectsSelector(QWidget* parent)
 	: SelectorWidget(parent)
@@ -10,11 +9,10 @@ EffectsSelector::EffectsSelector(QWidget* parent)
 
 void EffectsSelector::updateList()
 {
-	const auto& effects = EffectsList::instance().effects();
-	const auto& ingredients = IngredientsList::instance().ingredients();
+	const auto& config = Config::main();
 
 	QStringList names, tooltips;
-	for (const auto& effect : effects)
+	for (const auto& effect : config.effects)
 	{
 		names << effect.name;
 		tooltips << effect.tooltip;

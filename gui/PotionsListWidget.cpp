@@ -2,8 +2,7 @@
 
 #include "PotionsListWidget.h"
 
-#include "EffectsList.h"
-#include "IngredientsList.h"
+#include "Config.h"
 #include "PotionsList.h"
 #include "GameSave.h"
 
@@ -22,7 +21,7 @@ PotionsListWidget::PotionsListWidget(QWidget* parent)
 void PotionsListWidget::nbCraftable(int id, QString& text, QString& tooltip)
 {
 	const auto& potionsList = PotionsList::instance();
-	const auto& ingredients = IngredientsList::instance().ingredients();
+	const auto& ingredients = Config::main().ingredients;
 	const auto& potions = potionsList.allPotions();
 	const auto& potionsId = potionsList.sortedPotions();
 	const auto& ingredientsCount = potionsList.additionalData()[id].ingredientsCount;
@@ -47,8 +46,8 @@ void PotionsListWidget::nbCraftable(int id, QString& text, QString& tooltip)
 
 void PotionsListWidget::nbDiscoveredEffects(int id, QString& text, QString& tooltip)
 {
-	const auto& ingredients = IngredientsList::instance().ingredients();
-	const auto& effects = EffectsList::instance().effects();
+	const auto& ingredients = Config::main().ingredients;
+	const auto& effects = Config::main().effects;
 	const auto& discoveredEffects = PotionsList::instance().additionalData()[id].discoveredEffects;
 
 	tooltip = "";
@@ -68,8 +67,8 @@ void PotionsListWidget::refreshList()
 	if (l)
 		QWidget().setLayout(l);
 
-	const auto& ingredients = IngredientsList::instance().ingredients();
-	const auto& effects = EffectsList::instance().effects();
+	const auto& ingredients = Config::main().ingredients;
+	const auto& effects = Config::main().effects;
 	const auto& potions = PotionsList::instance().allPotions();
 	const auto& potionsId = PotionsList::instance().sortedPotions();
 	const auto& ingredientsCount = GameSave::instance().ingredientsCount();

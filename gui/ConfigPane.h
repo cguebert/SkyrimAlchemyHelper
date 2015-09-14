@@ -7,9 +7,7 @@ class QCheckBox;
 class QLineEdit;
 class QPushButton;
 
-class IngredientsList;
-class EffectsList;
-class PluginsList;
+class Config;
 
 namespace modParser { struct Config; }
 
@@ -18,9 +16,7 @@ class ConfigPane : public QWidget
 	Q_OBJECT
 
 public:
-	ConfigPane(IngredientsList& ingredientsList,
-		EffectsList& effectsList,
-		PluginsList& pluginsList,
+	ConfigPane(Config& config,
 		bool firstLaunch = false,
 		QWidget* parent = nullptr);
 
@@ -43,9 +39,6 @@ signals:
 
 protected:
 	void loadConfig();
-	void convertConfig(const modParser::Config& config);
-	bool getModsPaths(std::vector<std::string>& paths);
-	bool findRealPaths(std::vector<std::string>& paths);
 
 	bool m_firstLaunch;
 	QLineEdit *m_dataFolderEdit,
@@ -57,9 +50,7 @@ protected:
 	QPushButton *m_modOrganizerPathButton;
 	bool m_modified = false;
 
-	IngredientsList& m_ingredientsList;
-	EffectsList& m_effectsList;
-	PluginsList& m_pluginsList;
+	Config& m_config;
 };
 
 #endif // CONFIGPANE_H

@@ -1,14 +1,11 @@
 #include <QtWidgets>
 
 #include "KnownIngredientsWidget.h"
-#include "EffectsList.h"
-#include "IngredientsList.h"
+#include "Config.h"
 #include "GameSave.h"
 
 KnownIngredientsModel::KnownIngredientsModel(GameSave& gamesave, QObject* parent)
 	: QAbstractTableModel(parent)
-	, m_ingredientsList(IngredientsList::instance())
-	, m_effectsList(EffectsList::instance())
 	, m_gameSave(gamesave)
 {
 	
@@ -28,8 +25,8 @@ QVariant KnownIngredientsModel::data(const QModelIndex& index, int role) const
 {
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		const auto& ingredient = m_ingredientsList.ingredients()[index.row()];
-		const auto& effects = m_effectsList.effects();
+		const auto& ingredient = Config::main().ingredients[index.row()];
+		const auto& effects = Config::main().effects;
 		switch (index.column())
 		{
 		case 0: return ingredient.name;

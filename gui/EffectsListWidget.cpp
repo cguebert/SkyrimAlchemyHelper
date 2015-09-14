@@ -1,17 +1,17 @@
 #include <QtWidgets>
 
 #include "EffectsListWidget.h"
-#include "EffectsList.h"
+#include "Config.h"
 
-EffectsListModel::EffectsListModel(EffectsList& effectsList, QObject* parent)
+EffectsListModel::EffectsListModel(Config& config, QObject* parent)
 	: QAbstractTableModel(parent)
-	, m_effectsList(effectsList)
+	, m_config(config)
 {
 }
 
 int EffectsListModel::rowCount(const QModelIndex& /*parent*/) const
 {
-	return m_effectsList.size();
+	return m_config.effects.size();
 }
 
 int EffectsListModel::columnCount(const QModelIndex& /*parent*/) const
@@ -23,7 +23,7 @@ QVariant EffectsListModel::data(const QModelIndex& index, int role) const
 {
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		const auto& effect = m_effectsList.effects()[index.row()];
+		const auto& effect = m_config.effects[index.row()];
 		switch (index.column())
 		{
 		case 0: return effect.name;
@@ -63,14 +63,14 @@ void EffectsListModel::endReset()
 
 //****************************************************************************//
 
-EffectsListWidget::EffectsListWidget(EffectsList& effectsList, QWidget* parent)
+EffectsListWidget::EffectsListWidget(Config& config, QWidget* parent)
 	: QWidget(parent)
 {
 	QVBoxLayout* vLayout = new QVBoxLayout;
 
 	auto m_view = new QTableView(this);
 	m_view->setSortingEnabled(true);
-	m_model = new EffectsListModel(effectsList, this);
+	m_model = new EffectsListModel(config, this);
 	auto proxyModel = new QSortFilterProxyModel(this);
 	proxyModel->setSourceModel(m_model);
 	proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);

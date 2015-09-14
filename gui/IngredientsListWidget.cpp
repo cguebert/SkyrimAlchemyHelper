@@ -1,24 +1,17 @@
 #include <QtWidgets>
 
 #include "IngredientsListWidget.h"
-#include "IngredientsList.h"
-#include "EffectsList.h"
-#include "PluginsList.h"
+#include "Config.h"
 
-IngredientsListModel::IngredientsListModel(IngredientsList& ingredientsList,
-	EffectsList& effectsList,
-	PluginsList& pluginsList, 
-	QObject* parent)
+IngredientsListModel::IngredientsListModel(Config& config, QObject* parent)
 	: QAbstractTableModel(parent)
-	, m_ingredientsList(ingredientsList)
-	, m_effectsList(effectsList)
-	, m_pluginsList(pluginsList)
+	, m_config(config)
 {
 }
 
 int IngredientsListModel::rowCount(const QModelIndex& /*parent*/) const
 {
-	return m_ingredientsList.size();
+	return m_config.ingredients.size();
 }
 
 int IngredientsListModel::columnCount(const QModelIndex& /*parent*/) const
@@ -30,38 +23,37 @@ QVariant IngredientsListModel::data(const QModelIndex& index, int role) const
 {
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		const auto& ingredient = m_ingredientsList.ingredients()[index.row()];
-		const auto& effects = m_effectsList.effects();
+		const auto& ingredient = m_config.ingredients[index.row()];
 		switch (index.column())
 		{
 		case 0: return ingredient.name;
 		case 1:
-			return ingredient.pluginId == -1 ? "" : m_pluginsList.plugins()[ingredient.pluginId].name;
+			return ingredient.pluginId == -1 ? "" : m_config.plugins[ingredient.pluginId].name;
 		case 2:
 		{
 			const auto id = ingredient.sortedEffects[0].effectId;
-			return id == -1 ? "" : effects[id].name;
+			return id == -1 ? "" : m_config.effects[id].name;
 		}
 		case 3: return ingredient.sortedEffects[0].magnitude;
 		case 4: return ingredient.sortedEffects[0].duration;
 		case 5:
 		{
 			const auto id = ingredient.sortedEffects[1].effectId;
-			return id == -1 ? "" : effects[id].name;
+			return id == -1 ? "" : m_config.effects[id].name;
 		}
 		case 6: return ingredient.sortedEffects[1].magnitude;
 		case 7: return ingredient.sortedEffects[1].duration;
 		case 8:
 		{
 			const auto id = ingredient.sortedEffects[2].effectId;
-			return id == -1 ? "" : effects[id].name;
+			return id == -1 ? "" : m_config.effects[id].name;
 		}
 		case 9: return ingredient.sortedEffects[2].magnitude;
 		case 10: return ingredient.sortedEffects[2].duration;
 		case 11:
 		{
 			const auto id = ingredient.sortedEffects[3].effectId;
-			return id == -1 ? "" : effects[id].name;
+			return id == -1 ? "" : m_config.effects[id].name;
 		}
 		case 12: return ingredient.sortedEffects[3].magnitude;
 		case 13: return ingredient.sortedEffects[3].duration;
@@ -108,17 +100,14 @@ void IngredientsListModel::endReset()
 
 //****************************************************************************//
 
-IngredientsListWidget::IngredientsListWidget(IngredientsList& ingredientsList,
-	EffectsList& effectsList,
-	PluginsList& pluginsList, 
-	QWidget* parent)
+IngredientsListWidget::IngredientsListWidget(Config& config, QWidget* parent)
 	: QWidget(parent)
 {
 	QVBoxLayout* vLayout = new QVBoxLayout;
 
 	auto m_view = new QTableView(this);
 	m_view->setSortingEnabled(true);
-	m_model = new IngredientsListModel(ingredientsList, effectsList, pluginsList, this);
+	m_model = new IngredientsListModel(config, this);
 	auto proxyModel = new QSortFilterProxyModel(this);
 	proxyModel->setSourceModel(m_model);
 	proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);

@@ -1,6 +1,5 @@
 #include "IngredientsSelector.h"
-#include "IngredientsList.h"
-#include "EffectsList.h"
+#include "Config.h"
 
 IngredientsSelector::IngredientsSelector(QWidget* parent)
 	: SelectorWidget(parent)
@@ -10,11 +9,10 @@ IngredientsSelector::IngredientsSelector(QWidget* parent)
 
 void IngredientsSelector::updateList()
 {
-	const auto& ingredients = IngredientsList::instance().ingredients();
-	const auto& effects = EffectsList::instance().effects();
+	const auto& config = Config::main();
 
 	QStringList names, tooltips;
-	for (const auto& ingredient : ingredients)
+	for (const auto& ingredient : config.ingredients)
 	{
 		names << ingredient.name;
 		tooltips << ingredient.tooltip;

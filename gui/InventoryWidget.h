@@ -4,8 +4,6 @@
 #include <QAbstractTableModel>
 
 class QTableView;
-class GameSave;
-class IngredientsList;
 
 class InventoryModel : public QAbstractTableModel
 {
@@ -21,7 +19,6 @@ public:
 	void endReset();
 
 protected:
-	IngredientsList& m_ingredientsList;
 	const std::vector<std::pair<int, int>>& m_inventory;
 };
 

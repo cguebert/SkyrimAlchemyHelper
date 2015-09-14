@@ -3,8 +3,7 @@
 #include "FiltersWidget.h"
 #include "FlowLayout.h"
 
-#include "EffectsList.h"
-#include "IngredientsList.h"
+#include "Config.h"
 #include "PotionsList.h"
 
 FiltersWidget::FiltersWidget(QWidget* parent)
@@ -125,7 +124,7 @@ void FiltersWidget::effectFilterAction(FilterActionType action, int id)
 		return;
 
 	// Add this effect
-	const auto& effect = EffectsList::instance().effects()[id];
+	const auto& effect = Config::main().effects[id];
 
 	auto boxWidget = new QWidget;
 	auto boxLayout = new QHBoxLayout(boxWidget);
@@ -161,7 +160,7 @@ void FiltersWidget::ingredientFilterAction(FilterActionType action, int id)
 		return;
 
 	// Add this ingredient
-	const auto& ingredient = IngredientsList::instance().ingredients()[id];
+	const auto& ingredient = Config::main().ingredients[id];
 
 	auto boxWidget = new QWidget;
 	auto boxLayout = new QHBoxLayout(boxWidget);

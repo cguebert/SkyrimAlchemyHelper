@@ -5,12 +5,12 @@
 
 class QPushButton;
 class QTableView;
-class EffectsList;
+class Config;
 
 class EffectsListModel : public QAbstractTableModel
 {
 public:
-	EffectsListModel(EffectsList& effectsList, QObject* parent = nullptr);
+	EffectsListModel(Config& config, QObject* parent = nullptr);
 
 	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -21,7 +21,7 @@ public:
 	void endReset();
 
 protected:
-	EffectsList& m_effectsList;
+	Config& m_config;
 };
 
 //****************************************************************************//
@@ -30,7 +30,7 @@ class EffectsListWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit EffectsListWidget(EffectsList& effectsList, QWidget* parent = nullptr);
+	explicit EffectsListWidget(Config& config, QWidget* parent = nullptr);
 
 public slots:
 	void beginReset();

@@ -1,5 +1,5 @@
 #include "DiscoverEffects.h"
-#include "IngredientsList.h"
+#include "Config.h"
 #include "GameSave.h"
 #include "PotionsList.h"
 
@@ -58,13 +58,13 @@ void DiscoverEffects::setFilters()
 
 	// Then filter for at least one unknwon ingredient
 	potionsList.addCustomFilter([this](const PotionsList::Potion& potion){
-		const auto& ingredients = IngredientsList::instance().ingredients();
+		const auto& ingredients = Config::main().ingredients;
 		for (auto ingId : potion.ingredients)
 		{
 			if (ingId == -1)
 				break;
 			const auto& ing = ingredients[ingId];
-			for (int i = 0; i < IngredientsList::nbEffectsPerIngredient; ++i)
+			for (int i = 0; i < Config::nbEffectsPerIngredient; ++i)
 			{
 				const auto& effData = ing.effects[i];
 				for (auto effId : potion.effects)
@@ -85,7 +85,7 @@ void DiscoverEffects::setSortingFunction()
 {
 	auto& potionsList = PotionsList::instance();
 	potionsList.addCustomSort([this](const PotionsList::Potion& potion){
-		const auto& ingredients = IngredientsList::instance().ingredients();
+		const auto& ingredients = Config::main().ingredients;
 		float score = 0;
 		for (auto ingId : potion.ingredients)
 		{
@@ -93,7 +93,7 @@ void DiscoverEffects::setSortingFunction()
 				break;
 			int nbUnknownEffects = 0, nbDiscoveredEffects = 0; // For this ingredient only
 			const auto& ing = ingredients[ingId];
-			for (int i = 0; i < IngredientsList::nbEffectsPerIngredient; ++i)
+			for (int i = 0; i < Config::nbEffectsPerIngredient; ++i)
 			{
 				const auto& effData = ing.effects[i];
 				if (m_knownIngredients[ingId][i])
@@ -146,7 +146,7 @@ bool DiscoverEffects::selectOnePotion()
 	// Modify the lists as if the player has created this potion
 	const auto& potions = potionsList.allPotions();
 	const auto& potion = potions[selection];
-	const auto& ingredients = IngredientsList::instance().ingredients();
+	const auto& ingredients = Config::main().ingredients;
 
 	PotionsList::PotionAdditionalData addData;
 
@@ -160,7 +160,7 @@ bool DiscoverEffects::selectOnePotion()
 		--m_ingredientsCount[ingId]; // Use one of this ingredient
 		
 		const auto& ing = ingredients[ingId];
-		for (int j = 0; j < IngredientsList::nbEffectsPerIngredient; ++j)
+		for (int j = 0; j < Config::nbEffectsPerIngredient; ++j)
 		{
 			const auto& effData = ing.effects[j];
 			for (auto effId : potion.effects)

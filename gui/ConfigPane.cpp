@@ -4,12 +4,9 @@
 #include <sstream>
 
 #include "ConfigPane.h"
-#include "EffectsList.h"
-#include "IngredientsList.h"
-#include "PluginsList.h"
+#include "Config.h"
+#include "ConfigModsParser.h"
 #include "Settings.h"
-
-#include <modParser/ModParser.h>
 
 namespace
 {
@@ -19,18 +16,35 @@ QString convert(const std::string& text)
 	return QString::fromLatin1(text.c_str()); 
 }
 
+std::string loadFile(const std::string& fileName)
+{
+	std::ifstream file(fileName);
+	if (!file.is_open())
+		return "";
+	std::stringstream stream;
+	stream << file.rdbuf();
+	file.close();
+	return stream.str();
 }
 
-ConfigPane::ConfigPane(IngredientsList& ingredientsList,
-	EffectsList& effectsList,
-	PluginsList& pluginsList,
-	bool firstLaunch,
-	QWidget *parent)
+void replaceAll(std::string& text, const std::string& from, const std::string& to)
+{
+	size_t lenFrom = from.size(), lenTo = to.size();
+	if (!lenFrom) return;
+	size_t pos = 0;
+	while ((pos = text.find(from, pos)) != std::string::npos)
+	{
+		text.replace(pos, lenFrom, to);
+		pos += lenTo;
+	}
+}
+
+}
+
+ConfigPane::ConfigPane(Config& config, bool firstLaunch, QWidget *parent)
 	: QWidget(parent)
 	, m_firstLaunch(firstLaunch)
-	, m_ingredientsList(ingredientsList)
-	, m_effectsList(effectsList)
-	, m_pluginsList(pluginsList)
+	, m_config(config)
 {
 	auto gridLayout = new QGridLayout;
 
@@ -93,7 +107,7 @@ ConfigPane::ConfigPane(IngredientsList& ingredientsList,
 
 	setLayout(gridLayout);
 
-	loadConfig();
+	
 }
 
 void ConfigPane::loadConfig()
@@ -114,29 +128,6 @@ void ConfigPane::loadConfig()
 	m_savesFolderEdit->setText(settings.savesFolder);
 	m_modOrganizerPathEdit->setText(settings.modOrganizerPath);
 	m_languageEdit->setText(settings.language);
-}
-
-std::string loadFile(const std::string& fileName)
-{
-	std::ifstream file(fileName);
-	if (!file.is_open())
-		return "";
-	std::stringstream stream;
-	stream << file.rdbuf();
-	file.close();
-	return stream.str();
-}
-
-void replaceAll(std::string& text, const std::string& from, const std::string& to)
-{
-	size_t lenFrom = from.size(), lenTo = to.size();
-	if (!lenFrom) return;
-	size_t pos = 0;
-	while ((pos = text.find(from, pos)) != std::string::npos)
-	{
-		text.replace(pos, lenFrom, to);
-		pos += lenTo;
-	}
 }
 
 void ConfigPane::defaultConfig()
@@ -298,72 +289,33 @@ void ConfigPane::saveConfig()
 	settings.language = m_languageEdit->text();
 }
 
-bool ConfigPane::getModsPaths(std::vector<std::string>& modsPathList)
-{
-	std::string dataDirPath = m_dataFolderEdit->text().toStdString();
-	std::string pluginsListPath = m_pluginsListPathEdit->text().toStdString();
-	
-	// Add "Skyrim.esm" if not using Mod Organizer
-	if (m_useModOrganizerCheckBox->checkState() != Qt::Checked)
-	{
-		std::string inList = loadFile(pluginsListPath);
-		std::transform(inList.begin(), inList.end(), inList.begin(), ::tolower);
-		if (inList.find("skyrim.esm") == std::string::npos)
-			modsPathList.emplace_back("Skyrim.esm");
-	}
-
-	// Loading the "plugins.txt" file
-	std::ifstream inFile(pluginsListPath);
-	std::string modName;
-	while (std::getline(inFile, modName))
-	{
-		if (modName[0] == '#')
-			continue;
-
-		modsPathList.emplace_back(modName);
-	}
-
-	if (m_useModOrganizerCheckBox->checkState() == Qt::Checked)
-	{
-		if (!findRealPaths(modsPathList)) // Convert the mods name to their real location inside ModOrganizer
-		{
-			QMessageBox::warning(this, tr("Mods list error"), tr("There was an error trying to find mods with ModOrganizer"));
-			return false;
-		}
-	}
-	else
-	{
-		for (auto& path : modsPathList)
-			path = dataDirPath + "/" + path;
-	}
-
-	return true;
-}
-
 void ConfigPane::parseMods()
 {
-	std::vector<std::string> modsPathList;
-	if (!getModsPaths(modsPathList))
+	ConfigModsParser modsParser(m_useModOrganizerCheckBox->checkState() == Qt::Checked,
+		m_dataFolderEdit->text(), m_pluginsListPathEdit->text(), m_modOrganizerPathEdit->text(),
+		m_languageEdit->text());
+
+	auto result = modsParser.parse();
+
+	switch (result)
+	{
+	case ConfigModsParser::Result::Error_ModOrganizer:
+		QMessageBox::warning(this, tr("Mods list error"), tr("There was an error trying to find mods with ModOrganizer"));
 		return;
 
-	modParser::ModParser modParser;
-	modParser.setModsList(modsPathList);
-	modParser.setLanguage(m_languageEdit->text().toStdString());
-	auto config = modParser.parseConfig();
-
-	if (config.ingredientsList.empty())
-	{
+	case ConfigModsParser::Result::Error_ModsParsing:
 		QMessageBox::warning(this, tr("Error in parsing"), tr("There was an error trying to extract ingredients from the mods"));
 		return;
-	}
-	else
-	{
+
+	case ConfigModsParser::Result::Success:
 		emit startModsParse();
-		convertConfig(config);
+		modsParser.copyToConfig(m_config);
+
 		emit endModsParse();
 		m_modified = true;
 
-		QMessageBox::information(this, tr("Loading finished"), tr("%1 ingredients found in %2 mods").arg(m_ingredientsList.size()).arg(m_pluginsList.size()));
+		QMessageBox::information(this, tr("Loading finished"), tr("%1 ingredients found in %2 mods")
+			.arg(modsParser.nbIngredients()).arg(modsParser.nbPlugins()));
 	}
 }
 
@@ -404,207 +356,4 @@ void ConfigPane::useModOrganizerChanged(int state)
 bool ConfigPane::modified()
 {
 	return m_modified;
-}
-
-bool ConfigPane::findRealPaths(std::vector<std::string>& paths)
-{
-	QString modsDirPath;
-	QString modOrganizerPath = m_modOrganizerPathEdit->text();
-	QString pluginsListPath = m_pluginsListPathEdit->text();
-	if (modOrganizerPath.isEmpty() || pluginsListPath.isEmpty())
-		return false;
-
-	// Convert to a QStringList
-	QStringList pathsList;
-	for (const auto& path : paths)
-		pathsList.push_back(convert(path));
-	paths.clear();
-
-	// Get the current profile
-	QDir modOrganizerDir = QFileInfo(modOrganizerPath).absoluteDir();
-	QFileInfo modOrganizerIni(modOrganizerDir, "ModOrganizer.ini"); 
-	if (!modOrganizerIni.exists())
-		return false;
-
-	// Get the mod directory
-	QSettings modOrganizerSettings(modOrganizerIni.absoluteFilePath(), QSettings::IniFormat);
-	modsDirPath = modOrganizerSettings.value("Settings/mod_directory").toString();
-	if (modsDirPath.isEmpty())
-		return false;
-
-	QDir modsDir(modsDirPath);
-	if (!modsDir.exists())
-		return false;
-
-	// Get the mod list
-	QDir modOrganizerProfileDir = QFileInfo(pluginsListPath).absoluteDir();
-	QFileInfo modListFileInfo(modOrganizerProfileDir, "modlist.txt");
-	if (!modListFileInfo.exists())
-		return false;
-
-	QFile modListFile(modListFileInfo.absoluteFilePath());
-	if (!modListFile.open(QIODevice::ReadOnly))
-		return false;
-
-	using QStringPair = std::pair<QString, QString>;
-	std::vector<QStringPair> realPathsPairs;
-	QStringList filters;
-	filters << "*.esm" << "*.esp";
-	QTextStream modListStream(&modListFile);
-	while (!modListStream.atEnd())
-	{
-		QString modName = modListStream.readLine();
-		if (!modName.startsWith('+'))
-			continue;
-		modName = modName.mid(1); // Remove '+'
-
-		QDir modDir(modsDir);
-		if (!modDir.cd(modName))
-			continue;
-
-		QStringList files = modDir.entryList(filters, QDir::Files);
-		for (const auto& path : pathsList)
-		{
-			if (files.contains(path))
-				realPathsPairs.emplace_back(path, QFileInfo(modDir, path).absoluteFilePath());
-		}
-	}
-
-	// Lastly, look into the Skyrim data folder
-	QDir dataDir(m_dataFolderEdit->text());
-	QStringList files = dataDir.entryList(filters, QDir::Files);
-	for (const auto& path : pathsList)
-	{
-		if (files.contains(path))
-			realPathsPairs.emplace_back(path, QFileInfo(dataDir, path).absoluteFilePath());
-	}
-
-	for (const auto& path : pathsList)
-	{
-		auto it = std::find_if(realPathsPairs.begin(), realPathsPairs.end(), [&path](const QStringPair& p){
-			return p.first == path;
-		});
-		if (it != realPathsPairs.end())
-			paths.push_back(it->second.toStdString());
-	}
-
-	return true;
-}
-
-int indexOf(const EffectsList::Effects& effects, quint32 id)
-{
-	auto it = std::find_if(effects.begin(), effects.end(), [&id](const EffectsList::Effect& effect){
-		return effect.code == id;
-	});
-	if (it != effects.end())
-		return it - effects.begin();
-	return -1;
-}
-
-int indexOf(const PluginsList::Plugins& plugins, QString name)
-{
-	auto it = std::find_if(plugins.begin(), plugins.end(), [&name](const PluginsList::Plugin& plugin){
-		return !plugin.name.compare(name, Qt::CaseInsensitive);
-	});
-	if (it != plugins.end())
-		return it - plugins.begin();
-	return -1;
-}
-
-void ConfigPane::convertConfig(const modParser::Config& config)
-{
-	auto& plugins = m_pluginsList.plugins();
-	auto& effects = m_effectsList.effects();
-	auto& ingredients = m_ingredientsList.ingredients();
-
-	plugins.clear();
-	effects.clear();
-	ingredients.clear();
-
-	// Add plugins
-	for (const auto& inMod : config.modsList)
-		plugins.emplace_back(convert(inMod));
-
-	// Sort the plugins list by name
-	std::sort(plugins.begin(), plugins.end(), [](const PluginsList::Plugin& lhs, const PluginsList::Plugin& rhs){
-		return lhs.name < rhs.name;
-	});
-
-	// Add effects
-	for (const auto& inEffect : config.magicalEffectsList)
-	{
-		EffectsList::Effect effect;
-		effect.code = inEffect.id;
-		effect.flags = inEffect.flags;
-		effect.baseCost = inEffect.baseCost;
-		effect.name = convert(inEffect.name);
-		effect.description = convert(inEffect.description);
-		effects.push_back(effect);
-	}
-
-	// Sort the effects list by name
-	std::sort(effects.begin(), effects.end(), [](const EffectsList::Effect& lhs, const EffectsList::Effect& rhs){
-		return lhs.name < rhs.name;
-	});
-
-	// Add ingredients
-	for (const auto& inIng : config.ingredientsList)
-	{
-		IngredientsList::Ingredient ingredient;
-		ingredient.code = inIng.id;
-		ingredient.name = convert(inIng.name);
-		ingredient.pluginId = indexOf(plugins, convert(inIng.modName));
-		if (ingredient.pluginId == -1)
-			continue;
-		++plugins[ingredient.pluginId].nbIngredients;
-
-		bool validEffects = true;
-		for (int i = 0; i < 4; ++i)
-		{
-			IngredientsList::EffectData& effectData = ingredient.effects[i];
-			effectData.effectId = indexOf(effects, inIng.effects[i].id);
-			if (effectData.effectId == -1)
-			{
-				validEffects = false;
-				break;
-			}
-			effectData.magnitude = inIng.effects[i].magnitude;
-			effectData.duration = inIng.effects[i].duration;
-		}
-		if (!validEffects)
-			continue;
-
-		// Sort the effects for an easier computation of potions,
-		//  but keep the original ones as they are for the known ingredients loaded for each save
-		std::copy(std::begin(ingredient.effects), std::end(ingredient.effects), std::begin(ingredient.sortedEffects));
-		std::sort(std::begin(ingredient.sortedEffects), std::end(ingredient.sortedEffects), 
-			[](const IngredientsList::EffectData& lhs, const IngredientsList::EffectData& rhs)
-			{ return lhs.effectId < rhs.effectId; }
-		);
-
-		ingredients.push_back(ingredient);
-	}
-
-	// Sort the ingredients list by name
-	std::sort(ingredients.begin(), ingredients.end(), [](const IngredientsList::Ingredient& lhs, const IngredientsList::Ingredient& rhs){
-		return lhs.name < rhs.name;
-	});
-
-	// Create the tooltips of the effects (with the sorted list of ingredients)
-	for (int i = 0, nb = ingredients.size(); i < nb; ++i)
-	{
-		auto& ingredient = ingredients[i];
-		for (auto effectData : ingredient.sortedEffects)
-		{
-			auto& effect = effects[effectData.effectId];
-			ingredient.tooltip += effect.name + "\n";
-			effect.ingredients.push_back(i);
-			effect.tooltip += ingredient.name + "\n";
-		}
-		ingredient.tooltip = ingredient.tooltip.trimmed();
-	}
-
-	// Trim the tooltips of the effects
-	for (auto& effect : effects)
-		effect.tooltip = effect.tooltip.trimmed();
 }

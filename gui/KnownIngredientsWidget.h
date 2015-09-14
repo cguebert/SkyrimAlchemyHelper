@@ -4,9 +4,7 @@
 #include <QAbstractTableModel>
 
 class QTableView;
-class EffectsList;
 class GameSave;
-class IngredientsList;
 
 class KnownIngredientsModel : public QAbstractTableModel
 {
@@ -22,8 +20,6 @@ public:
 	void endReset();
 
 protected:
-	IngredientsList& m_ingredientsList;
-	EffectsList& m_effectsList;
 	GameSave& m_gameSave;
 };
 
