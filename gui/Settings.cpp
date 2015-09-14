@@ -35,7 +35,7 @@ void Settings::load()
 
 	maxValidIngredientCount = settings.value("maxValidIngredientCount", 1000).toInt();
 	minValidNbIngredients = settings.value("minValidNbIngredients", 5).toInt();
-	minTotalIngredientsCount = settings.value("minTotalIngredientsCount", 10).toInt();
+	minTotalIngredientsCount = settings.value("minTotalIngredientsCount", 25).toInt();
 }
 
 void Settings::save()

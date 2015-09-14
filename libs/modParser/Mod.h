@@ -17,7 +17,8 @@ protected:
 	void doParse();
 
 	using Type = std::array<char, 4>;
-	bool isType(const Type& type, const std::string& name);
+	friend bool operator==(const Type& type, const char name[5]);
+	friend bool operator==(const Type& type, const std::string& name);
 
 	void newIngredient();
 	void newMagicalEffect();
@@ -36,7 +37,7 @@ protected:
 	void parseEffectID();
 	void parseEffectItem();
 
-	void computeIngredientId(uint32_t id);
+	std::string getMaster(uint32_t id);
 	bool setIngredient(const Ingredient& ingredient); // Return true if adding, false if modifying existing
 	void updateMagicalEffects();
 
