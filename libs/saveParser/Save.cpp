@@ -29,8 +29,8 @@ bool Save::parse(const std::string& fileName)
 void Save::doParse()
 {
 	parseHeader();
-	getPlayerLocation();
 	parseFormIDArray();
+	getPlayerLocation();
 	computeIngredientsRefIDs();
 	parseChangeForms();
 }

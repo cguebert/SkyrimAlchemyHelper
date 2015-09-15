@@ -180,6 +180,13 @@ void SaveDialog::refreshInformation()
 	auto ingLabel = new QLabel(QString(tr("%1 known ingredients, with %2% of discovered effects"))
 		.arg(knownIngredients).arg(knownIngredients ? knownEffects * 25 / knownIngredients : 0));
 	layout->addWidget(ingLabel);
+
+	// Information about the inventory
+	int total = 0;
+	for (auto ing : m_gameSave.ingredientsCount())
+		total += ing;
+	layout->addWidget(new QLabel(QString(tr("%1 total ingredients in %2 containers"))
+		.arg(total).arg(m_gameSave.containers().size())));
 }
 
 void SaveDialog::copySave()
