@@ -1,7 +1,8 @@
 #pragma once
 
 #include <parser/Parser.h>
-#include "Config.h"
+#include <functional>
+
 #include "StringsTable.h"
 
 namespace modParser
@@ -9,66 +10,65 @@ namespace modParser
 
 class Mod
 {
-public:
-	static void parse(const std::string& fileName, Config& config, const std::string& language = "english");
-	
 protected:
-	Mod(const std::string& fileName, Config& config, const std::string& language);
+	Mod(const std::string& fileName, const std::string& language);
 	void doParse();
 
-	using Type = std::array<char, 4>;
-	friend bool operator==(const Type& type, const char name[5]);
-	friend bool operator==(const Type& type, const std::string& name);
+	using ParseFieldFunc = std::function<void()>;
+	struct FieldParser
+	{
+		FieldParser() = default;
+		FieldParser(const std::string& type, ParseFieldFunc parseFunction)
+			: type(type), parseFunction(parseFunction) {}
 
-	void newIngredient();
-	void newMagicalEffect();
-	
-	void parseRecord();
-	void parseGenericRecord();
-	void parsePluginInformation();
+		std::string type;
+		ParseFieldFunc parseFunction;
+	};
+	using FieldParsers = std::vector<FieldParser>;
+
+	using BeginRecordFunc = std::function<void(uint32_t id, uint32_t dataSize, uint32_t flags)>;
+	using EndRecordFunc = std::function<void(uint32_t id)>;
+	struct RecordParser
+	{
+		RecordParser() = default;
+		RecordParser(const std::string& type, const FieldParsers& fields, BeginRecordFunc beginFunction = nullptr, EndRecordFunc endFunction = nullptr)
+			: type(type), fields(fields), beginFunction(beginFunction), endFunction(endFunction) {}
+
+		std::string type;
+		FieldParsers fields;
+		BeginRecordFunc beginFunction;
+		EndRecordFunc endFunction;
+	};
+	using RecordParsers = std::vector<RecordParser>;
+
+	struct GroupParser
+	{
+		GroupParser() = default;
+		GroupParser(const std::string& type, const RecordParsers& records)
+			: type(type), records(records) {}
+
+		std::string type;
+		RecordParsers records;
+	};
+
 	void parseGroup();
-	void parseIngredient();
-	void parseMagicalEffect();
+	void parseRecord(const RecordParser& recordParser);
+	void ignoreRecord();
+	void parseFields(const FieldParsers& fieldParsers, uint32_t dataSize);
+	void ignoreField();
 
-	void parseField();
-	void parseGenericField();
-	void parseMaster();
-	void parseMagicalEffectData();
-	void parseEffectID();
-	void parseEffectItem();
+	void parsePluginInformation();
 
 	std::string getMaster(uint32_t id);
-	bool setIngredient(const Ingredient& ingredient); // Return true if adding, false if modifying existing
-	void updateMagicalEffects();
-
 	std::string readLStringField();
-	
-	bool m_useStringsTable = false,
-		m_parsedMGEF = false;
-	int m_nbIngrAdded = 0, m_nbIngrModified = 0,
-		m_nbEffAdded = 0, m_nbEffModified = 0;
+	std::string readType();
 
-	parser::Parser in;
-	std::string m_modFileName, m_modName, m_language;
-	Ingredient m_currentIngredient;
-	MagicalEffect m_currentMagicalEffect;
-	enum class RecordType { None, Plugin, Ingredient, MagicalEffect };
-	RecordType m_currentRecord;
-	Config& m_config;
-	StringsTable m_stringsTable;
 	std::vector<std::string> m_masters;
-
-	using MGEFEntry = std::pair < uint32_t, std::streamoff >;
-	std::vector<MGEFEntry> m_magicalEffectsOffsets;
-
-	struct MGEFEntryComp
-	{
-		uint32_t idOf(const MGEFEntry& t) { return t.first; }
-		uint32_t idOf(const uint32_t& t) { return t; }
-
-		template <class T, class U>
-		bool operator() (const T& lhs, const U& rhs) { return idOf(lhs) < idOf(rhs); }
-	};
+	bool m_useStringsTable = false;
+	StringsTable m_stringsTable;
+	parser::Parser in;
+	std::string m_modFileName, m_modName, m_language;	
+	std::vector<GroupParser> m_groupParsers;
 };
 
 } // namespace modParser

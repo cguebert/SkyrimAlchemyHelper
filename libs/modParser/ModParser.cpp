@@ -2,7 +2,7 @@
 #include <fstream>
 
 #include "ModParser.h"
-#include "Mod.h"
+#include "ConfigParser.h"
 
 namespace modParser
 {
@@ -23,7 +23,7 @@ Config ModParser::parseConfig()
 {
 	Config config;
 	for (const auto& modPath : m_modsList)
-		Mod::parse(modPath, config, m_language);
+		ConfigParser::parse(modPath, m_language, config);
 	return config;
 }
 
