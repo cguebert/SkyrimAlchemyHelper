@@ -1,8 +1,10 @@
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 #include "ModParser.h"
 #include "ConfigParser.h"
+#include "ContainersParser.h"
 
 namespace modParser
 {
@@ -66,6 +68,47 @@ void ModParser::exportConfig(const Config& config)
 		}
 	}
 	ingredientsFile.close();
+}
+
+void ModParser::getContainersInfo(const IdsList& ids)
+{
+	// Create a list of all mods names
+	StringsList modsNames;
+	for (const auto& path : m_modsList)
+		modsNames.push_back(Mod::getModName(path));
+
+	// Sort the ids list by mod
+	struct ModData
+	{
+		shared_ptr<ContainersParser> parser;
+		vector<uint32_t> containersIds;
+	};
+	vector<ModData> mods;
+	int nbMods = m_modsList.size();
+	mods.resize(nbMods);
+
+	for (auto id : ids)
+	{
+		int8_t modId = id >> 24;
+		auto& mod = mods[modId];
+		if (!mod.parser)
+			mod.parser = make_shared<ContainersParser>(m_modsList[modId], m_language, modsNames);
+		mod.containersIds.push_back(id);
+	}
+
+	// Ask the information for each container and put it in this list
+	ContainersParser::Containers containers;
+	for (auto& mod : mods)
+	{
+		if (mod.parser)
+		{
+			auto c = mod.parser->findContainers(mod.containersIds);
+			containers.insert(containers.end(), c.begin(), c.end());
+		}
+	}
+
+	for (const auto& c : containers)
+		std::cout << hex << uppercase << c.id << " " << c.base << " " << c.cell << dec << endl;
 }
 
 } // namespace modParser

@@ -7,6 +7,7 @@ set(HEADER_FILES
 	BSAFile.h
 	Config.h
 	ConfigParser.h
+	ContainersParser.h
 	Mod.h
 	ModParser.h
 	StringsTable.h
@@ -15,6 +16,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
 	BSAFile.cpp
 	ConfigParser.cpp
+	ContainersParser.cpp
 	Mod.cpp
 	ModParser.cpp
 	StringsTable.cpp

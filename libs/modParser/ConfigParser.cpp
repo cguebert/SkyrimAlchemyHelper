@@ -42,6 +42,7 @@ ConfigParser::ConfigParser(const std::string& fileName, const std::string& langu
 			effect.id = effect.duration = 0;
 			effect.magnitude = 0;
 		}
+		return true;
 	};
 
 	ingRecord.endFunction = [this](uint32_t id) {
@@ -51,12 +52,11 @@ ConfigParser::ConfigParser(const std::string& fileName, const std::string& langu
 			++m_nbIngrModified;
 	};
 
-	ingRecord.fields.emplace_back("FULL", [this]() {
-		m_currentIngredient.name = readLStringField();
+	ingRecord.fields.emplace_back("FULL", [this](uint16_t dataSize) {
+		m_currentIngredient.name = readLStringField(dataSize);
 	});
 
-	ingRecord.fields.emplace_back("EFID", [this]() {
-		uint16_t dataSize; in >> dataSize;
+	ingRecord.fields.emplace_back("EFID", [this](uint16_t dataSize) {
 		uint32_t id; in >> id;
 		for (auto& effect : m_currentIngredient.effects)
 		{
@@ -68,8 +68,7 @@ ConfigParser::ConfigParser(const std::string& fileName, const std::string& langu
 		}
 	});
 
-	ingRecord.fields.emplace_back("EFIT", [this]() {
-		uint16_t dataSize; in >> dataSize;
+	ingRecord.fields.emplace_back("EFIT", [this](uint16_t dataSize) {
 		uint32_t area;
 		int i = 0;
 		while (i < 3 && m_currentIngredient.effects[i + 1].id)
@@ -83,6 +82,7 @@ ConfigParser::ConfigParser(const std::string& fileName, const std::string& langu
 	// We don't parse every effects yet, we will filter later for only the alchemy ones
 	RecordParsers mgefParsers = { { "MGEF", {}, [this](uint32_t id, uint32_t dataSize, uint32_t /*flags*/) {
 		m_magicalEffectsOffsets.emplace_back(id, dataSize, in.tellg());
+		return false;
 	} } };
 
 	m_groupParsers.emplace_back("MGEF", mgefParsers);
@@ -139,18 +139,17 @@ void ConfigParser::updateMagicalEffects()
 
 	// Prepare the parsers for the magical effects fields
 	FieldParsers mgefFields;
-	mgefFields.emplace_back("FULL", [this]() {
-		m_currentMagicalEffect.name = readLStringField();
+	mgefFields.emplace_back("FULL", [this](uint16_t dataSize) {
+		m_currentMagicalEffect.name = readLStringField(dataSize);
 	});
 
-	mgefFields.emplace_back("DATA", [this]() {
-		in.jump(2);
+	mgefFields.emplace_back("DATA", [this](uint16_t dataSize) {
 		in >> m_currentMagicalEffect.flags >> m_currentMagicalEffect.baseCost;
 		in.jump(144); // DATA is 152 bytes long
 	});
 
-	mgefFields.emplace_back("DNAM", [this]() {
-		m_currentMagicalEffect.description = readLStringField();
+	mgefFields.emplace_back("DNAM", [this](uint16_t dataSize) {
+		m_currentMagicalEffect.description = readLStringField(dataSize);
 	});
 
 	// Get the name of each magical effect

@@ -13,6 +13,9 @@ public:
 	Config parseConfig(); // Parse all mods and look for alchemy ingredients and their effects
 	void exportConfig(const Config& config); // Useful for debug purposes
 
+	using IdsList = std::vector<uint32_t>;
+	void getContainersInfo(const IdsList& ids);
+
 protected:
 	StringsList m_modsList;
 	std::string m_language = "english";

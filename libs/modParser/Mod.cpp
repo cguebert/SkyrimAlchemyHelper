@@ -8,7 +8,7 @@ namespace modParser
 
 using namespace std;
 
-string getModName(const string& modFileName)
+string Mod::getModName(const string& modFileName)
 {
 	auto p = modFileName.find_last_of("/\\");
 	if (p != string::npos)
@@ -36,16 +36,15 @@ Mod::Mod(const string& fileName, const std::string& language)
 
 void Mod::doParse()
 {
-	// Top level records
-	string type = readType();
-	if (type == "TES4")
+	if (!m_dataOffset)
 		parsePluginInformation();
 	else
-		cerr << "Error: No TES4 record at the start of the file" << endl;
-
+		in.seekg(m_dataOffset);
+	
+	// Top level records
 	while (!in.eof())
 	{
-		type = readType();
+		string type = readType();
 		if (in.stream().eof())
 			return;
 		else if (type == "GRUP")
@@ -71,18 +70,23 @@ void Mod::parseGroup()
 			while (in.tellg() - start < groupSize)
 			{
 				string recordType = readType();
-				bool parsed = false;
-				for (auto& record : group.records)
+				if (recordType == "GRUP")
+					parseSubGroup(group);
+				else
 				{
-					if (record.type == recordType)
+					bool parsed = false;
+					for (auto& record : group.records)
 					{
-						parseRecord(record);
-						parsed = true;
-						break;
+						if (record.type == recordType)
+						{
+							parseRecord(record);
+							parsed = true;
+							break;
+						}
 					}
+					if (!parsed)
+						ignoreRecord();
 				}
-				if (!parsed)
-					ignoreRecord();
 			}
 
 			parsedGroup = true;
@@ -94,6 +98,43 @@ void Mod::parseGroup()
 		in.seekg(start + groupSize);
 }
 
+void Mod::parseSubGroup(const GroupParser& group)
+{
+	if (group.beginSubGroupFunction)
+		group.beginSubGroupFunction();
+
+	auto start = in.tellg() - 4;
+	uint32_t groupSize;
+	in >> groupSize;
+	string groupType = readType();
+	in.jump(12);
+
+	while (in.tellg() - start < groupSize)
+	{
+		string recordType = readType();
+		if (recordType == "GRUP")
+			parseSubGroup(group);
+		else
+		{
+			bool parsed = false;
+			for (auto& record : group.records)
+			{
+				if (record.type == recordType)
+				{
+					parseRecord(record);
+					parsed = true;
+					break;
+				}
+			}
+			if (!parsed)
+				ignoreRecord();
+		}
+	}
+
+	if (group.endSubGroupFunction)
+		group.endSubGroupFunction();
+}
+
 void Mod::parseRecord(const RecordParser& recordParser)
 {
 	uint32_t dataSize, flags, id;
@@ -101,9 +142,18 @@ void Mod::parseRecord(const RecordParser& recordParser)
 	in.jump(8);
 
 	if (recordParser.beginFunction)
-		recordParser.beginFunction(id, dataSize, flags);
+	{
+		if (!recordParser.beginFunction(id, dataSize, flags))
+		{
+			in.jump(dataSize);
+			return;
+		}
+	}
 
-	parseFields(recordParser.fields, dataSize);
+	if (recordParser.fields.empty())
+		in.jump(dataSize);
+	else
+		parseFields(recordParser.fields, dataSize);
 
 	if (recordParser.endFunction)
 		recordParser.endFunction(id);
@@ -122,6 +172,9 @@ void Mod::parseFields(const FieldParsers& fieldParsers, uint32_t dataSize)
 	while (in.tellg() - start < dataSize)
 	{
 		string type = readType();
+		uint16_t dataSize;
+		in >> dataSize;
+		auto startField = in.tellg(); // TEMP DEBUG
 		bool parsed = false;
 		for (const auto& field : fieldParsers)
 		{
@@ -129,7 +182,7 @@ void Mod::parseFields(const FieldParsers& fieldParsers, uint32_t dataSize)
 			{
 				if (field.parseFunction)
 				{
-					field.parseFunction();
+					field.parseFunction(dataSize);
 					parsed = true;
 				}
 				break;
@@ -137,32 +190,33 @@ void Mod::parseFields(const FieldParsers& fieldParsers, uint32_t dataSize)
 		}
 
 		if (!parsed)
-			ignoreField();
-	}
-}
+			in.jump(dataSize);
 
-void Mod::ignoreField()
-{
-	uint16_t dataSize;
-	in >> dataSize;
-	in.jump(dataSize);
+		if (in.tellg() != startField + dataSize) // TEMP DEBUG
+		{
+			cerr << "Error in parsing field " << type << endl;
+			exit(1);
+		}
+	}
 }
 
 void Mod::parsePluginInformation()
 {
+	string type = readType();
+	if (type != "TES4")
+	{
+		cerr << "Error: No TES4 record at the start of the file" << endl;
+		return;
+	}
+
 	uint32_t dataSize, flags;
 	in >> dataSize >> flags;
 	in.jump(12);
 
 	m_useStringsTable = (flags & 0x80) != 0;
-	if (m_useStringsTable)
-		m_stringsTable.load(m_modFileName, m_language);
 
 	FieldParsers fields;
-	fields.emplace_back("MAST", [this](){
-		uint16_t dataSize;
-		in >> dataSize;
-
+	fields.emplace_back("MAST", [this](uint16_t dataSize){
 		string name;
 		name.resize(dataSize - 1); // Don't read null character in the string
 		in.stream().read(&name[0], dataSize - 1);
@@ -171,6 +225,8 @@ void Mod::parsePluginInformation()
 		m_masters.push_back(getModName(name));
 	});
 	parseFields(fields, dataSize);
+
+	m_dataOffset = in.tellg();
 }
 
 std::string Mod::getMaster(uint32_t id)
@@ -189,15 +245,17 @@ std::string Mod::getMaster(uint32_t id)
 	}
 }
 
-string Mod::readLStringField()
+string Mod::readLStringField(uint16_t dataSize)
 {
-	uint16_t dataSize;
-	in >> dataSize;
-
 	if (m_useStringsTable)
 	{
 		uint32_t id;
 		in >> id;
+		if (!m_stringsTableLoaded)
+		{
+			m_stringsTable.load(m_modFileName, m_language);
+			m_stringsTableLoaded = true;
+		}
 		return m_stringsTable.get(id);
 	}
 	else

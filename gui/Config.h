@@ -43,6 +43,13 @@ public:
 	};
 	using Ingredients = std::vector<Ingredient>;
 
+	struct Container
+	{
+		quint32 code = 0, cellCode = 0;
+		QString name, location;
+	};
+	using Containers = std::vector<Container>;
+
 public:
 	static Config& main() // Not a singleton, just the one everyone use
 	{ static Config config; return config; }
@@ -50,6 +57,7 @@ public:
 	Plugins plugins;
 	Effects effects;
 	Ingredients ingredients;
+	Containers containers;
 
 	void load();
 	void save() const;

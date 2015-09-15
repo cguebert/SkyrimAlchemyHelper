@@ -106,6 +106,10 @@ void GameSave::load(QString fileName)
 		m_containers.push_back(std::move(container));
 	}
 
+	std::sort(m_containers.begin(), m_containers.end(), [](const Container& lhs, const Container& rhs) {
+		return lhs.id < rhs.id;
+	});
+
 	// Compute inventory (remove ingredients with a count of zero)
 	m_inventory.clear();
 	for (int i = 0; i < nbIngredients; ++i)

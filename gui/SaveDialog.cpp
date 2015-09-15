@@ -59,7 +59,7 @@ SaveDialog::SaveDialog(QWidget *parent)
 
 	m_minValidNbIngredientsEdit = new QLineEdit;
 	m_minValidNbIngredientsEdit->setText(QString::number(settings.minValidNbIngredients));
-	m_minValidNbIngredientsEdit->setToolTip(tr("Consider invalid a container that has less than this number of type of ingredients."));
+	m_minValidNbIngredientsEdit->setToolTip(tr("Do not keep containers that have less than this number of type of ingredients."));
 	parseSettingsLayout->addRow(tr("Minimum valid number of ingredients types"), m_minValidNbIngredientsEdit);
 
 	m_minTotalIngredientsCountEdit = new QLineEdit;

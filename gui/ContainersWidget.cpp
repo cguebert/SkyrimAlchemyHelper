@@ -50,9 +50,12 @@ void ContainersWidget::refreshList()
 		containerWidget->setFrameShape(QFrame::Box);
 		
 		int nbIng = container.inventory.size();
-		auto idLabel = new QLabel(QString::number(container.id, 16).toUpper());
+		auto idLabel = new QLabel(getContainerLabel(container.id));
 		idLabel->setMinimumWidth(60);
+		m_idLabels.push_back(idLabel);
+
 		auto nbIngredientsLabel = new QLabel(tr("%1 ingredients").arg(nbIng));
+		nbIngredientsLabel->setMinimumWidth(80);
 		auto inventoryWidget = new InventoryWidget(container.inventory);
 		inventoryWidget->setMinimumHeight(std::min(25 + nbIng * 30, 250));
 		inventoryWidget->layout()->setContentsMargins(0, 0, 0, 0);
@@ -69,8 +72,8 @@ void ContainersWidget::refreshList()
 		auto topLayout = new QHBoxLayout;
 		topLayout->setSpacing(20);
 		topLayout->addWidget(toggleInventoryButton);
-		topLayout->addWidget(idLabel);
 		topLayout->addWidget(nbIngredientsLabel);
+		topLayout->addWidget(idLabel);
 		topLayout->addStretch();
 		
 		auto containerLayout = new QVBoxLayout(containerWidget);
@@ -106,4 +109,12 @@ void ContainersWidget::toggleInventoryWidget()
 			}
 		}
 	}
+}
+
+QString ContainersWidget::getContainerLabel(quint32 id)
+{
+	if (id == 0x14)
+		return tr("Player");
+
+	return QString::number(id, 16).toUpper();
 }
