@@ -48,7 +48,7 @@ ConfigModsParser::Result ConfigModsParser::parse()
 	modParser::ModParser modParser;
 	modParser.setModsList(modsPathList);
 	modParser.setLanguage(m_language.toStdString());
-	auto config = modParser.parseConfig();
+	m_config = modParser.parseConfig();
 
 	if (m_config.ingredientsList.empty())
 		return Result::Error_ModsParsing;
