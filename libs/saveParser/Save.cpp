@@ -217,67 +217,7 @@ Save::Inventory Save::searchForIngredients(const ChangeForm& form)
 	if (m_minValidNbIngredients > 0 && nb < m_minValidNbIngredients)
 		return Inventory();
 
-//	if (nb <= 2) // Cannot filter errors with only 2 values
-		return inventory;
-	
-	// We cut the list into ranges of continuously increasing or decreasing refIDs
-	enum class Progression { None, Increasing, Decreasing };
-	using InventoryIter = Inventory::const_iterator;
-	std::vector<std::pair<InventoryIter, InventoryIter>> ranges;
-	auto itBeg = inventory.begin(), itEnd = inventory.end();
-	ranges.emplace_back(itBeg, itBeg);
-	InventoryIter prevIt = itBeg;
-	Progression progresssion = Progression::None;
-	for (InventoryIter it = ++itBeg; it != itEnd; ++it)
-	{
-		bool newRange = false;
-		
-		if (prevIt->first < it->first) // Increasing values
-		{
-			if (progresssion == Progression::None)
-				progresssion = Progression::Increasing;
-			else if (progresssion == Progression::Decreasing)
-				newRange = true;
-		}
-		else if (prevIt->first > it->first) // Decreasing values
-		{
-			if (progresssion == Progression::None)
-				progresssion = Progression::Decreasing;
-			else if (progresssion == Progression::Increasing)
-				newRange = true;
-		}
-		else // Equal
-			newRange = true;
-
-		if (newRange)
-		{
-			ranges.back().second = it;
-			ranges.emplace_back(it, it);
-			progresssion = Progression::None;
-		}
-
-		prevIt = it;
-	}
-	ranges.back().second = itEnd;
-	
-	// We only want the longest range
-	int maxLen = 0, maxId = 0;
-	for (int i = 0, nbRanges = ranges.size(); i < nbRanges; ++i)
-	{
-		const auto& range = ranges[i];
-		int len = range.second - range.first;
-		if (len > maxLen)
-		{
-			maxLen = len;
-			maxId = i;
-		}
-	}
-
-	const auto& maxRange = ranges[maxId];
-	if (m_minValidNbIngredients > 0 && maxLen < m_minValidNbIngredients)
-		return Inventory();
-
-	return Inventory(maxRange.first, maxRange.second);
+	return inventory;
 }
 
 uint32_t Save::getFormID(const RefID& refID)
