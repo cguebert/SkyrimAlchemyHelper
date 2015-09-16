@@ -14,26 +14,26 @@ public:
 	{
 		uint32_t id = 0, id2 = 0, base = 0, cell = 0;
 		bool interior = true;
-		std::string baseName, cellName;
 	};
 	using Containers = std::vector<Container>;
 	Containers findContainers(const std::vector<uint32_t>& ids);
 
-	struct Cell
+	// Cell or container type
+	struct NameStruct
 	{
 		uint32_t id = 0, id2 = 0;
-		std::string cellName;
+		std::string name;
 	};
-	using Cells = std::vector<Cell>;
-	Cells getCellsName(const std::vector<uint32_t>& ids);
+	using NameStructs = std::vector<NameStruct>;
+	std::pair<NameStructs, NameStructs> getNames(const std::vector<uint32_t>& cellIds, const std::vector<uint32_t>& baseIds);
 
 protected:
 	void registerContainersParsers();
-	void registerCellsParsers();
+	void registerNamesParsers();
 
 	std::vector<uint8_t> m_mastersIds; // The ids of this mod's masters to their position in the complete mods list
 	Containers m_containers;
-	Cells m_cells;
+	NameStructs m_cells, m_containerTypes;
 
 	int m_currentId = -1;
 	uint32_t m_currentLocation = 0,

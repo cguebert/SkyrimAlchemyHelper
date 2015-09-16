@@ -70,7 +70,39 @@ void ModParser::exportConfig(const Config& config)
 	ingredientsFile.close();
 }
 
-void ModParser::getContainersInfo(const IdsList& ids)
+void setLocationNames(ModParser::Containers& containers, const ContainersParser::NameStructs& names)
+{
+	for (const auto& n : names)
+	{
+		uint32_t id = n.id;
+		auto it = find_if(containers.begin(), containers.end(), [id](const ModParser::Container& c) {
+			return c.id == id;
+		});
+
+		if (it == containers.end())
+			continue;
+
+		it->location = n.name;
+	}
+}
+
+void setTypeNames(ModParser::Containers& containers, const ContainersParser::NameStructs& names)
+{
+	for (const auto& n : names)
+	{
+		uint32_t id = n.id;
+		auto it = find_if(containers.begin(), containers.end(), [id](const ModParser::Container& c) {
+			return c.id == id;
+		});
+
+		if (it == containers.end())
+			continue;
+
+		it->type = n.name;
+	}
+}
+
+ModParser::Containers ModParser::getContainersInfo(const IdsList& ids)
 {
 	// Create a list of all mods names
 	StringsList modsNames;
@@ -111,9 +143,6 @@ void ModParser::getContainersInfo(const IdsList& ids)
 		mod.ids.clear();
 	}
 
-	for (const auto& c : containers)
-		cout << hex << uppercase << c.id << " " << c.base << " " << c.cell << dec << endl;
-	
 	// Make a list of the cells
 	vector<uint32_t> cells;
 	for (const auto& c : containers)
@@ -130,18 +159,70 @@ void ModParser::getContainersInfo(const IdsList& ids)
 		mod.ids.push_back(c);
 	}
 
+	// Make a list of the containers type
+	vector<uint32_t> containersTypes;
+	for (const auto& c : containers)
+		containersTypes.push_back(c.base);
+
+	sort(containersTypes.begin(), containersTypes.end());
+	containersTypes.erase(unique(containersTypes.begin(), containersTypes.end()), containersTypes.end());
+
+	// Split by mod 
+	for (auto c : containersTypes)
+	{
+		int8_t modId = c >> 24;
+		auto& mod = mods[modId];
+		mod.ids2.push_back(c);
+	}
+
+	Containers resultCont;
+	resultCont.resize(ids.size());
+	for (int i = 0, nb = ids.size(); i < nb; ++i)
+		resultCont[i].id = ids[i];
+
+	using IdNamePair = pair<uint32_t, string>;
+	vector<IdNamePair> locations, types;
+
 	// Ask the information for each cell
 	for (auto& mod : mods)
 	{ 
-		if (mod.ids.empty())
+		if (mod.ids.empty() && mod.ids2.empty())
 			continue;
 
 		if (!mod.parser)
 			mod.parser = make_shared<ContainersParser>(m_modsList[mod.id], m_language, modsNames);
 
-		mod.parser->getCellsName(mod.ids);
+		auto names = mod.parser->getNames(mod.ids, mod.ids2);
+		for (int i = 0, nb = mod.ids.size(); i < nb; ++i)
+			locations.emplace_back(mod.ids[i], names.first[i].name);
+
+		for (int i = 0, nb = mod.ids2.size(); i < nb; ++i)
+			types.emplace_back(mod.ids2[i], names.second[i].name);
+
 		mod.ids.clear();
+		mod.ids2.clear();
 	}
+
+	// Merge the location and type names into the containers
+	for (int i = 0, nb = containers.size(); i < nb; ++i)
+	{
+		uint32_t locId = containers[i].cell, typeId = containers[i].base;
+		auto itLoc = find_if(locations.begin(), locations.end(), [locId](const IdNamePair& inp) {
+			return inp.first == locId;
+		});
+
+		if (itLoc != locations.end())
+			resultCont[i].location = itLoc->second;
+
+		auto itType = find_if(types.begin(), types.end(), [typeId](const IdNamePair& inp) {
+			return inp.first == typeId;
+		});
+
+		if (itType != types.end())
+			resultCont[i].type = itType->second;
+	}
+
+	return resultCont;
 }
 
 } // namespace modParser

@@ -1,4 +1,5 @@
 #include "Mod.h"
+#include "zlib/zlib.h"
 
 #include <iostream>
 #include <fstream>
@@ -156,7 +157,36 @@ void Mod::parseRecord(const RecordParser& recordParser)
 	if (recordParser.fields.empty())
 		in.jump(dataSize);
 	else
+	{
+		bool compressed = false;
+		istringstream ss;
+		istream* oldPtr;
+		if (flags & 0x40000) // Compressed
+		{
+			compressed = true;
+			uint32_t decompSize;
+			in >> decompSize;
+			std::vector<unsigned char> compressedData;
+			compressedData.resize(dataSize - 4);
+			in >> compressedData;
+
+			string decompressedData;
+			decompressedData.resize(decompSize);
+
+			uLongf decSize = decompSize;
+			uncompress(reinterpret_cast<Bytef*>(&decompressedData[0]), &decSize, compressedData.data(), dataSize - 4);
+			ss.str(decompressedData);
+
+			oldPtr = in.streamPtr();
+			in.streamPtr() = &ss;
+			dataSize = decSize;
+		}
+
 		parseFields(recordParser.fields, dataSize);
+
+		if (compressed)
+			in.streamPtr() = oldPtr;
+	}
 
 	if (recordParser.endFunction)
 		recordParser.endFunction(id);

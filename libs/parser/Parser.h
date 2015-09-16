@@ -17,6 +17,7 @@ public:
 	void setStream(std::istringstream&& stream) { m_sstream = std::move(stream); m_in = &m_sstream; }
 
 	std::istream& stream() { return *m_in; }
+	std::istream*& streamPtr() { return m_in; }
 	std::streamoff tellg() { return m_in->tellg(); }
 	void seekg(std::streampos pos) { m_in->seekg(pos); }
 	void seekg(std::streamoff off, std::ios_base::seekdir dir) { m_in->seekg(off, dir); }
