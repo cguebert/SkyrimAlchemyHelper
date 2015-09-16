@@ -16,7 +16,7 @@ void ModParser::setModsList(const StringsList& list)
 	m_modsList = list;
 }
 
-void ModParser::setLanguage(const std::string& language)
+void ModParser::setLanguage(const string& language)
 {
 	m_language = language;
 }
@@ -77,38 +77,71 @@ void ModParser::getContainersInfo(const IdsList& ids)
 	for (const auto& path : m_modsList)
 		modsNames.push_back(Mod::getModName(path));
 
-	// Sort the ids list by mod
+	// Split the ids list by mod
 	struct ModData
 	{
+		int8_t id;
 		shared_ptr<ContainersParser> parser;
-		vector<uint32_t> containersIds;
+		vector<uint32_t> ids, ids2;
 	};
 	vector<ModData> mods;
 	int nbMods = m_modsList.size();
 	mods.resize(nbMods);
+	for (int i = 0; i < nbMods; ++i)
+		mods[i].id = i;
 
 	for (auto id : ids)
 	{
 		int8_t modId = id >> 24;
-		auto& mod = mods[modId];
-		if (!mod.parser)
-			mod.parser = make_shared<ContainersParser>(m_modsList[modId], m_language, modsNames);
-		mod.containersIds.push_back(id);
+		mods[modId].ids.push_back(id);
 	}
 
 	// Ask the information for each container and put it in this list
 	ContainersParser::Containers containers;
 	for (auto& mod : mods)
 	{
-		if (mod.parser)
-		{
-			auto c = mod.parser->findContainers(mod.containersIds);
-			containers.insert(containers.end(), c.begin(), c.end());
-		}
+		if (mod.ids.empty())
+			continue;
+
+		if (!mod.parser)
+			mod.parser = make_shared<ContainersParser>(m_modsList[mod.id], m_language, modsNames);
+
+		auto c = mod.parser->findContainers(mod.ids);
+		containers.insert(containers.end(), c.begin(), c.end());
+		mod.ids.clear();
 	}
 
 	for (const auto& c : containers)
-		std::cout << hex << uppercase << c.id << " " << c.base << " " << c.cell << dec << endl;
+		cout << hex << uppercase << c.id << " " << c.base << " " << c.cell << dec << endl;
+	
+	// Make a list of the cells
+	vector<uint32_t> cells;
+	for (const auto& c : containers)
+		cells.push_back(c.cell);
+
+	sort(cells.begin(), cells.end());
+	cells.erase(unique(cells.begin(), cells.end()), cells.end());
+
+	// Split by mod 
+	for (auto c : cells)
+	{
+		int8_t modId = c >> 24;
+		auto& mod = mods[modId];
+		mod.ids.push_back(c);
+	}
+
+	// Ask the information for each cell
+	for (auto& mod : mods)
+	{ 
+		if (mod.ids.empty())
+			continue;
+
+		if (!mod.parser)
+			mod.parser = make_shared<ContainersParser>(m_modsList[mod.id], m_language, modsNames);
+
+		mod.parser->getCellsName(mod.ids);
+		mod.ids.clear();
+	}
 }
 
 } // namespace modParser

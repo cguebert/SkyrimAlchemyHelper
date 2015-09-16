@@ -27,3 +27,9 @@ add_library(${PROJECT_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES})
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Libraries")
 
 target_link_libraries(${PROJECT_NAME} "Parser")
+
+include_directories(${EXTLIB_INCLUDE_DIR})
+
+add_library("ZLib" STATIC IMPORTED)
+set_target_properties("ZLib" PROPERTIES IMPORTED_LOCATION "${EXTLIB_BINARIES_DIR}/zlibstatic.lib")
+target_link_libraries(${PROJECT_NAME} "ZLib")

@@ -39,7 +39,10 @@ void Mod::doParse()
 	if (!m_dataOffset)
 		parsePluginInformation();
 	else
+	{
+		in.stream().clear();
 		in.seekg(m_dataOffset);
+	}
 	
 	// Top level records
 	while (!in.eof())
