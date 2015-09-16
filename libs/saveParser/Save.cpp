@@ -201,7 +201,7 @@ Save::Inventory Save::searchForIngredients(const ChangeForm& form)
 	while ((refId = m_searchHelper.search(form.data, pos)) != -1)
 	{
 		int32_t nb = *reinterpret_cast<const int32_t*>(form.data.data() + pos + 3);
-		if (nb < 0 || (m_maxValidIngredientCount > 0 && nb > m_maxValidIngredientCount))
+		if (nb <= 0 || (m_maxValidIngredientCount > 0 && nb > m_maxValidIngredientCount))
 		{
 			++pos;
 			continue;

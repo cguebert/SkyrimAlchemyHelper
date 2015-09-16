@@ -221,6 +221,10 @@ void ConfigDialog::saveConfig()
 
 void ConfigDialog::defaultConfig()
 {
+	// Language
+	if (m_languageEdit->text().isEmpty())
+		m_languageEdit->setText("english");
+
 	// Skyrim Data folder
 	m_dataFolderEdit->setText("");
 	//   Steam folder

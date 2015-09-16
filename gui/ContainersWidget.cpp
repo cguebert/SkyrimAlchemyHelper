@@ -50,10 +50,13 @@ void ContainersWidget::refreshList()
 		auto containerWidget = new QFrame;
 		containerWidget->setFrameShape(QFrame::Box);
 		
-		int nbIng = container.inventory.size();
 		auto idLabel = new QLabel(QString::number(container.id, 16).toUpper());
 		idLabel->setMinimumWidth(60);
 		m_idLabels.emplace_back(idLabel, container.id);
+
+		int nbIng = 0;
+		for (const auto& item : container.inventory)
+			nbIng += item.second;
 
 		auto nbIngredientsLabel = new QLabel(tr("%1 ingredients").arg(nbIng));
 		nbIngredientsLabel->setMinimumWidth(80);

@@ -297,6 +297,9 @@ ModsParserWrapper::Result ModsParserWrapper::updateContainers(const std::vector<
 
 	for (const auto& c : containers)
 	{
+		if (c.type.empty() || c.location.empty())
+			continue;
+
 		ContainersCache::Container container;
 		container.code = c.id;
 		container.cellCode = c.cell;
