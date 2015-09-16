@@ -2,6 +2,8 @@
 
 #include <QString>
 #include <vector>
+#include <memory>
+#include <mutex>
 
 namespace modParser { struct Config; }
 
@@ -43,13 +45,6 @@ public:
 	};
 	using Ingredients = std::vector<Ingredient>;
 
-	struct Container
-	{
-		quint32 code = 0, cellCode = 0;
-		QString name, location;
-	};
-	using Containers = std::vector<Container>;
-
 public:
 	static Config& main() // Not a singleton, just the one everyone use
 	{ static Config config; return config; }
@@ -57,7 +52,6 @@ public:
 	Plugins plugins;
 	Effects effects;
 	Ingredients ingredients;
-	Containers containers;
 
 	void load();
 	void save() const;
@@ -74,4 +68,24 @@ protected:
 	void savePlugins() const;
 	void saveEffects() const;
 	void saveIngredients() const;
+};
+
+class ContainersCache
+{
+public:
+	static ContainersCache& instance()
+	{ static ContainersCache cache; return cache; }
+
+	struct Container
+	{
+		quint32 code = 0, cellCode = 0;
+		QString name, location;
+	};
+	using Containers = std::vector<Container>;
+	Containers containers;
+
+	std::mutex containersMutex; // Because other threads will update it
+
+protected:
+	ContainersCache() = default;
 };

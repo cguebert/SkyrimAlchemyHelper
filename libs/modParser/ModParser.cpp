@@ -70,38 +70,6 @@ void ModParser::exportConfig(const Config& config)
 	ingredientsFile.close();
 }
 
-void setLocationNames(ModParser::Containers& containers, const ContainersParser::NameStructs& names)
-{
-	for (const auto& n : names)
-	{
-		uint32_t id = n.id;
-		auto it = find_if(containers.begin(), containers.end(), [id](const ModParser::Container& c) {
-			return c.id == id;
-		});
-
-		if (it == containers.end())
-			continue;
-
-		it->location = n.name;
-	}
-}
-
-void setTypeNames(ModParser::Containers& containers, const ContainersParser::NameStructs& names)
-{
-	for (const auto& n : names)
-	{
-		uint32_t id = n.id;
-		auto it = find_if(containers.begin(), containers.end(), [id](const ModParser::Container& c) {
-			return c.id == id;
-		});
-
-		if (it == containers.end())
-			continue;
-
-		it->type = n.name;
-	}
-}
-
 ModParser::Containers ModParser::getContainersInfo(const IdsList& ids)
 {
 	// Create a list of all mods names
@@ -207,6 +175,8 @@ ModParser::Containers ModParser::getContainersInfo(const IdsList& ids)
 	for (int i = 0, nb = containers.size(); i < nb; ++i)
 	{
 		uint32_t locId = containers[i].cell, typeId = containers[i].base;
+		resultCont[i].cell = locId;
+
 		auto itLoc = find_if(locations.begin(), locations.end(), [locId](const IdNamePair& inp) {
 			return inp.first == locId;
 		});

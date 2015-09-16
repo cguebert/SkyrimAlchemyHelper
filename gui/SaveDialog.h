@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDialog>
+#include <QThread>
 
 #include "GameSave.h"
 
@@ -28,6 +29,7 @@ public slots:
 
 protected:
 	void refreshInformation();
+	void refreshContainersNames();
 
 	QWidget* m_saveInfoContainer;
 	InventoryWidget* m_inventoryWidget;
@@ -40,4 +42,20 @@ protected:
 	QLineEdit *m_maxValidIngredientCountEdit, 
 		*m_minValidNbIngredientsEdit, 
 		*m_minTotalIngredientsCountEdit;
+};
+
+class ContainersWorkerThread : public QThread
+{
+Q_OBJECT
+public:
+	ContainersWorkerThread(std::vector<uint32_t> ids, QObject* parent = nullptr)
+		: m_ids(ids), QThread(parent) {}
+
+	void run() override;
+
+signals:
+	void resultReady();
+
+protected:
+	std::vector<uint32_t> m_ids;
 };

@@ -3,9 +3,11 @@
 #include "SaveDialog.h"
 #include "Settings.h"
 
+#include "Config.h"
 #include "ContainersWidget.h"
 #include "InventoryWidget.h"
 #include "KnownIngredientsWidget.h"
+#include "ModsParserWrapper.h"
 
 SaveDialog::SaveDialog(QWidget *parent)
 	: QDialog(parent)
@@ -137,6 +139,8 @@ bool SaveDialog::modified() const
 
 void SaveDialog::refreshInformation()
 {
+	refreshContainersNames();
+
 	auto l = m_saveInfoContainer->layout();
 	if (l)
 		QWidget().setLayout(l);
@@ -232,4 +236,48 @@ void SaveDialog::setLoadMostRecent(int state)
 {
 	m_loadMostRecent = (state == Qt::Checked);
 	loadSave();
+}
+
+void SaveDialog::refreshContainersNames()
+{
+	const auto& saveContainers = m_gameSave.containers();
+	std::vector<uint32_t> saveIds, configIds, updateIds;
+	for (const auto& c : saveContainers)
+	{
+		if (c.id != 0x14)
+			saveIds.push_back(c.id);
+	}
+
+	{
+		std::lock_guard<std::mutex> lock(ContainersCache::instance().containersMutex);
+		const auto& configContainers = ContainersCache::instance().containers;
+		for (const auto& c : configContainers)
+			configIds.push_back(c.code);
+	}
+
+	std::sort(saveIds.begin(), saveIds.end());
+	std::sort(configIds.begin(), configIds.end());
+
+	std::set_difference(saveIds.begin(), saveIds.end(), configIds.begin(), configIds.end(), std::back_inserter(updateIds));
+	if (updateIds.empty())
+		return;
+
+	auto workerThread = new ContainersWorkerThread(updateIds, this);
+	connect(workerThread, SIGNAL(resultReady()), m_containersWidget, SLOT(updateIdLabels()));
+	connect(workerThread, SIGNAL(finished()), workerThread, SLOT(deleteLater()));
+	workerThread->start();
+}
+
+void ContainersWorkerThread::run()
+{
+	ModsParserWrapper parser;
+	if (parser.updateContainers(m_ids) != ModsParserWrapper::Result::Success)
+		return;
+
+	const auto& parserContainers = parser.containers();
+	std::lock_guard<std::mutex> lock(ContainersCache::instance().containersMutex);
+	auto& configContainers = ContainersCache::instance().containers;
+	configContainers.insert(configContainers.end(), parserContainers.begin(), parserContainers.end());
+
+	emit resultReady();
 }

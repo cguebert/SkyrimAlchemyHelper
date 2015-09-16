@@ -5,17 +5,22 @@
 #include "Config.h"
 #include <modParser/ModParser.h>
 
-class ConfigModsParser
+class ModsParserWrapper
 {
 public:
-	ConfigModsParser(bool useModOrganizer,
+	ModsParserWrapper(); // Using Settings values
+	ModsParserWrapper(bool useModOrganizer,
 		QString dataFolder,
 		QString pluginsListPath,
 		QString modOrganizerPath,
 		QString language);
+
 	enum class Result { Success, Error_ModOrganizer, Error_ModsParsing };
-	Result parse();
-	void copyToConfig(Config& config);
+	Result parseConfig();
+	void copyToConfig(Config& config) const;
+
+	Result updateContainers(const std::vector<uint32_t>& ids);
+	const ContainersCache::Containers& containers() const;
 
 	int nbPlugins() const;
 	int nbIngredients() const;
@@ -30,15 +35,19 @@ protected:
 
 	modParser::ModParser m_parser;
 	modParser::Config m_config;
+	ContainersCache::Containers m_containers;
 };
 
 //****************************************************************************//
 
-inline int ConfigModsParser::nbPlugins() const
+inline int ModsParserWrapper::nbPlugins() const
 { return m_config.modsList.size(); }
 
-inline int ConfigModsParser::nbIngredients() const
+inline int ModsParserWrapper::nbIngredients() const
 { return m_config.ingredientsList.size(); }
 
-inline int ConfigModsParser::nbEffects() const
+inline int ModsParserWrapper::nbEffects() const
 { return m_config.magicalEffectsList.size(); }
+
+inline const ContainersCache::Containers& ModsParserWrapper::containers() const
+{ return m_containers; }

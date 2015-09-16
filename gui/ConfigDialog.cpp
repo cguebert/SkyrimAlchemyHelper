@@ -8,7 +8,7 @@
 #include "IngredientsListWidget.h"
 #include "PluginsListWidget.h"
 
-#include "ConfigModsParser.h"
+#include "ModsParserWrapper.h"
 #include "Settings.h"
 
 namespace
@@ -369,27 +369,30 @@ bool ConfigDialog::testConfig()
 
 void ConfigDialog::parseMods()
 {
-	ConfigModsParser modsParser(m_useModOrganizerCheckBox->checkState() == Qt::Checked,
+	ModsParserWrapper modsParser(m_useModOrganizerCheckBox->checkState() == Qt::Checked,
 		m_dataFolderEdit->text(), m_pluginsListPathEdit->text(), m_modOrganizerPathEdit->text(),
 		m_languageEdit->text());
 
-	auto result = modsParser.parse();
+	auto result = modsParser.parseConfig();
 
 	switch (result)
 	{
-	case ConfigModsParser::Result::Error_ModOrganizer:
+	case ModsParserWrapper::Result::Error_ModOrganizer:
 		QMessageBox::warning(this, tr("Mods list error"), tr("There was an error trying to find mods with ModOrganizer"));
 		return;
 
-	case ConfigModsParser::Result::Error_ModsParsing:
+	case ModsParserWrapper::Result::Error_ModsParsing:
 		QMessageBox::warning(this, tr("Error in parsing"), tr("There was an error trying to extract ingredients from the mods"));
 		return;
 
-	case ConfigModsParser::Result::Success:
+	case ModsParserWrapper::Result::Success:
 		emit startModsParse();
 		modsParser.copyToConfig(m_config);
 		emit endModsParse();
 		m_modified = true;
+
+		std::lock_guard<std::mutex> lock(ContainersCache::instance().containersMutex);
+		ContainersCache::instance().containers.clear();
 
 		QMessageBox::information(this, tr("Loading finished"), tr("%1 ingredients found in %2 mods")
 			.arg(modsParser.nbIngredients()).arg(modsParser.nbPlugins()));

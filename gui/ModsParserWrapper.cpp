@@ -3,7 +3,8 @@
 #include <fstream>
 #include <sstream>
 
-#include "ConfigModsParser.h"
+#include "ModsParserWrapper.h"
+#include "Settings.h"
 
 namespace
 {
@@ -26,7 +27,17 @@ std::string loadFile(const std::string& fileName)
 
 }
 
-ConfigModsParser::ConfigModsParser(bool useModOrganizer,
+ModsParserWrapper::ModsParserWrapper()
+{
+	const auto& settings = Settings::instance();
+	m_useModOrganizer = settings.useModOrganizer;
+	m_dataFolder = settings.dataFolder;
+	m_pluginsListPath = settings.pluginsListPath;
+	m_modOrganizerPath = settings.modOrganizerPath;
+	m_language = settings.language;
+}
+
+ModsParserWrapper::ModsParserWrapper(bool useModOrganizer,
 	QString dataFolder,
 	QString pluginsListPath,
 	QString modOrganizerPath,
@@ -39,7 +50,7 @@ ConfigModsParser::ConfigModsParser(bool useModOrganizer,
 {
 }
 
-ConfigModsParser::Result ConfigModsParser::parse()
+ModsParserWrapper::Result ModsParserWrapper::parseConfig()
 {
 	std::vector<std::string> modsPathList;
 	if (!getModsPaths(modsPathList))
@@ -56,7 +67,7 @@ ConfigModsParser::Result ConfigModsParser::parse()
 	return Result::Success;
 }
 
-bool ConfigModsParser::getModsPaths(std::vector<std::string>& modsPathList)
+bool ModsParserWrapper::getModsPaths(std::vector<std::string>& modsPathList)
 {
 	// Add "Skyrim.esm" if not using Mod Organizer
 	if (!m_useModOrganizer)
@@ -93,7 +104,7 @@ bool ConfigModsParser::getModsPaths(std::vector<std::string>& modsPathList)
 	return true;
 }
 
-bool ConfigModsParser::findRealPaths(std::vector<std::string>& paths)
+bool ModsParserWrapper::findRealPaths(std::vector<std::string>& paths)
 {
 	QString modsDirPath;
 	if (m_modOrganizerPath.isEmpty() || m_pluginsListPath.isEmpty())
@@ -176,7 +187,7 @@ bool ConfigModsParser::findRealPaths(std::vector<std::string>& paths)
 	return true;
 }
 
-void ConfigModsParser::copyToConfig(Config& config)
+void ModsParserWrapper::copyToConfig(Config& config) const
 {
 	config.plugins.clear();
 	config.effects.clear();
@@ -268,4 +279,34 @@ void ConfigModsParser::copyToConfig(Config& config)
 	// Trim the tooltips of the effects
 	for (auto& effect : config.effects)
 		effect.tooltip = effect.tooltip.trimmed();
+}
+
+ModsParserWrapper::Result ModsParserWrapper::updateContainers(const std::vector<uint32_t>& ids)
+{
+	std::vector<std::string> modsPathList;
+	if (!getModsPaths(modsPathList))
+		return Result::Error_ModOrganizer;
+
+	modParser::ModParser modParser;
+	modParser.setModsList(modsPathList);
+	modParser.setLanguage(m_language.toStdString());
+	
+	auto containers = modParser.getContainersInfo(ids);
+	m_containers.clear();
+	m_containers.reserve(containers.size());
+
+	for (const auto& c : containers)
+	{
+		ContainersCache::Container container;
+		container.code = c.id;
+		container.cellCode = c.cell;
+		container.name = convert(c.type);
+		container.location = convert(c.location);
+		m_containers.push_back(container);
+	}
+
+	if (!ids.empty() && containers.empty())
+		return Result::Error_ModsParsing;
+
+	return Result::Success;
 }

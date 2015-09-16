@@ -31,6 +31,7 @@ void ContainersWidget::refreshList()
 
 	m_toggleButtons.clear();
 	m_inventoryWidgets.clear();
+	m_idLabels.clear();
 	
 	QVBoxLayout* vLayout = new QVBoxLayout;
 	QString containersCountText;
@@ -50,9 +51,9 @@ void ContainersWidget::refreshList()
 		containerWidget->setFrameShape(QFrame::Box);
 		
 		int nbIng = container.inventory.size();
-		auto idLabel = new QLabel(getContainerLabel(container.id));
+		auto idLabel = new QLabel(QString::number(container.id, 16).toUpper());
 		idLabel->setMinimumWidth(60);
-		m_idLabels.push_back(idLabel);
+		m_idLabels.emplace_back(idLabel, container.id);
 
 		auto nbIngredientsLabel = new QLabel(tr("%1 ingredients").arg(nbIng));
 		nbIngredientsLabel->setMinimumWidth(80);
@@ -85,6 +86,8 @@ void ContainersWidget::refreshList()
 
 	vLayout->addStretch();
 
+	updateIdLabels();
+
 	setLayout(vLayout);
 }
 
@@ -116,5 +119,20 @@ QString ContainersWidget::getContainerLabel(quint32 id)
 	if (id == 0x14)
 		return tr("Player");
 
+	const auto& containers = ContainersCache::instance().containers;
+	auto it = std::find_if(containers.begin(), containers.end(), [id](const ContainersCache::Container& c) {
+		return c.code == id;
+	});
+
+	if (it != containers.end())
+		return tr("%1 in %2").arg(it->name).arg(it->location);
+
 	return QString::number(id, 16).toUpper();
+}
+
+void ContainersWidget::updateIdLabels()
+{
+	std::lock_guard<std::mutex> lock(ContainersCache::instance().containersMutex);
+	for (auto& idLabel : m_idLabels)
+		idLabel.first->setText(getContainerLabel(idLabel.second));
 }

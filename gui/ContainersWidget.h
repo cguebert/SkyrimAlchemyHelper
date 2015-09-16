@@ -16,6 +16,7 @@ public:
 
 public slots:
 	void toggleInventoryWidget();
+	void updateIdLabels();
 
 protected:
 	QString getContainerLabel(quint32 id);
@@ -23,5 +24,5 @@ protected:
 	GameSave& m_gameSave;
 	std::vector<QPushButton*> m_toggleButtons;
 	std::vector<QWidget*> m_inventoryWidgets;
-	std::vector<QLabel*> m_idLabels;
+	std::vector<std::pair<QLabel*, quint32>> m_idLabels;
 };

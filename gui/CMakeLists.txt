@@ -14,7 +14,6 @@ add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 set(HEADER_FILES
 	Config.h
 	ConfigDialog.h
-	ConfigModsParser.h
 	ContainersWidget.h
 	DiscoverEffects.h
 	EffectsListWidget.h
@@ -27,6 +26,7 @@ set(HEADER_FILES
 	InventoryWidget.h
 	KnownIngredientsWidget.h
 	MainWindow.h
+	ModsParserWrapper.h
 	PluginsListWidget.h
 	PotionsList.h
 	PotionsListWidget.h
@@ -39,7 +39,6 @@ set(SOURCE_FILES
 	main.cpp
 	Config.cpp
 	ConfigDialog.cpp
-	ConfigModsParser.cpp
 	ContainersWidget.cpp
 	DiscoverEffects.cpp
 	EffectsListWidget.cpp
@@ -52,6 +51,7 @@ set(SOURCE_FILES
 	InventoryWidget.cpp
 	KnownIngredientsWidget.cpp
 	MainWindow.cpp
+	ModsParserWrapper.cpp
 	PluginsListWidget.cpp
 	PotionsList.cpp
 	PotionsListWidget.cpp
