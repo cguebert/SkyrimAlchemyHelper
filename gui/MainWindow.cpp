@@ -137,7 +137,7 @@ void MainWindow::afterLaunch()
 {
 	if (Settings::instance().isEmpty())
 	{
-		QMessageBox::information(this, tr("First launch"), tr("Please verify the configuration"));
+		QMessageBox::information(this, tr("First launch"), tr("Please verify the configuration, then click \"Parse mods\"."));
 		ConfigDialog dlg(this, true);
 		if(dlg.exec())
 			GameSave::instance().loadSaveFromConfig();

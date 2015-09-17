@@ -116,7 +116,7 @@ QWidget* ConfigDialog::createConfigPane()
 	gridLayout->addWidget(m_savesFolderEdit, 2, 1);
 	gridLayout->addWidget(savesButton, 2, 2);
 
-	m_useModOrganizerCheckBox = new QCheckBox("Use Mod Organizer");
+	m_useModOrganizerCheckBox = new QCheckBox(tr("Use Mod Organizer"));
 	connect(m_useModOrganizerCheckBox, SIGNAL(stateChanged(int)), this, SLOT(useModOrganizerChanged(int)));
 	gridLayout->addWidget(m_useModOrganizerCheckBox, 3, 0, 1, 3);
 
@@ -131,14 +131,17 @@ QWidget* ConfigDialog::createConfigPane()
 	gridLayout->addWidget(m_modOrganizerPathButton, 4, 2);
 
 	auto languageLabel = new QLabel(tr("Language"));
-	m_languageEdit = new QLineEdit;
+	m_languageComboBox = new QComboBox;
+	QStringList languages;
+	languages << "english" << "french" << "german" << "italian" << "spanish";
+	m_languageComboBox->addItems(languages);
 	gridLayout->addWidget(languageLabel, 5, 0);
-	gridLayout->addWidget(m_languageEdit, 5, 1);
+	gridLayout->addWidget(m_languageComboBox, 5, 1);
 
 	auto buttonsLayout = new QHBoxLayout;
 	auto parseModsButton = new QPushButton(tr("Parse mods"));
 	connect(parseModsButton, SIGNAL(clicked()), this, SLOT(parseMods()));
-	auto defaultConfigButton = new QPushButton(tr("Default configuration"));
+	auto defaultConfigButton = new QPushButton(tr("Auto configuration"));
 	connect(defaultConfigButton, SIGNAL(clicked()), this, SLOT(defaultConfig()));
 	buttonsLayout->addWidget(parseModsButton);
 	buttonsLayout->addWidget(defaultConfigButton);
@@ -202,7 +205,7 @@ void ConfigDialog::loadConfig()
 	m_pluginsListPathEdit->setText(settings.pluginsListPath);
 	m_savesFolderEdit->setText(settings.savesFolder);
 	m_modOrganizerPathEdit->setText(settings.modOrganizerPath);
-	m_languageEdit->setText(settings.language);
+	m_languageComboBox->setCurrentText(settings.language);
 }
 
 void ConfigDialog::saveConfig()
@@ -213,7 +216,7 @@ void ConfigDialog::saveConfig()
 	settings.pluginsListPath = m_pluginsListPathEdit->text();
 	settings.savesFolder = m_savesFolderEdit->text();
 	settings.modOrganizerPath = m_modOrganizerPathEdit->text();
-	settings.language = m_languageEdit->text();
+	settings.language = m_languageComboBox->currentText();
 
 	Config::main() = m_config;
 	m_config.save();
@@ -221,10 +224,6 @@ void ConfigDialog::saveConfig()
 
 void ConfigDialog::defaultConfig()
 {
-	// Language
-	if (m_languageEdit->text().isEmpty())
-		m_languageEdit->setText("english");
-
 	// Skyrim Data folder
 	m_dataFolderEdit->setText("");
 	//   Steam folder
@@ -375,7 +374,7 @@ void ConfigDialog::parseMods()
 {
 	ModsParserWrapper modsParser(m_useModOrganizerCheckBox->checkState() == Qt::Checked,
 		m_dataFolderEdit->text(), m_pluginsListPathEdit->text(), m_modOrganizerPathEdit->text(),
-		m_languageEdit->text());
+		m_languageComboBox->currentText());
 
 	auto result = modsParser.parseConfig();
 

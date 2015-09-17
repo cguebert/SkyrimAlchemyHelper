@@ -18,6 +18,7 @@ public:
 	explicit FiltersWidget(QWidget* parent = nullptr);
 
 	void clear();
+	QSize sizeHint() const;
 
 signals:
 	void modified();

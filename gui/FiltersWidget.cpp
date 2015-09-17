@@ -46,6 +46,11 @@ FiltersWidget::FiltersWidget(QWidget* parent)
 	setLayout(vLayout);
 }
 
+QSize FiltersWidget::sizeHint() const
+{
+	return QSize(500, 110);
+}
+
 void FiltersWidget::clear()
 {
 	while (auto child = m_effectsLayout->takeAt(0))

@@ -450,11 +450,14 @@ void PotionsList::prepareDefaultSortFunctions()
 
 void PotionsList::computePotionsData()
 {
+	m_additionalData.clear();
+
+	if (!GameSave::instance().isLoaded())
+		return;
+
 	const auto& ingredients = Config::main().ingredients;
 	const auto& ingredientsCount = GameSave::instance().ingredientsCount();
 	const auto& knownIngredients = GameSave::instance().knownIngredients();
-
-	m_additionalData.clear();
 
 	int nb = std::min(static_cast<int>(m_sortedPotions.size()), m_nbComputePotionsData);
 	m_additionalData.reserve(nb);

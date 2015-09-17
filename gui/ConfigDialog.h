@@ -6,6 +6,7 @@
 #include "Config.h"
 
 class QCheckBox;
+class QComboBox;
 class QLineEdit;
 class QPushButton;
 class QTabWidget;
@@ -44,8 +45,8 @@ protected:
 	QLineEdit *m_dataFolderEdit,
 		*m_pluginsListPathEdit,
 		*m_savesFolderEdit,
-		*m_modOrganizerPathEdit,
-		*m_languageEdit;
+		*m_modOrganizerPathEdit;
+	QComboBox *m_languageComboBox;
 	QCheckBox *m_useModOrganizerCheckBox;
 	QPushButton *m_modOrganizerPathButton;
 	bool m_modified = false;
