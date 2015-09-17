@@ -41,6 +41,7 @@ void replaceAll(std::string& text, const std::string& from, const std::string& t
 
 ConfigDialog::ConfigDialog(QWidget *parent, bool firstLaunch)
 	: QDialog(parent)
+	, m_firstLaunch(firstLaunch)
 {
 	// Copy main lists
 	m_config = Config::main();

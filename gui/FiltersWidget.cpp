@@ -227,6 +227,7 @@ void FiltersWidget::removeEffect()
 				m_effectsFilters.erase(it);
 				updatePotionsListFilters();
 			}
+			emit effectFilterRemoved(id);
 		}
 	}
 }
@@ -249,6 +250,7 @@ void FiltersWidget::removeIngredient()
 				m_ingredientsFilters.erase(it);
 				updatePotionsListFilters();
 			}
+			emit ingredientFilterRemoved(id);
 		}
 	}
 }

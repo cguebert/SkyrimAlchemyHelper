@@ -92,6 +92,8 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_ingredientsSelector, SIGNAL(ingredientFilterAction(FilterActionType, int)), m_filtersWidget, SLOT(ingredientFilterAction(FilterActionType, int)));
 	connect(m_effectsSelector, SIGNAL(effectFilterAction(FilterActionType, int)), m_filtersWidget, SLOT(effectFilterAction(FilterActionType, int)));
 	connect(m_filtersWidget, SIGNAL(modified()), m_potionsWidget, SLOT(refreshList()));
+	connect(m_filtersWidget, SIGNAL(ingredientFilterRemoved(int)), m_ingredientsSelector, SLOT(filterRemoved(int)));
+	connect(m_filtersWidget, SIGNAL(effectFilterRemoved(int)), m_effectsSelector, SLOT(filterRemoved(int)));
 
 	readSettings();
 }

@@ -7,7 +7,8 @@
 
 #include "FiltersWidget.h"
 
-class QVBoxLayout;
+class QPushButton;
+class QWidget;
 
 class SelectorWidget : public QWidget
 {
@@ -19,10 +20,20 @@ public:
 
 public slots:
 	void modifyFilter();
+	void filterRemoved(int);
 
 protected:
 	virtual bool filterAction(FilterActionType actionType, int id) = 0;
 
 	QStringList m_items, m_tooltips;
+
+	struct ItemBox
+	{
+		QWidget *widget;
+		QPushButton *addContainsButton, *addDoesNotContainButton, *removeButton;
+	};
+
+	using ItemBoxes = std::vector<ItemBox>;
+	ItemBoxes m_itemBoxes;
 };
 

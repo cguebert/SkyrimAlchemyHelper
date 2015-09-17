@@ -22,6 +22,8 @@ public:
 
 signals:
 	void modified();
+	void effectFilterRemoved(int);
+	void ingredientFilterRemoved(int);
 
 public slots:
 	void effectFilterAction(FilterActionType action, int id);
