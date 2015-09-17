@@ -70,6 +70,8 @@ protected:
 	void saveIngredients() const;
 };
 
+//****************************************************************************//
+
 class ContainersCache
 {
 public:
@@ -85,6 +87,9 @@ public:
 	Containers containers;
 
 	std::mutex containersMutex; // Because other threads will update it
+
+	void load();
+	void save();
 
 protected:
 	ContainersCache() = default;

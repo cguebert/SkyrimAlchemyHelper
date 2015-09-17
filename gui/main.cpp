@@ -12,6 +12,7 @@ int main(int argc, char *argv[])
 
 	// The order is important
 	Config::main().load();
+	ContainersCache::instance().load();
 	GameSave::instance().loadSaveFromConfig();
 
 	MainWindow window;

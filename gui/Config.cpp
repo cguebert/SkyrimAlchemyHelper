@@ -10,6 +10,7 @@ namespace
 const QString pluginsFileName = "data/plugins.txt";
 const QString effectsFileName = "data/effects.txt";
 const QString ingredientsFileName = "data/ingredients.txt";
+const QString containersFileName = "data/containers.txt";
 
 QString convert(const std::string& text)
 {
@@ -251,4 +252,60 @@ int Config::indexOfIngredient(quint32 pluginId, quint32 ingredientId) const
 	if (it != ingredients.end())
 		return it - ingredients.begin();
 	return -1;
+}
+
+//****************************************************************************//
+
+void ContainersCache::load()
+{
+	Containers containersList;
+	QFile inputFile(containersFileName);
+	if (inputFile.open(QIODevice::ReadOnly))
+	{
+		QTextStream in(&inputFile);
+		while (!in.atEnd())
+		{
+			Container container;
+			QString line = in.readLine();
+			QStringList split = line.split(" ");
+			if (split.size() == 2)
+			{
+				container.code = split[0].toUInt(nullptr, 16);
+				container.cellCode = split[1].toUInt(nullptr, 16);
+			}
+
+			container.name = in.readLine();
+			container.location = in.readLine();
+			if (!container.name.isEmpty() && !container.location.isEmpty())
+				containersList.push_back(container);
+		}
+		inputFile.close();
+	}
+
+	{
+		std::lock_guard<std::mutex> lock(containersMutex);
+		containers = containersList;
+	}
+}
+
+void ContainersCache::save()
+{
+	ContainersCache::Containers containersList;
+	{
+		std::lock_guard<std::mutex> lock(containersMutex);
+		containersList = containers;
+	}
+
+	QFile outputFile(containersFileName);
+	if (outputFile.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		QTextStream out(&outputFile);
+		for (const auto& container : containersList)
+		{
+			out << QString::number(container.code, 16).toUpper() << ' ';
+			out << QString::number(container.cellCode, 16).toUpper() << '\n';
+			out << container.name << '\n';
+			out << container.location << '\n';
+		}
+	}
 }

@@ -202,6 +202,8 @@ void SaveDialog::copySave()
 	settings.maxValidIngredientCount = m_maxValidIngredientCountEdit->text().toInt();
 	settings.minValidNbIngredients = m_minValidNbIngredientsEdit->text().toInt();
 	settings.minTotalIngredientsCount = m_minTotalIngredientsCountEdit->text().toInt();
+
+	ContainersCache::instance().save();
 }
 
 void SaveDialog::loadSave()
