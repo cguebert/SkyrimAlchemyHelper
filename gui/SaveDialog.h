@@ -5,8 +5,11 @@
 
 #include "GameSave.h"
 
-class QWidget;
+class QCheckBox;
+class QLabel;
 class QLineEdit;
+class QWidget;
+
 class InventoryWidget;
 class KnownIngredientsWidget;
 class ContainersWidget;
@@ -26,6 +29,7 @@ public slots:
 	void copySave();
 	void saveSelected(int index);
 	void setLoadMostRecent(int state);
+	void getContainersNamesChanged(int state);
 
 protected:
 	void refreshInformation();
@@ -42,6 +46,10 @@ protected:
 	QLineEdit *m_maxValidIngredientCountEdit, 
 		*m_minValidNbIngredientsEdit, 
 		*m_minTotalIngredientsCountEdit;
+	QCheckBox *m_playerOnlyCheckBox,
+		*m_getContainersNamesCheckBox,
+		*m_sameCellAsPlayerCheckBox;
+	QLabel *m_sameCellAsPlayerLabel;
 };
 
 class ContainersWorkerThread : public QThread

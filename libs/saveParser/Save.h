@@ -45,6 +45,7 @@ public:
 	void setMaxValidIngredientCount(int count); // Everything higher than this is considered invalid (if 0, accept everything)
 	void setMinValidNbIngredients(int nb); // Ignore containers (and the player inventory) if there is less than nb different ingredients (if 0, accept everything)
 	void setMinTotalIngredientsCount(int count); // Ignore containers if there are less than total count ingredients of all types
+	void setPlayerOnly(bool playerOnly); // Do not parse containers
 
 	using InventoryItem = std::pair<int, int>; // Index in listedIngredients, count
 	using Inventory = std::vector<InventoryItem>;
@@ -122,6 +123,7 @@ protected:
 	Containers m_containers;
 	SearchHelper m_searchHelper;
 	int m_maxValidIngredientCount = 0, m_minValidNbIngredients = 0, m_minTotalIngredientsCount = 0;
+	bool m_playerOnly = false; // If true, do not parse containers
 };
 
 //****************************************************************************//
@@ -149,6 +151,9 @@ inline void Save::setMinValidNbIngredients(int nb)
 
 inline void Save::setMinTotalIngredientsCount(int count)
 { m_minTotalIngredientsCount = count; }
+
+inline void Save::setPlayerOnly(bool playerOnly)
+{ m_playerOnly = playerOnly; }
 
 inline const Save::StringsList& Save::masters() const
 { return m_plugins; }

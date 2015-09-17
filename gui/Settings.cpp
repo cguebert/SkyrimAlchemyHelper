@@ -32,7 +32,10 @@ void Settings::load()
 	language = settings.value("language", "english").toString();
 
 	useModOrganizer = settings.value("useModOrganizer").toBool();
-	loadMostRecentSave = settings.value("loadMostRecentSave").toBool();
+	loadMostRecentSave = settings.value("loadMostRecentSave", true).toBool();
+	playerOnly = settings.value("playerOnly", false).toBool();
+	getContainersInfo = settings.value("getContainersInfo", true).toBool();
+	sameCellAsPlayer = settings.value("sameCellAsPlayer", false).toBool();
 
 	maxValidIngredientCount = settings.value("maxValidIngredientCount", 1000).toInt();
 	minValidNbIngredients = settings.value("minValidNbIngredients", 5).toInt();
@@ -52,6 +55,9 @@ void Settings::save()
 
 	settings.setValue("useModOrganizer", useModOrganizer);
 	settings.setValue("loadMostRecentSave", loadMostRecentSave);
+	settings.setValue("playerOnly", playerOnly);
+	settings.setValue("getContainersInfo", getContainersInfo);
+	settings.setValue("sameCellAsPlayer", sameCellAsPlayer);
 
 	settings.setValue("maxValidIngredientCount", maxValidIngredientCount);
 	settings.setValue("minValidNbIngredients", minValidNbIngredients);

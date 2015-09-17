@@ -69,10 +69,33 @@ SaveDialog::SaveDialog(QWidget *parent)
 	m_minTotalIngredientsCountEdit->setToolTip(tr("Do not keep containers that have less than this total number of ingredients of all types."));
 	parseSettingsLayout->addRow(tr("Minimum total number of ingredients"), m_minTotalIngredientsCountEdit);
 
+	// Settings for filtering containers based on their id
+	auto containersFiltersGroupBox = new QGroupBox(tr("Filter containers"));
+	auto containersFiltersLayout = new QFormLayout(containersFiltersGroupBox);
+
+	m_playerOnlyCheckBox = new QCheckBox;
+	m_playerOnlyCheckBox->setCheckState(settings.playerOnly ? Qt::Checked : Qt::Unchecked);
+	m_playerOnlyCheckBox->setToolTip(tr("Ignore all containers."));
+	containersFiltersLayout->addRow(tr("Only get the player's inventory"), m_playerOnlyCheckBox);
+
+	m_getContainersNamesCheckBox = new QCheckBox;
+	m_getContainersNamesCheckBox->setCheckState(settings.getContainersInfo ? Qt::Checked : Qt::Unchecked);
+	m_getContainersNamesCheckBox->setToolTip(tr("Reparse the mods to extract the containers name and location (can be long)."));
+	containersFiltersLayout->addRow(tr("Get the containers' names"), m_getContainersNamesCheckBox);
+
+	m_sameCellAsPlayerCheckBox = new QCheckBox;
+	m_sameCellAsPlayerCheckBox->setCheckState(settings.sameCellAsPlayer ? Qt::Checked : Qt::Unchecked);
+	m_sameCellAsPlayerCheckBox->setToolTip(tr("Only keep the containers in the same cell as the player."));
+	m_sameCellAsPlayerCheckBox->setEnabled(settings.getContainersInfo);
+	m_sameCellAsPlayerLabel = new QLabel(tr("Containers in same cell as player"));
+	m_sameCellAsPlayerLabel->setEnabled(settings.getContainersInfo);
+	containersFiltersLayout->addRow(m_sameCellAsPlayerLabel, m_sameCellAsPlayerCheckBox);
+
 	// Left layout
 	auto leftLayout = new QVBoxLayout;
 	leftLayout->addWidget(loadSettingsGroupBox);
 	leftLayout->addWidget(parseSettingsGroupBox);
+	leftLayout->addWidget(containersFiltersGroupBox);
 	leftLayout->addStretch();
 	
 	// Right widget
@@ -125,6 +148,7 @@ SaveDialog::SaveDialog(QWidget *parent)
 
 	connect(useMostRecentCheckBox, SIGNAL(stateChanged(int)), this, SLOT(setLoadMostRecent(int)));
 	connect(saveComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(saveSelected(int)));
+	connect(m_getContainersNamesCheckBox, SIGNAL(stateChanged(int)), this, SLOT(getContainersNamesChanged(int)));
 }
 
 QSize SaveDialog::sizeHint() const
@@ -139,7 +163,8 @@ bool SaveDialog::modified() const
 
 void SaveDialog::refreshInformation()
 {
-	refreshContainersNames();
+	if (m_getContainersNamesCheckBox->checkState() == Qt::Checked)
+		refreshContainersNames();
 
 	auto l = m_saveInfoContainer->layout();
 	if (l)
@@ -202,6 +227,9 @@ void SaveDialog::copySave()
 	settings.maxValidIngredientCount = m_maxValidIngredientCountEdit->text().toInt();
 	settings.minValidNbIngredients = m_minValidNbIngredientsEdit->text().toInt();
 	settings.minTotalIngredientsCount = m_minTotalIngredientsCountEdit->text().toInt();
+	settings.playerOnly = m_playerOnlyCheckBox->checkState() == Qt::Checked;
+	settings.getContainersInfo = m_getContainersNamesCheckBox->checkState() == Qt::Checked;
+	settings.sameCellAsPlayer = m_sameCellAsPlayerCheckBox->checkState() == Qt::Checked;
 
 	ContainersCache::instance().save();
 }
@@ -216,6 +244,7 @@ void SaveDialog::loadSave()
 	m_gameSave.setMaxValidIngredientCount(m_maxValidIngredientCountEdit->text().toInt());
 	m_gameSave.setMinValidNbIngredients(m_minValidNbIngredientsEdit->text().toInt());
 	m_gameSave.setMinTotalIngredientsCount(m_minTotalIngredientsCountEdit->text().toInt());
+	m_gameSave.setPlayerOnly(m_playerOnlyCheckBox->checkState() == Qt::Checked);
 
 	if (m_loadMostRecent && !m_savesList.empty())
 		m_gameSave.load(m_savesList.first().absoluteFilePath());
@@ -238,6 +267,13 @@ void SaveDialog::setLoadMostRecent(int state)
 {
 	m_loadMostRecent = (state == Qt::Checked);
 	loadSave();
+}
+
+void SaveDialog::getContainersNamesChanged(int state)
+{
+	bool enabled = (state == Qt::Checked);
+	m_sameCellAsPlayerCheckBox->setEnabled(enabled);
+	m_sameCellAsPlayerLabel->setEnabled(enabled);
 }
 
 void SaveDialog::refreshContainersNames()

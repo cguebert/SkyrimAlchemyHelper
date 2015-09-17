@@ -57,6 +57,7 @@ void GameSave::load(QString fileName)
 	save.setMaxValidIngredientCount(m_maxValidIngredientCount);
 	save.setMinValidNbIngredients(m_minValidNbIngredients);
 	save.setMinTotalIngredientsCount(m_minTotalIngredientsCount);
+	save.setPlayerOnly(m_playerOnly);
 	m_isLoaded = save.parse(fileName.toStdString());
 	if (!m_isLoaded)
 		return;

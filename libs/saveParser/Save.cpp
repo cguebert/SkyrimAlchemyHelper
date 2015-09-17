@@ -88,7 +88,7 @@ void Save::parseChangeForms()
 		ChangeForm form(in);
 		form.formID = getFormID(form.refID);
 		
-		if (form.formType == 0) // Container
+		if (form.formType == 0 && !m_playerOnly) // Container
 		{
 			form.loadData();
 			parseContainer(form);
