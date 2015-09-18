@@ -42,7 +42,7 @@ QVariant KnownIngredientsModel::data(const QModelIndex& index, int role) const
 		if (index.column())
 			return QVariant();
 
-		const QColor unknownBackgroundColor = QColor(192, 192, 192);
+		const QColor unknownBackgroundColor = QPalette().midlight().color();
 		const auto& item = m_gameSave.knownIngredients()[index.row()];
 		for (auto val : item)
 			if (!val)

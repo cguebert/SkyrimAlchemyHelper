@@ -4,11 +4,10 @@
 #include "ConfigDialog.h"
 #include "SaveDialog.h"
 
-#include "EffectsSelector.h"
 #include "FiltersWidget.h"
-#include "IngredientsSelector.h"
 #include "PotionsListWidget.h"
 #include "PotionsList.h"
+#include "SelectorWidget.h"
 #include "Settings.h"
 
 MainWindow::MainWindow(QWidget *parent)

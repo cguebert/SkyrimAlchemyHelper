@@ -17,12 +17,10 @@ set(HEADER_FILES
 	ContainersWidget.h
 	DiscoverEffects.h
 	EffectsListWidget.h
-	EffectsSelector.h
 	FiltersWidget.h
 	FlowLayout.h
 	GameSave.h
 	IngredientsListWidget.h
-	IngredientsSelector.h
 	InventoryWidget.h
 	KnownIngredientsWidget.h
 	MainWindow.h
@@ -42,12 +40,10 @@ set(SOURCE_FILES
 	ContainersWidget.cpp
 	DiscoverEffects.cpp
 	EffectsListWidget.cpp
-	EffectsSelector.cpp
 	FiltersWidget.cpp
 	FlowLayout.cpp
 	GameSave.cpp
 	IngredientsListWidget.cpp
-	IngredientsSelector.cpp
 	InventoryWidget.cpp
 	KnownIngredientsWidget.cpp
 	MainWindow.cpp

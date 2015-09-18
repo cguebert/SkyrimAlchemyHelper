@@ -1,6 +1,7 @@
 #include <QtWidgets>
 
 #include "SelectorWidget.h"
+#include "Config.h"
 
 SelectorWidget::SelectorWidget(QWidget* parent) 
 	: QWidget(parent)
@@ -137,4 +138,58 @@ void SelectorWidget::filterRemoved(int id)
 	itemBox.removeButton->hide();
 	itemBox.widget->setBackgroundRole(QPalette::Window);
 	itemBox.widget->setAutoFillBackground(false);
+}
+
+//****************************************************************************//
+
+EffectsSelector::EffectsSelector(QWidget* parent)
+	: SelectorWidget(parent)
+{
+	updateList();
+}
+
+void EffectsSelector::updateList()
+{
+	const auto& config = Config::main();
+
+	QStringList names, tooltips;
+	for (const auto& effect : config.effects)
+	{
+		names << effect.name;
+		tooltips << effect.tooltip;
+	}
+	setItems(names, tooltips);
+}
+
+bool EffectsSelector::filterAction(FilterActionType action, int id)
+{
+	emit effectFilterAction(action, id);
+	return true;
+}
+
+//****************************************************************************//
+
+IngredientsSelector::IngredientsSelector(QWidget* parent)
+	: SelectorWidget(parent)
+{
+	updateList();
+}
+
+void IngredientsSelector::updateList()
+{
+	const auto& config = Config::main();
+
+	QStringList names, tooltips;
+	for (const auto& ingredient : config.ingredients)
+	{
+		names << ingredient.name;
+		tooltips << ingredient.tooltip;
+	}
+	setItems(names, tooltips);
+}
+
+bool IngredientsSelector::filterAction(FilterActionType action, int id)
+{
+	emit ingredientFilterAction(action, id);
+	return false;
 }
