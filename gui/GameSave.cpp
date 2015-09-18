@@ -32,6 +32,8 @@ GameSave::GameSave()
 	m_maxValidIngredientCount = settings.maxValidIngredientCount;
 	m_minValidNbIngredients = settings.minValidNbIngredients;
 	m_minTotalIngredientsCount = settings.minTotalIngredientsCount;
+	m_playerOnly = settings.playerOnly;
+	m_sameCellAsPlayer = settings.sameCellAsPlayer;
 }
 
 void GameSave::load(QString fileName)
@@ -72,6 +74,7 @@ void GameSave::load(QString fileName)
 	m_header.playerName = convert(header.playerName);
 	m_header.playerLevel = header.playerLevel;
 	m_header.saveNumber = header.saveNumber;
+	m_header.locationId = header.worldSpace2;
 
 	// Convert known ingredients
 	std::array<bool, 4> unknownIngredient = { false, false, false, false };
@@ -88,8 +91,9 @@ void GameSave::load(QString fileName)
 	// Convert all containers
 	const auto& saveIngredients = save.listedIngredients();
 	const auto saveContainers = save.containers();
-	m_containers.reserve(saveContainers.size());
-	m_ingredientsCount.assign(nbIngredients, 0);
+	const auto nbSaveContainers = saveContainers.size();
+	m_containers.reserve(nbSaveContainers);
+	m_containersState.assign(nbSaveContainers, true);
 	for (const auto& sc : saveContainers)
 	{
 		Container container;
@@ -101,7 +105,6 @@ void GameSave::load(QString fileName)
 				continue;
 
 			container.inventory.emplace_back(ingId, ing.second);
-			m_ingredientsCount[ingId] += ing.second;
 		}
 
 		m_containers.push_back(std::move(container));
@@ -111,13 +114,7 @@ void GameSave::load(QString fileName)
 		return lhs.id < rhs.id;
 	});
 
-	// Compute inventory (remove ingredients with a count of zero)
-	m_inventory.clear();
-	for (int i = 0; i < nbIngredients; ++i)
-	{
-		if (m_ingredientsCount[i])
-			m_inventory.emplace_back(i, m_ingredientsCount[i]);
-	}
+	filterContainers();
 }
 
 void GameSave::loadSaveFromConfig()
@@ -165,4 +162,52 @@ QFileInfoList GameSave::savesList()
 	QStringList filters;
 	filters << "*.ess";
 	return dir.entryInfoList(filters, QDir::Files, QDir::Time);
+}
+
+void GameSave::computeIngredientsCount()
+{
+	const auto& config = Config::main();
+	const auto& ingredients = config.ingredients;
+	const int nbIngredients = ingredients.size();
+
+	m_ingredientsCount.assign(nbIngredients, 0);
+	for (int i = 0, nb = m_containers.size(); i < nb; ++i)
+	{
+		const auto& container = m_containers[i];
+		if (m_containersState[i])
+		{
+			for (const auto& ing : container.inventory)
+				m_ingredientsCount[ing.first] += ing.second;
+		}
+	}
+
+	// Compute inventory (remove ingredients with a count of zero)
+	m_inventory.clear();
+	for (int i = 0; i < nbIngredients; ++i)
+	{
+		if (m_ingredientsCount[i])
+			m_inventory.emplace_back(i, m_ingredientsCount[i]);
+	}
+}
+
+void GameSave::filterContainers()
+{
+	if (m_sameCellAsPlayer)
+	{
+		const auto& containersInfo = ContainersCache::instance().containers;
+		const auto cellId = m_header.locationId;
+		for (int i = 0, nb = m_containers.size(); i < nb; ++i)
+		{
+			const auto& container = m_containers[i];
+			auto id = container.id;
+			auto it = std::find_if(containersInfo.begin(), containersInfo.end(), [id](const ContainersCache::Container& c) {
+				return c.code == id;
+			});
+
+			if (it != containersInfo.end() && it->cellCode != cellId)
+				m_containersState[i] = false;
+		}
+	}
+
+	computeIngredientsCount();
 }

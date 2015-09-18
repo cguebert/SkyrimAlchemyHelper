@@ -27,11 +27,10 @@ void ContainersWidget::refreshList()
 
 	const auto& ingredients = Config::main().ingredients;
 	const auto& containers = m_gameSave.containers();
+	const auto& containersState = m_gameSave.containersState();
 	int nbContainers = containers.size();
 
-	m_toggleButtons.clear();
-	m_inventoryWidgets.clear();
-	m_idLabels.clear();
+	m_containersWidgets.clear();
 	
 	QVBoxLayout* vLayout = new QVBoxLayout;
 	QString containersCountText;
@@ -52,7 +51,6 @@ void ContainersWidget::refreshList()
 		
 		auto idLabel = new QLabel(QString::number(container.id, 16).toUpper());
 		idLabel->setMinimumWidth(60);
-		m_idLabels.emplace_back(idLabel, container.id);
 
 		int nbIng = 0;
 		for (const auto& item : container.inventory)
@@ -64,17 +62,24 @@ void ContainersWidget::refreshList()
 		inventoryWidget->setMinimumHeight(std::min(25 + nbIng * 30, 250));
 		inventoryWidget->layout()->setContentsMargins(0, 0, 0, 0);
 		inventoryWidget->hide();
-		m_inventoryWidgets.push_back(inventoryWidget);
 
 		auto toggleInventoryAction = new QAction(containerWidget);
 		toggleInventoryAction->setData(i);
 		auto toggleInventoryButton = new QPushButton(tr("Show"));
 		connect(toggleInventoryButton, SIGNAL(clicked(bool)), toggleInventoryAction, SLOT(trigger()));
 		connect(toggleInventoryAction, SIGNAL(triggered(bool)), this, SLOT(toggleInventoryWidget()));
-		m_toggleButtons.push_back(toggleInventoryButton);
+
+		auto activeCheckBox = new QCheckBox;
+		activeCheckBox->setToolTip(tr("Add this container to the ingredients available for potions."));
+		activeCheckBox->setCheckState(containersState[i] ? Qt::Checked : Qt::Unchecked);
+		auto toggleActiveAction = new QAction(containerWidget);
+		toggleActiveAction->setData(i);
+		connect(activeCheckBox, SIGNAL(stateChanged(int)), toggleActiveAction, SLOT(trigger()));
+		connect(toggleActiveAction, SIGNAL(triggered(bool)), this, SLOT(toggleContainerStatus()));
 
 		auto topLayout = new QHBoxLayout;
 		topLayout->setSpacing(20);
+		topLayout->addWidget(activeCheckBox);
 		topLayout->addWidget(toggleInventoryButton);
 		topLayout->addWidget(nbIngredientsLabel);
 		topLayout->addWidget(idLabel);
@@ -85,6 +90,14 @@ void ContainersWidget::refreshList()
 		containerLayout->addWidget(inventoryWidget);
 
 		vLayout->addWidget(containerWidget);
+
+		ContainerWidgets widgets;
+		widgets.id = container.id;
+		widgets.activeCheckBox = activeCheckBox;
+		widgets.toggleButton = toggleInventoryButton;
+		widgets.idLabel = idLabel;
+		widgets.inventoryWidget = inventoryWidget;
+		m_containersWidgets.push_back(widgets);
 	}
 
 	vLayout->addStretch();
@@ -103,15 +116,16 @@ void ContainersWidget::toggleInventoryWidget()
 		int id = action->data().toInt(&ok);
 		if (ok)
 		{
-			if (m_inventoryWidgets[id]->isVisible())
+			auto& widgets = m_containersWidgets[id];
+			if (widgets.inventoryWidget->isVisible())
 			{
-				m_inventoryWidgets[id]->hide();
-				m_toggleButtons[id]->setText(tr("Show"));
+				widgets.inventoryWidget->hide();
+				widgets.toggleButton->setText(tr("Show"));
 			}
 			else
 			{
-				m_inventoryWidgets[id]->show();
-				m_toggleButtons[id]->setText(tr("Hide"));
+				widgets.inventoryWidget->show();
+				widgets.toggleButton->setText(tr("Hide"));
 			}
 		}
 	}
@@ -136,6 +150,33 @@ QString ContainersWidget::getContainerLabel(quint32 id)
 void ContainersWidget::updateIdLabels()
 {
 	std::lock_guard<std::mutex> lock(ContainersCache::instance().containersMutex);
-	for (auto& idLabel : m_idLabels)
-		idLabel.first->setText(getContainerLabel(idLabel.second));
+	for (auto& widgets : m_containersWidgets)
+		widgets.idLabel->setText(getContainerLabel(widgets.id));
+}
+
+void ContainersWidget::updateCheckBoxes()
+{
+	const auto& containersState = m_gameSave.containersState();
+	for (int i = 0, nb = m_containersWidgets.size(); i < nb; ++i)
+	{
+		QSignalBlocker blocker(m_containersWidgets[i].activeCheckBox);
+		m_containersWidgets[i].activeCheckBox->setChecked(containersState[i] ? Qt::Checked : Qt::Unchecked);
+	}
+}
+
+void ContainersWidget::toggleContainerStatus()
+{
+	QAction* action = qobject_cast<QAction*>(sender());
+	if (action)
+	{
+		bool ok = false;
+		int id = action->data().toInt(&ok);
+		if (ok)
+		{
+			auto& containersState = m_gameSave.containersState();
+			auto& widgets = m_containersWidgets[id];
+			containersState[id] = widgets.activeCheckBox->checkState() == Qt::Checked;
+			emit containersStatusUpdated();
+		}
+	}
 }

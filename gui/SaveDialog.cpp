@@ -144,11 +144,15 @@ SaveDialog::SaveDialog(QWidget *parent)
 
 	refreshInformation();
 
+	if (settings.getContainersInfo)
+		refreshContainersNames();
+
 	connect(this, SIGNAL(accepted()), this, SLOT(copySave()));
 
 	connect(useMostRecentCheckBox, SIGNAL(stateChanged(int)), this, SLOT(setLoadMostRecent(int)));
 	connect(saveComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(saveSelected(int)));
 	connect(m_getContainersNamesCheckBox, SIGNAL(stateChanged(int)), this, SLOT(getContainersNamesChanged(int)));
+	connect(m_containersWidget, SIGNAL(containersStatusUpdated()), this, SLOT(updateIngredientsCount()));
 }
 
 QSize SaveDialog::sizeHint() const
@@ -163,9 +167,6 @@ bool SaveDialog::modified() const
 
 void SaveDialog::refreshInformation()
 {
-	if (m_getContainersNamesCheckBox->checkState() == Qt::Checked)
-		refreshContainersNames();
-
 	auto l = m_saveInfoContainer->layout();
 	if (l)
 		QWidget().setLayout(l);
@@ -214,8 +215,12 @@ void SaveDialog::refreshInformation()
 	int total = 0;
 	for (auto ing : m_gameSave.ingredientsCount())
 		total += ing;
+	int nbActiveContainers = 0;
+	for (const auto status : m_gameSave.containersState())
+		if (status)
+			++nbActiveContainers;
 	layout->addWidget(new QLabel(QString(tr("%1 total ingredients in %2 containers"))
-		.arg(total).arg(m_gameSave.containers().size())));
+		.arg(total).arg(nbActiveContainers)));
 }
 
 void SaveDialog::copySave()
@@ -245,12 +250,15 @@ void SaveDialog::loadSave()
 	m_gameSave.setMinValidNbIngredients(m_minValidNbIngredientsEdit->text().toInt());
 	m_gameSave.setMinTotalIngredientsCount(m_minTotalIngredientsCountEdit->text().toInt());
 	m_gameSave.setPlayerOnly(m_playerOnlyCheckBox->checkState() == Qt::Checked);
+	m_gameSave.setFilterSameCellAsPlayer(m_sameCellAsPlayerCheckBox->checkState() == Qt::Checked);
 
 	if (m_loadMostRecent && !m_savesList.empty())
 		m_gameSave.load(m_savesList.first().absoluteFilePath());
 	else
 		m_gameSave.load(m_selectedSavePath);
 	refreshInformation();
+	if (m_getContainersNamesCheckBox->checkState() == Qt::Checked)
+		refreshContainersNames();
 
 	m_inventoryWidget->endReset();
 	m_knownIngredientsWidget->endReset();
@@ -274,6 +282,33 @@ void SaveDialog::getContainersNamesChanged(int state)
 	bool enabled = (state == Qt::Checked);
 	m_sameCellAsPlayerCheckBox->setEnabled(enabled);
 	m_sameCellAsPlayerLabel->setEnabled(enabled);
+
+	m_gameSave.setFilterSameCellAsPlayer(enabled ? (m_sameCellAsPlayerCheckBox->checkState() == Qt::Checked) : false);
+}
+
+void SaveDialog::containersUpdated()
+{
+	if (m_sameCellAsPlayerCheckBox->checkState() == Qt::Checked)
+	{
+		m_inventoryWidget->beginReset();
+		m_gameSave.filterContainers();
+		m_inventoryWidget->endReset();
+
+		refreshInformation();
+		m_containersWidget->updateCheckBoxes();
+	}
+		
+	m_containersWidget->updateIdLabels();
+}
+
+void SaveDialog::updateIngredientsCount()
+{
+	m_inventoryWidget->beginReset();
+
+	m_gameSave.computeIngredientsCount();
+
+	m_inventoryWidget->endReset();
+	refreshInformation();
 }
 
 void SaveDialog::refreshContainersNames()
@@ -301,7 +336,7 @@ void SaveDialog::refreshContainersNames()
 		return;
 
 	auto workerThread = new ContainersWorkerThread(updateIds, this);
-	connect(workerThread, SIGNAL(resultReady()), m_containersWidget, SLOT(updateIdLabels()));
+	connect(workerThread, SIGNAL(resultReady()), this, SLOT(containersUpdated()));
 	connect(workerThread, SIGNAL(finished()), workerThread, SLOT(deleteLater()));
 	workerThread->start();
 }

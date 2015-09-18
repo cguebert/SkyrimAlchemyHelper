@@ -30,6 +30,8 @@ public slots:
 	void saveSelected(int index);
 	void setLoadMostRecent(int state);
 	void getContainersNamesChanged(int state);
+	void containersUpdated();
+	void updateIngredientsCount();
 
 protected:
 	void refreshInformation();

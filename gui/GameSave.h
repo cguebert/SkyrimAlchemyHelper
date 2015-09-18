@@ -24,12 +24,17 @@ public:
 	void setMinValidNbIngredients(int nb); // Ignore containers (and the player inventory) if there is less than nb different ingredients (if 0, accept everything)
 	void setMinTotalIngredientsCount(int count); // Ignore containers if there are less than total count ingredients of all types
 	void setPlayerOnly(bool playerOnly); // If true, ignore all containers and parse only the player (default: false)
+	void setFilterSameCellAsPlayer(bool sameCell); // If true, ignore containers that are not in the same cell as the player
+	
+	void filterContainers(); // Apply sameCellAsPlayer
+	void computeIngredientsCount();
 
 	QPixmap screenshot() const;
 
 	struct Header
 	{
 		int saveNumber = 0, playerLevel = 0;
+		quint32 locationId = 0;
 		QString playerName, playerLocation;
 	};
 
@@ -50,6 +55,8 @@ public:
 	using Containers = std::vector<Container>;
 	const Containers& containers() const; // Player inventory, and all containers depending on the parse parameters
 
+	std::vector<bool>& containersState();
+
 	using IngredientsCount = std::vector<int>;
 	const IngredientsCount& ingredientsCount() const; // Same as inventory, but more direct and with the 0-count ingredients
 
@@ -64,7 +71,8 @@ protected:
 	Containers m_containers;
 	std::vector<int> m_ingredientsCount;
 	int m_maxValidIngredientCount = 1000, m_minValidNbIngredients = 5, m_minTotalIngredientsCount = 50;
-	bool m_playerOnly = false;
+	bool m_playerOnly = false, m_sameCellAsPlayer = false;
+	std::vector<bool> m_containersState;
 };
 
 //****************************************************************************//
@@ -99,5 +107,11 @@ inline void GameSave::setMinTotalIngredientsCount(int count)
 inline void GameSave::setPlayerOnly(bool playerOnly)
 { m_playerOnly = playerOnly; }
 
+inline void GameSave::setFilterSameCellAsPlayer(bool sameCell)
+{ m_sameCellAsPlayer = sameCell; }
+
 inline const GameSave::Containers& GameSave::containers() const
 { return m_containers; }
+
+inline std::vector<bool>& GameSave::containersState()
+{ return m_containersState; }

@@ -2,6 +2,7 @@
 #include <QFrame>
 
 class GameSave;
+class QCheckBox;
 class QLabel;
 class QPushButton;
 
@@ -13,16 +14,29 @@ public:
 
 	void clear();
 	void refreshList();
+	void updateIdLabels();
+	void updateCheckBoxes();
+
+signals:
+	void containersStatusUpdated();
 
 public slots:
 	void toggleInventoryWidget();
-	void updateIdLabels();
+	void toggleContainerStatus();
 
 protected:
 	QString getContainerLabel(quint32 id);
 
 	GameSave& m_gameSave;
-	std::vector<QPushButton*> m_toggleButtons;
-	std::vector<QWidget*> m_inventoryWidgets;
-	std::vector<std::pair<QLabel*, quint32>> m_idLabels;
+
+	struct ContainerWidgets
+	{
+		quint32 id;
+		QCheckBox* activeCheckBox;
+		QPushButton* toggleButton;
+		QLabel* idLabel;
+		QWidget* inventoryWidget;
+	};
+	using ContainerWidgetsList = std::vector<ContainerWidgets>;
+	ContainerWidgetsList m_containersWidgets;
 };
