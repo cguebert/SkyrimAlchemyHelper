@@ -39,4 +39,14 @@ struct Config
 	ModsList modsList;
 };
 
+//****************************************************************************//
+
+struct Container 
+{ 
+	uint32_t id = 0, cell = 0; 
+	std::string type, location; 
+	bool interior = true; 
+};
+using Containers = std::vector<Container>;
+
 } // namespace modParser

@@ -13,8 +13,6 @@ public:
 	Config parseConfig(); // Parse all mods and look for alchemy ingredients and their effects
 	void exportConfig(const Config& config); // Useful for debug purposes
 
-	struct Container { uint32_t id = 0, cell = 0; std::string type, location; };
-	using Containers = std::vector<Container>;
 	using IdsList = std::vector<uint32_t>;
 	Containers getContainersInfo(const IdsList& ids);
 

@@ -62,7 +62,7 @@ protected:
 	void parseSubGroup(const GroupParser& group);
 	void parseRecord(const RecordParser& recordParser);
 	void ignoreRecord();
-	void parseFields(const FieldParsers& fieldParsers, uint32_t dataSize);
+	void parseFields(const FieldParsers& fieldParsers, uint32_t dataSize, uint32_t flags = 0);
 	void ignoreField();
 
 	void parsePluginInformation();

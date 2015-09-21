@@ -268,10 +268,11 @@ void ContainersCache::load()
 			Container container;
 			QString line = in.readLine();
 			QStringList split = line.split(" ");
-			if (split.size() == 2)
+			if (split.size() == 3)
 			{
 				container.code = split[0].toUInt(nullptr, 16);
 				container.cellCode = split[1].toUInt(nullptr, 16);
+				container.interior = (split[2] !=  "0");
 			}
 
 			container.name = in.readLine();
@@ -303,7 +304,8 @@ void ContainersCache::save()
 		for (const auto& container : containersList)
 		{
 			out << QString::number(container.code, 16).toUpper() << ' ';
-			out << QString::number(container.cellCode, 16).toUpper() << '\n';
+			out << QString::number(container.cellCode, 16).toUpper() << ' ';
+			out << (container.interior ? '1' : '0') << '\n';
 			out << container.name << '\n';
 			out << container.location << '\n';
 		}

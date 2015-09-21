@@ -235,8 +235,6 @@ void SaveDialog::copySave()
 	settings.playerOnly = m_playerOnlyCheckBox->checkState() == Qt::Checked;
 	settings.getContainersInfo = m_getContainersNamesCheckBox->checkState() == Qt::Checked;
 	settings.sameCellAsPlayer = m_sameCellAsPlayerCheckBox->checkState() == Qt::Checked;
-
-	ContainersCache::instance().save();
 }
 
 void SaveDialog::loadSave()
@@ -348,9 +346,12 @@ void ContainersWorkerThread::run()
 		return;
 
 	const auto& parserContainers = parser.containers();
-	std::lock_guard<std::mutex> lock(ContainersCache::instance().containersMutex);
-	auto& configContainers = ContainersCache::instance().containers;
-	configContainers.insert(configContainers.end(), parserContainers.begin(), parserContainers.end());
+	{
+		std::lock_guard<std::mutex> lock(ContainersCache::instance().containersMutex);
+		auto& configContainers = ContainersCache::instance().containers;
+		configContainers.insert(configContainers.end(), parserContainers.begin(), parserContainers.end());
+	}
+	ContainersCache::instance().save();
 
 	emit resultReady();
 }

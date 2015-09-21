@@ -7,13 +7,26 @@ namespace modParser
 
 using namespace std;
 
-ContainersParser::ContainersParser(const std::string& fileName, const std::string& language, const std::vector<std::string>& modsNames)
+void ContainersParser::parse(const std::string& fileName, const std::string& language, const StringList& modsNames, Containers& containers, ContainerTypes& containerTypes)
+{
+	ContainersParser parser(fileName, language, modsNames, containers, containerTypes);
+	parser.findContainers();
+}
+
+ContainersParser::ContainersParser(const std::string& fileName, 
+	const std::string& language, 
+	const StringList& modsNames,
+	Containers& containers,
+	ContainerTypes& containerTypes)
 	: Mod(fileName, language)
 	, m_modsNames(modsNames)
+	, m_containers(containers)
+	, m_containersTypes(containerTypes)
 {
 	// We want to read the masters list now
 	parsePluginInformation();
 
+	// Compute the id of the masters in the whole mods list
 	int nbMasters = m_masters.size();
 	m_mastersIds.assign(nbMasters + 1, -1);
 	for (int i = 0; i < nbMasters; ++i)
@@ -26,6 +39,28 @@ ContainersParser::ContainersParser(const std::string& fileName, const std::strin
 	auto it = find(m_modsNames.begin(), m_modsNames.end(), m_modName);
 	if (it != m_modsNames.end())
 		m_mastersIds[nbMasters] = it - m_modsNames.begin();
+
+	// Mod id to master id
+	std::vector<int> modToMaster;
+	modToMaster.assign(m_modsNames.size(), -1);
+	for (int i = 0; i <= nbMasters; ++i)
+	{
+		if (m_mastersIds[i] != -1)
+			modToMaster[m_mastersIds[i]] = i;
+	}
+
+	// Extract the containers that can be in this mod
+	for (int i = 0, nbContainers = containers.size(); i < nbContainers; ++i)
+	{
+		auto& container = containers[i];
+		int modId = container.id >> 24;
+		int masterId = modToMaster[modId];
+		if (masterId != -1)
+		{
+			uint32_t id2 = (container.id & 0x00FFFFFF) | (masterId << 24);
+			m_containersIds.emplace_back(id2, i);
+		}
+	}
 }
 
 void ContainersParser::registerContainersParsers()
@@ -36,44 +71,56 @@ void ContainersParser::registerContainersParsers()
 	RecordParser refrRecord;
 	refrRecord.type = "REFR";
 	refrRecord.beginFunction = [this](uint32_t id, uint32_t /*dataSize*/, uint32_t /*flags*/) {
-		auto it = find_if(m_containers.begin(), m_containers.end(), [id](const Container& c){
-			return c.id2 == id;
+		auto it = find_if(m_containersIds.begin(), m_containersIds.end(), [id](const std::pair<uint32_t, int>& p){
+			return p.first == id;
 		});
-		if (it == m_containers.end() || !m_currentLocation)
+		if (it == m_containersIds.end() || !m_currentCell.id)
 			return false;
-		m_currentId = it - m_containers.begin();
-		it->cell = m_currentLocation;
-		it->interior = m_isInteriorCell;
+		m_currentId = it->second;
+		m_currentCell.containersIndices.push_back(m_currentId);
 		return true;
 	};
 
-	refrRecord.endFunction = [this](uint32_t id) {
-		const auto& container = m_containers[m_currentId];
-	};
-
 	refrRecord.fields.emplace_back("NAME", [this](uint16_t dataSize) {
-		in >> m_containers[m_currentId].base;
+		uint32_t id, type;
+		in >> id;
+		type = toGlobal(id);
+
+		auto it = find_if(m_containersTypes.rbegin(), m_containersTypes.rend(), [type](const ContainerType& ct){
+			return ct.first == type;
+		});
+		if (it != m_containersTypes.rend())
+			m_containers[m_currentId].type = it->second;
+		else
+			cout << "Cannot find " << hex << uppercase << id << " " << type << dec << endl;
 	});
 
 // CELL
 	RecordParser cellRecord;
 	cellRecord.type = "CELL";
-	cellRecord.beginFunction = [this](uint32_t id, uint32_t /*dataSize*/, uint32_t /*flags*/) {
-		m_currentLocation = id;
-		m_subGroupsDepth = 0;
-		m_isInteriorCell = true;
+	cellRecord.beginFunction = [this](uint32_t id, uint32_t dataSize, uint32_t flags) {
+		m_currentCell.id = id;
+		m_currentCell.dataSize = dataSize;
+		m_currentCell.flags = flags;
+		m_currentCell.subGroupsDepth = 0;
+		m_currentCell.isInteriorCell = true;
+		m_currentCell.offset = in.tellg();
 		return false;
 	};
 
 	GroupParser cellGroup("CELL",{ refrRecord, cellRecord });
 	cellGroup.beginSubGroupFunction = [this]() {
-		++m_subGroupsDepth;
+		++m_currentCell.subGroupsDepth;
 	};
 
 	cellGroup.endSubGroupFunction = [this]() {
-		if (!m_subGroupsDepth)
-			m_currentLocation = 0;
-		--m_subGroupsDepth;
+		--m_currentCell.subGroupsDepth;
+		if (!m_currentCell.subGroupsDepth)
+		{
+			if (!m_currentCell.containersIndices.empty())
+				getCellName();
+			m_currentCell.id = 0;
+		}
 	};
 
 	m_groupParsers.push_back(cellGroup);
@@ -81,154 +128,95 @@ void ContainersParser::registerContainersParsers()
 // WRLD
 	RecordParser worldRecord;
 	worldRecord.type = "WRLD";
-	worldRecord.beginFunction = [this](uint32_t id, uint32_t /*dataSize*/, uint32_t /*flags*/) {
-		m_currentLocation = id;
-		m_subGroupsDepth = 0;
-		m_isInteriorCell = false;
+	worldRecord.beginFunction = [this](uint32_t id, uint32_t dataSize, uint32_t flags) {
+		m_currentCell.id = id;
+		m_currentCell.dataSize = dataSize;
+		m_currentCell.flags = flags;
+		m_currentCell.subGroupsDepth = 0;
+		m_currentCell.isInteriorCell = false;
+		m_currentCell.offset = in.tellg();
 		return false;
 	};
 
 	GroupParser worldGroup("WRLD", { refrRecord, worldRecord });
 	worldGroup.beginSubGroupFunction = [this]() {
-		++m_subGroupsDepth;
+		++m_currentCell.subGroupsDepth;
 	};
 
 	worldGroup.endSubGroupFunction = [this]() {
-		if (!m_subGroupsDepth)
-			m_currentLocation = 0;
-		--m_subGroupsDepth;
+		--m_currentCell.subGroupsDepth;
+		if (!m_currentCell.subGroupsDepth)
+		{
+			if (!m_currentCell.containersIndices.empty())
+				getCellName();
+			m_currentCell.id = 0;
+		}
 	};
 
 	m_groupParsers.push_back(worldGroup);
-}
 
-ContainersParser::Containers ContainersParser::findContainers(const std::vector<uint32_t>& ids)
-{
-	registerContainersParsers();
-
-	const int nb = ids.size();
-	m_containers.clear();
-	m_containers.resize(nb);
-
-	uint32_t nbMasters = m_masters.size();
-	uint32_t mask = nbMasters << 24;
-	for (int i = 0; i < nb; ++i)
-	{
-		auto& container = m_containers[i];
-		const auto& id = ids[i];
-
-		container.id = id;
-		container.id2 = (id & 0x00FFFFFF) | mask;
-	}
-
-	doParse();
-
-	// Convert FormIDs from this mod to the complete mods list
-	for (auto& container : m_containers)
-	{
-		int8_t masterId = std::min(container.base >> 24, nbMasters);
-		int32_t modMask = m_mastersIds[masterId] << 24;
-		container.base = (container.base & 0x00FFFFFF) | modMask;
-
-		masterId = container.cell >> 24;
-		modMask = m_mastersIds[masterId] << 24;
-		container.cell = (container.cell & 0x00FFFFFF) | modMask;
-	}
-
-	return m_containers;
-}
-
-void ContainersParser::registerNamesParsers()
-{
-	m_groupParsers.clear();
-
-// CELL
-	RecordParser cellRecord;
-	cellRecord.type = "CELL";
-	cellRecord.beginFunction = [this](uint32_t id, uint32_t dataSize, uint32_t flags) {
-		auto it = find_if(m_cells.begin(), m_cells.end(), [id](const NameStruct& c){
-			return c.id2 == id;
-		});
-		if (it == m_cells.end())
-			return false;
-		m_currentId = it - m_cells.begin();
-		return true;
-	};
-
-	cellRecord.fields.emplace_back("FULL", [this](uint16_t dataSize) {
-		m_cells[m_currentId].name = readLStringField(dataSize);
+// Cell name
+	m_cellNameParser.emplace_back("FULL", [this](uint16_t dataSize) {
+		m_currentCell.name = readLStringField(dataSize);
 	});
+}
 
-	GroupParser cellGroup("CELL", { cellRecord });
-	m_groupParsers.push_back(cellGroup);
-
-// WRLD
-	RecordParser worldRecord = cellRecord;
-	worldRecord.type = "WRLD";
-
-	GroupParser worldGroup("WRLD", { worldRecord });
-	m_groupParsers.push_back(worldGroup);
-
+void ContainersParser::registerTypesParsers()
+{
 // CONT
 	RecordParser contRecord;
 	contRecord.type = "CONT";
 	contRecord.beginFunction = [this](uint32_t id, uint32_t dataSize, uint32_t flags) {
-		auto it = find_if(m_containerTypes.begin(), m_containerTypes.end(), [id](const NameStruct& c){
-			return c.id2 == id;
-		});
-		if (it == m_containerTypes.end())
-			return false;
-		m_currentId = it - m_containerTypes.begin();
+		m_containersTypes.emplace_back(toGlobal(id), "");
 		return true;
 	};
 
 	contRecord.fields.emplace_back("FULL", [this](uint16_t dataSize) {
-		m_containerTypes[m_currentId].name = readLStringField(dataSize);
+		m_containersTypes.back().second = readLStringField(dataSize);
 	});
 
 	GroupParser contGroup("CONT", { contRecord });
 	m_groupParsers.push_back(contGroup);
 }
 
-std::pair<ContainersParser::NameStructs, ContainersParser::NameStructs> ContainersParser::getNames(
-	const std::vector<uint32_t>& cellIds, 
-	const std::vector<uint32_t>& baseIds)
+void ContainersParser::findContainers()
 {
-	registerNamesParsers();
-
-	// Prepare cells
-	const int nbCells = cellIds.size();
-	m_cells.clear();
-	m_cells.resize(nbCells);
-
-	int nbMasters = m_masters.size();
-	uint32_t mask = nbMasters << 24;
-	for (int i = 0; i < nbCells; ++i)
-	{
-		auto& cell = m_cells[i];
-		const auto& id = cellIds[i];
-
-		cell.id = id;
-		cell.id2 = (id & 0x00FFFFFF) | mask;
-	}
-
-	// Prepare container types
-	const int nbContainerTypes = baseIds.size();
-	m_containerTypes.clear();
-	m_containerTypes.resize(nbContainerTypes);
-
-	for (int i = 0; i < nbContainerTypes; ++i)
-	{
-		auto& type = m_containerTypes[i];
-		const auto& id = baseIds[i];
-
-		type.id = id;
-		type.id2 = (id & 0x00FFFFFF) | mask;
-	}
+	if (!m_containersIds.empty())
+		registerContainersParsers();
+	registerTypesParsers();
 
 	doParse();
+}
 
-	return make_pair(m_cells, m_containerTypes);
+void ContainersParser::getCellName()
+{
+	auto start = in.tellg();
+	in.seekg(m_currentCell.offset);
+	m_currentCell.name.clear();
+	parseFields(m_cellNameParser, m_currentCell.dataSize, m_currentCell.flags);
+	in.seekg(start);
+
+	if (!m_currentCell.name.empty())
+	{
+		for (auto id : m_currentCell.containersIndices)
+		{
+			auto& container = m_containers[id];
+			container.cell = toGlobal(m_currentCell.id);
+			container.location = m_currentCell.name;
+			container.interior = m_currentCell.isInteriorCell;
+		}
+	}
+
+	m_currentCell.containersIndices.clear();
+}
+
+uint32_t ContainersParser::toGlobal(uint32_t id)
+{
+	uint32_t masterId = id >> 24;
+	if (masterId >= m_mastersIds.size())
+		return (id & 0x00FFFFFF) | (m_mastersIds.back() << 24);
+	else
+		return (id & 0x00FFFFFF) | (m_mastersIds[masterId] << 24);
 }
 
 

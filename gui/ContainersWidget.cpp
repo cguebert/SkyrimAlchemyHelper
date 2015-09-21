@@ -142,7 +142,7 @@ QString ContainersWidget::getContainerLabel(quint32 id)
 	});
 
 	if (it != containers.end())
-		return tr("%1 in %2").arg(it->name).arg(it->location);
+		return tr("%1 - %2").arg(it->name).arg(it->location);
 
 	return QString::number(id, 16).toUpper();
 }

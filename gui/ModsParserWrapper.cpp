@@ -303,6 +303,7 @@ ModsParserWrapper::Result ModsParserWrapper::updateContainers(const std::vector<
 		ContainersCache::Container container;
 		container.code = c.id;
 		container.cellCode = c.cell;
+		container.interior = c.interior;
 		container.name = convert(c.type);
 		container.location = convert(c.location);
 		m_containers.push_back(container);

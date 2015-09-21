@@ -81,6 +81,7 @@ public:
 	struct Container
 	{
 		quint32 code = 0, cellCode = 0;
+		bool interior = true;
 		QString name, location;
 	};
 	using Containers = std::vector<Container>;
