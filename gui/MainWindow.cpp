@@ -54,37 +54,40 @@ MainWindow::MainWindow(QWidget *parent)
 	addDockWidget(Qt::LeftDockWidgetArea, effectsDock);
 	tabifyDockWidget(effectsDock, ingredientsDock);
 
-	QWidget* mainWidget = new QWidget(this);
-	QVBoxLayout* vLayout = new QVBoxLayout;
-	vLayout->setContentsMargins(0, 0, 0, 0);
-
 	auto potionsScrollArea = new QScrollArea(this);
 	m_potionsWidget = new PotionsListWidget;
 	potionsScrollArea->setWidget(m_potionsWidget);
 	potionsScrollArea->setFrameStyle(QFrame::NoFrame);
 	potionsScrollArea->setWidgetResizable(true);
-	vLayout->addWidget(potionsScrollArea);
+	setCentralWidget(potionsScrollArea);
 
-	QPushButton* okButton = new QPushButton(tr("Exit"), this);
-	connect(okButton, SIGNAL(clicked()), this, SLOT(close()));
-	QPushButton* configButton = new QPushButton(tr("Configuration"), this);
-	connect(configButton, SIGNAL(clicked()), this, SLOT(editConfig()));
-	QPushButton* saveButton = new QPushButton(tr("Game save"), this);
-	connect(saveButton, SIGNAL(clicked()), this, SLOT(gameSaveInformation()));
-	QPushButton* discoverButton = new QPushButton(tr("Discover effects"), this);
-	connect(discoverButton, SIGNAL(clicked()), this, SLOT(discoverEffects()));
-	QHBoxLayout* buttonsLayout = new QHBoxLayout;
-	buttonsLayout->setContentsMargins(5, 5, 5, 5);
-	buttonsLayout->addWidget(configButton);
-	buttonsLayout->addWidget(saveButton);
-	buttonsLayout->addStretch();
-	buttonsLayout->addWidget(discoverButton);
-	buttonsLayout->addStretch();
-	buttonsLayout->addWidget(okButton);
-	vLayout->addLayout(buttonsLayout);
+	auto fileMenu = menuBar()->addMenu(tr("&File"));
+	auto exitAction = new QAction(tr("E&xit"), this);
+	exitAction->setShortcut(tr("Ctrl+Q"));
+	connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
+	fileMenu->addAction(exitAction);
 
-	mainWidget->setLayout(vLayout);
-	setCentralWidget(mainWidget);
+	auto editMenu = menuBar()->addMenu(tr("&Edit"));
+	auto configAction = new QAction(tr("Con&figuration"), this);
+	configAction->setShortcut(tr("Ctrl+F"));
+	connect(configAction, SIGNAL(triggered()), this, SLOT(editConfig()));
+	editMenu->addAction(configAction);
+
+	auto gameSaveAction = new QAction(tr("&Game save"), this);
+	gameSaveAction->setShortcut(tr("Ctrl+G"));
+	connect(gameSaveAction, SIGNAL(triggered()), this, SLOT(gameSaveInformation()));
+	editMenu->addAction(gameSaveAction);
+
+	auto toolsMenu = menuBar()->addMenu(tr("&Tools"));
+	auto discoverEffectsAction = new QAction(tr("&Discover effects"), this);
+	discoverEffectsAction->setShortcut(tr("Ctrl+D"));
+	connect(discoverEffectsAction, SIGNAL(triggered()), this, SLOT(discoverEffects()));
+	toolsMenu->addAction(discoverEffectsAction);
+
+	auto helpMenu = menuBar()->addMenu(tr("&Help"));
+	auto aboutAction = new QAction(tr("&About"), this);
+	connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
+	helpMenu->addAction(aboutAction);
 
 	connect(this, SIGNAL(mainWindowShown()), this, SLOT(afterLaunch()), Qt::QueuedConnection);
 
@@ -174,4 +177,12 @@ void MainWindow::discoverEffects()
 	m_filtersWidget->clear();
 	PotionsList::instance().discoverEffects();
 	m_potionsWidget->refreshList();
+}
+
+void MainWindow::about()
+{
+	QMessageBox::about(this, tr("About"),
+		tr("<h2>Skyrim Alchemy Helper 1.0</h2>"
+		"<p>Copyright &copy; 2015 Christophe Guébert"
+		"<p>Licence: GPL v3."));
 }

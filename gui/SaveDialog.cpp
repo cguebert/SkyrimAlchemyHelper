@@ -314,7 +314,7 @@ void SaveDialog::getContainersNamesChanged(int state)
 
 void SaveDialog::containersUpdated()
 {
-	if (m_sameCellAsPlayerCheckBox->checkState() == Qt::Checked)
+	if (m_sameCellAsPlayerCheckBox->checkState() == Qt::Checked || m_interiorCellsOnlyCheckBox->checkState() == Qt::Checked)
 	{
 		m_inventoryWidget->beginReset();
 		m_gameSave.filterContainers();

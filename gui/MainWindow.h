@@ -24,6 +24,7 @@ public slots:
 	void afterLaunch();
 	void gameSaveInformation();
 	void discoverEffects();
+	void about();
 
 protected:
 	void showEvent(QShowEvent* event);
