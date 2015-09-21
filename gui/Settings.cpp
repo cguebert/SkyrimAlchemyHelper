@@ -36,6 +36,7 @@ void Settings::load()
 	playerOnly = settings.value("playerOnly", false).toBool();
 	getContainersInfo = settings.value("getContainersInfo", true).toBool();
 	sameCellAsPlayer = settings.value("sameCellAsPlayer", false).toBool();
+	interiorCellsOnly = settings.value("interiorCellsOnly", false).toBool();
 
 	maxValidIngredientCount = settings.value("maxValidIngredientCount", 1000).toInt();
 	minValidNbIngredients = settings.value("minValidNbIngredients", 5).toInt();
@@ -58,6 +59,7 @@ void Settings::save()
 	settings.setValue("playerOnly", playerOnly);
 	settings.setValue("getContainersInfo", getContainersInfo);
 	settings.setValue("sameCellAsPlayer", sameCellAsPlayer);
+	settings.setValue("interiorCellsOnly", interiorCellsOnly);
 
 	settings.setValue("maxValidIngredientCount", maxValidIngredientCount);
 	settings.setValue("minValidNbIngredients", minValidNbIngredients);

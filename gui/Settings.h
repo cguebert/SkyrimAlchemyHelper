@@ -19,7 +19,8 @@ public:
 		loadMostRecentSave = true,	// If true, always load the most recent save instead of a user chosen one
 		playerOnly = false,			// If true, only parse the player and ignore all containers
 		getContainersInfo = true,	// If true, extract containers information from the mods
-		sameCellAsPlayer = false;	// If true, only keept containers that are in the same cell as the player
+		sameCellAsPlayer = false,	// If true, only keep containers that are in the same cell as the player
+		interiorCellsOnly = false;	// If true, only keep containers that are in interior cells
 
 	int maxValidIngredientCount = 1000, // When parsing a save, an ingredient count higher than this is considered invalid (if 0, accept everything)
 		minValidNbIngredients = 5, // When parsing a save, ignore containers and the player inventory if there is less than this number of different ingredients (if 0, accept everything)

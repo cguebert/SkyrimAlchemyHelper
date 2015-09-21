@@ -6,6 +6,7 @@
 #include "GameSave.h"
 
 class QCheckBox;
+class QComboBox;
 class QLabel;
 class QLineEdit;
 class QWidget;
@@ -36,6 +37,7 @@ public slots:
 protected:
 	void refreshInformation();
 	void refreshContainersNames();
+	void selectCurrentSave();
 
 	QWidget* m_saveInfoContainer;
 	InventoryWidget* m_inventoryWidget;
@@ -43,15 +45,19 @@ protected:
 	ContainersWidget* m_containersWidget;
 	GameSave m_gameSave;
 	QFileInfoList m_savesList;
+	QStringList m_savesNames;
 	bool m_modified = false, m_loadMostRecent;
 	QString m_selectedSavePath;
+	QComboBox *m_saveComboBox;
 	QLineEdit *m_maxValidIngredientCountEdit, 
 		*m_minValidNbIngredientsEdit, 
 		*m_minTotalIngredientsCountEdit;
 	QCheckBox *m_playerOnlyCheckBox,
 		*m_getContainersNamesCheckBox,
+		*m_interiorCellsOnlyCheckBox,
 		*m_sameCellAsPlayerCheckBox;
-	QLabel *m_sameCellAsPlayerLabel;
+	QLabel *m_sameCellAsPlayerLabel,
+		*m_interiorCellsOnlyLabel;
 };
 
 class ContainersWorkerThread : public QThread

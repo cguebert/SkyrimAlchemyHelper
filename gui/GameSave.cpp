@@ -34,6 +34,7 @@ GameSave::GameSave()
 	m_minTotalIngredientsCount = settings.minTotalIngredientsCount;
 	m_playerOnly = settings.playerOnly;
 	m_sameCellAsPlayer = settings.sameCellAsPlayer;
+	m_interiorCellsOnly = settings.interiorCellsOnly;
 }
 
 void GameSave::load(QString fileName)
@@ -192,7 +193,7 @@ void GameSave::computeIngredientsCount()
 
 void GameSave::filterContainers()
 {
-	if (m_sameCellAsPlayer)
+	if (m_sameCellAsPlayer || m_interiorCellsOnly)
 	{
 		const auto& containersInfo = ContainersCache::instance().containers;
 		const auto cellId = m_header.locationId;
@@ -204,8 +205,13 @@ void GameSave::filterContainers()
 				return c.code == id;
 			});
 
-			if (it != containersInfo.end() && it->cellCode != cellId)
-				m_containersState[i] = false;
+			if (it != containersInfo.end())
+			{
+				if (m_sameCellAsPlayer && it->cellCode != cellId)
+					m_containersState[i] = false;
+				if (m_interiorCellsOnly && !it->interior)
+					m_containersState[i] = false;
+			}
 		}
 	}
 

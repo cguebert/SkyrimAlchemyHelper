@@ -35,20 +35,19 @@ SaveDialog::SaveDialog(QWidget *parent)
 	useMostRecentCheckBox->setCheckState(m_loadMostRecent ? Qt::Checked : Qt::Unchecked);
 	loadSettingsLayout->addWidget(useMostRecentCheckBox);
 	
-	auto saveComboBox = new QComboBox;
-	QStringList savesNames;
+	m_saveComboBox = new QComboBox;
 	for (auto fileInfo : m_savesList)
-		savesNames.push_back(fileInfo.completeBaseName());
-	saveComboBox->addItems(savesNames);
-	loadSettingsLayout->addWidget(saveComboBox);
+		m_savesNames.push_back(fileInfo.completeBaseName());
+	m_saveComboBox->addItems(m_savesNames);
+	loadSettingsLayout->addWidget(m_saveComboBox);
 
-	if (!m_selectedSavePath.isEmpty()) // Set current index based on previous settings
+	if (m_loadMostRecent)
 	{
-		auto name = QFileInfo(m_selectedSavePath).completeBaseName();
-		auto pos = savesNames.indexOf(name);
-		if (pos != -1)
-			saveComboBox->setCurrentIndex(pos);
+		m_saveComboBox->setCurrentIndex(0);
+		m_saveComboBox->setEnabled(false);
 	}
+	else if (!m_selectedSavePath.isEmpty()) // Set current index based on previous settings
+		selectCurrentSave();
 	
 	// Settings for the save parsing
 	auto parseSettingsGroupBox = new QGroupBox(tr("Parse settings"));
@@ -90,6 +89,14 @@ SaveDialog::SaveDialog(QWidget *parent)
 	m_sameCellAsPlayerLabel = new QLabel(tr("Containers in same cell as player"));
 	m_sameCellAsPlayerLabel->setEnabled(settings.getContainersInfo);
 	containersFiltersLayout->addRow(m_sameCellAsPlayerLabel, m_sameCellAsPlayerCheckBox);
+
+	m_interiorCellsOnlyCheckBox = new QCheckBox;
+	m_interiorCellsOnlyCheckBox->setCheckState(settings.interiorCellsOnly ? Qt::Checked : Qt::Unchecked);
+	m_interiorCellsOnlyCheckBox->setToolTip(tr("Only keep the containers that are in interior cells."));
+	m_interiorCellsOnlyCheckBox->setEnabled(settings.getContainersInfo);
+	m_interiorCellsOnlyLabel = new QLabel(tr("Interior cells only"));
+	m_interiorCellsOnlyLabel->setEnabled(settings.getContainersInfo);
+	containersFiltersLayout->addRow(m_interiorCellsOnlyLabel, m_interiorCellsOnlyCheckBox);
 
 	// Left layout
 	auto leftLayout = new QVBoxLayout;
@@ -150,7 +157,7 @@ SaveDialog::SaveDialog(QWidget *parent)
 	connect(this, SIGNAL(accepted()), this, SLOT(copySave()));
 
 	connect(useMostRecentCheckBox, SIGNAL(stateChanged(int)), this, SLOT(setLoadMostRecent(int)));
-	connect(saveComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(saveSelected(int)));
+	connect(m_saveComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(saveSelected(int)));
 	connect(m_getContainersNamesCheckBox, SIGNAL(stateChanged(int)), this, SLOT(getContainersNamesChanged(int)));
 	connect(m_containersWidget, SIGNAL(containersStatusUpdated()), this, SLOT(updateIngredientsCount()));
 }
@@ -235,6 +242,7 @@ void SaveDialog::copySave()
 	settings.playerOnly = m_playerOnlyCheckBox->checkState() == Qt::Checked;
 	settings.getContainersInfo = m_getContainersNamesCheckBox->checkState() == Qt::Checked;
 	settings.sameCellAsPlayer = m_sameCellAsPlayerCheckBox->checkState() == Qt::Checked;
+	settings.interiorCellsOnly = m_interiorCellsOnlyCheckBox->checkState() == Qt::Checked;
 }
 
 void SaveDialog::loadSave()
@@ -248,7 +256,16 @@ void SaveDialog::loadSave()
 	m_gameSave.setMinValidNbIngredients(m_minValidNbIngredientsEdit->text().toInt());
 	m_gameSave.setMinTotalIngredientsCount(m_minTotalIngredientsCountEdit->text().toInt());
 	m_gameSave.setPlayerOnly(m_playerOnlyCheckBox->checkState() == Qt::Checked);
-	m_gameSave.setFilterSameCellAsPlayer(m_sameCellAsPlayerCheckBox->checkState() == Qt::Checked);
+	if (m_getContainersNamesCheckBox->checkState() == Qt::Checked)
+	{
+		m_gameSave.setFilterSameCellAsPlayer(m_sameCellAsPlayerCheckBox->checkState() == Qt::Checked);
+		m_gameSave.setInteriorCellsOnly(m_interiorCellsOnlyCheckBox->checkState() == Qt::Checked);
+	}
+	else
+	{
+		m_gameSave.setFilterSameCellAsPlayer(false);
+		m_gameSave.setInteriorCellsOnly(false);
+	}
 
 	if (m_loadMostRecent && !m_savesList.empty())
 		m_gameSave.load(m_savesList.first().absoluteFilePath());
@@ -271,7 +288,18 @@ void SaveDialog::saveSelected(int index)
 
 void SaveDialog::setLoadMostRecent(int state)
 {
-	m_loadMostRecent = (state == Qt::Checked);
+	bool checked = (state == Qt::Checked);
+	m_loadMostRecent = checked;
+	m_saveComboBox->setEnabled(!checked);
+
+	if (!checked)
+		selectCurrentSave();
+	else
+	{
+		QSignalBlocker blocker(m_saveComboBox);
+		m_saveComboBox->setCurrentIndex(0);
+	}
+
 	loadSave();
 }
 
@@ -280,8 +308,8 @@ void SaveDialog::getContainersNamesChanged(int state)
 	bool enabled = (state == Qt::Checked);
 	m_sameCellAsPlayerCheckBox->setEnabled(enabled);
 	m_sameCellAsPlayerLabel->setEnabled(enabled);
-
-	m_gameSave.setFilterSameCellAsPlayer(enabled ? (m_sameCellAsPlayerCheckBox->checkState() == Qt::Checked) : false);
+	m_interiorCellsOnlyCheckBox->setEnabled(enabled);
+	m_interiorCellsOnlyLabel->setEnabled(enabled);
 }
 
 void SaveDialog::containersUpdated()
@@ -307,6 +335,17 @@ void SaveDialog::updateIngredientsCount()
 
 	m_inventoryWidget->endReset();
 	refreshInformation();
+}
+
+void SaveDialog::selectCurrentSave()
+{
+	QSignalBlocker blocker(m_saveComboBox);
+	auto name = QFileInfo(m_selectedSavePath).completeBaseName();
+	auto pos = m_savesNames.indexOf(name);
+	if (pos != -1)
+		m_saveComboBox->setCurrentIndex(pos);
+	else
+		m_saveComboBox->setCurrentIndex(0);
 }
 
 void SaveDialog::refreshContainersNames()

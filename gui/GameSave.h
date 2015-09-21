@@ -25,6 +25,7 @@ public:
 	void setMinTotalIngredientsCount(int count); // Ignore containers if there are less than total count ingredients of all types
 	void setPlayerOnly(bool playerOnly); // If true, ignore all containers and parse only the player (default: false)
 	void setFilterSameCellAsPlayer(bool sameCell); // If true, ignore containers that are not in the same cell as the player
+	void setInteriorCellsOnly(bool interior); // IF true, ignore containers that are out in the world
 	
 	void filterContainers(); // Apply sameCellAsPlayer
 	void computeIngredientsCount();
@@ -71,7 +72,7 @@ protected:
 	Containers m_containers;
 	std::vector<int> m_ingredientsCount;
 	int m_maxValidIngredientCount = 1000, m_minValidNbIngredients = 5, m_minTotalIngredientsCount = 50;
-	bool m_playerOnly = false, m_sameCellAsPlayer = false;
+	bool m_playerOnly = false, m_sameCellAsPlayer = false, m_interiorCellsOnly = false;
 	std::vector<bool> m_containersState;
 };
 
@@ -109,6 +110,9 @@ inline void GameSave::setPlayerOnly(bool playerOnly)
 
 inline void GameSave::setFilterSameCellAsPlayer(bool sameCell)
 { m_sameCellAsPlayer = sameCell; }
+
+inline void GameSave::setInteriorCellsOnly(bool interior)
+{ m_interiorCellsOnly = interior; }
 
 inline const GameSave::Containers& GameSave::containers() const
 { return m_containers; }
