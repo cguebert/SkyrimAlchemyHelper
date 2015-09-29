@@ -49,6 +49,7 @@ public slots:
 	void gameSaveInformation();
 	void discoverEffects();
 	void about();
+	void aboutQt();
 
 protected:
 	void showEvent(QShowEvent* event);

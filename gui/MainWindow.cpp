@@ -113,6 +113,10 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
 	helpMenu->addAction(aboutAction);
 
+	auto aboutQtAction = new QAction(tr("About &Qt"), this);
+	connect(aboutQtAction, SIGNAL(triggered()), this, SLOT(aboutQt()));
+	helpMenu->addAction(aboutQtAction);
+
 	connect(this, SIGNAL(mainWindowShown()), this, SLOT(afterLaunch()), Qt::QueuedConnection);
 
 	connect(m_ingredientsSelector, SIGNAL(ingredientFilterAction(FilterActionType, int)), m_filtersWidget, SLOT(ingredientFilterAction(FilterActionType, int)));
@@ -207,6 +211,11 @@ void MainWindow::about()
 {
 	QMessageBox::about(this, tr("About"),
 		tr("<h2>Skyrim Alchemy Helper 1.0</h2>"
-		"<p>Copyright &copy; 2015 Christophe Guébert"
-		"<p>Licence: GPL v3."));
+		"<p>Copyright &copy; 2015 Christophe Guebert"
+		"<p>Using zlib 1.2.8 and Qt 5.5"));
+}
+
+void MainWindow::aboutQt()
+{
+	QApplication::aboutQt();
 }
