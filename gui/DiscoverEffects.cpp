@@ -125,7 +125,7 @@ void DiscoverEffects::setSortingFunction()
 
 		// Prefer 2 ingredients potions if they have the same score
 		if (potion.ingredients[2] == -1)
-			score += 3.5;
+			score += 1.5;
 		return score;
 	});
 }
