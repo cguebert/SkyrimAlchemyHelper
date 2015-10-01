@@ -150,7 +150,12 @@ bool ModsParserWrapper::findRealPaths(std::vector<std::string>& paths)
 	QSettings modOrganizerSettings(modOrganizerIni.absoluteFilePath(), QSettings::IniFormat);
 	modsDirPath = modOrganizerSettings.value("Settings/mod_directory").toString();
 	if (modsDirPath.isEmpty())
-		return false;
+	{
+		QDir modsDir(modOrganizerDir);
+		if (!modsDir.cd("mods"))
+			return false;
+		modsDirPath = modsDir.absolutePath();
+	}
 
 	QDir modsDir(modsDirPath);
 	if (!modsDir.exists())
