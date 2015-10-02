@@ -42,6 +42,11 @@ bool Settings::isEmpty()
 	return m_isEmpty;
 }
 
+void Settings::clearEmptyFlag()
+{
+	m_isEmpty = false;
+}
+
 void Settings::load()
 {
 	QSettings settings("SAH.ini", QSettings::IniFormat);

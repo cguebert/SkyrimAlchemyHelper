@@ -26,6 +26,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #include "ModsParserWrapper.h"
 #include "Settings.h"
@@ -47,6 +48,18 @@ std::string loadFile(const std::string& fileName)
 	stream << file.rdbuf();
 	file.close();
 	return stream.str();
+}
+
+std::ostream& logFile()
+{
+	static std::ofstream file;
+	if (!file.is_open())
+	{
+		file.open("data/log.txt", std::ios_base::trunc);
+		std::cout.rdbuf(file.rdbuf());
+		std::cerr.rdbuf(file.rdbuf());
+	}
+	return file;
 }
 
 }
@@ -76,9 +89,14 @@ ModsParserWrapper::ModsParserWrapper(bool useModOrganizer,
 
 ModsParserWrapper::Result ModsParserWrapper::parseConfig()
 {
+	logFile() << "*** Parse Config ***" << std::endl;
+
 	std::vector<std::string> modsPathList;
 	if (!getModsPaths(modsPathList))
+	{
+		logFile() << "Could not get all necessary information from ModOrganizer configuration" << std::endl << std::endl;
 		return Result::Error_ModOrganizer;
+	}
 
 	modParser::ModParser modParser;
 	modParser.setModsList(modsPathList);
@@ -86,7 +104,12 @@ ModsParserWrapper::Result ModsParserWrapper::parseConfig()
 	m_config = modParser.parseConfig();
 
 	if (m_config.ingredientsList.empty())
+	{
+		logFile() << "Error: parsing found no ingredients" << std::endl << std::endl;
 		return Result::Error_ModsParsing;
+	}
+
+	logFile() << "Parsing successful" << std::endl << std::endl;
 
 	return Result::Success;
 }
@@ -99,7 +122,10 @@ bool ModsParserWrapper::getModsPaths(std::vector<std::string>& modsPathList)
 		std::string inList = loadFile(m_pluginsListPath.toStdString());
 		std::transform(inList.begin(), inList.end(), inList.begin(), ::tolower);
 		if (inList.find("skyrim.esm") == std::string::npos)
+		{
 			modsPathList.emplace_back("Skyrim.esm");
+			logFile() << "Adding Skyrim.esm wich was not in the mods list" << std::endl;
+		}
 	}
 
 	// Loading the "plugins.txt" file
@@ -112,6 +138,8 @@ bool ModsParserWrapper::getModsPaths(std::vector<std::string>& modsPathList)
 
 		modsPathList.emplace_back(modName);
 	}
+
+	logFile() << modsPathList.size() << " mods found in " << m_pluginsListPath.toStdString() << std::endl;
 
 	if (m_useModOrganizer)
 	{
@@ -131,8 +159,17 @@ bool ModsParserWrapper::getModsPaths(std::vector<std::string>& modsPathList)
 bool ModsParserWrapper::findRealPaths(std::vector<std::string>& paths)
 {
 	QString modsDirPath;
-	if (m_modOrganizerPath.isEmpty() || m_pluginsListPath.isEmpty())
+	if (m_modOrganizerPath.isEmpty())
+	{
+		logFile() << "Error: path to ModOrganizer is empty" << std::endl;
 		return false;
+	}
+
+	if (m_pluginsListPath.isEmpty())
+	{
+		logFile() << "Error: path to the plugins list file is empty" << std::endl;
+		return false;
+	}
 
 	// Convert to a QStringList
 	QStringList pathsList;
@@ -144,32 +181,48 @@ bool ModsParserWrapper::findRealPaths(std::vector<std::string>& paths)
 	QDir modOrganizerDir = QFileInfo(m_modOrganizerPath).absoluteDir();
 	QFileInfo modOrganizerIni(modOrganizerDir, "ModOrganizer.ini"); 
 	if (!modOrganizerIni.exists())
+	{
+		logFile() << "Error: cannot find " << modOrganizerIni.absoluteFilePath().toStdString() << std::endl;
 		return false;
+	}
 
 	// Get the mod directory
 	QSettings modOrganizerSettings(modOrganizerIni.absoluteFilePath(), QSettings::IniFormat);
 	modsDirPath = modOrganizerSettings.value("Settings/mod_directory").toString();
 	if (modsDirPath.isEmpty())
 	{
+		logFile() << "Warning: mod_directory setting not found, looking into \"mods\" directory" << std::endl;
 		QDir modsDir(modOrganizerDir);
 		if (!modsDir.cd("mods"))
+		{
+			logFile() << "Error: cannot find where the mods are installed with ModOrganizer" << std::endl;
 			return false;
+		}
 		modsDirPath = modsDir.absolutePath();
 	}
 
 	QDir modsDir(modsDirPath);
 	if (!modsDir.exists())
+	{
+		logFile() << "Error: failed to find mods in " << modsDirPath.toStdString() << std::endl;
 		return false;
+	}
 
 	// Get the mod list
 	QDir modOrganizerProfileDir = QFileInfo(m_pluginsListPath).absoluteDir();
 	QFileInfo modListFileInfo(modOrganizerProfileDir, "modlist.txt");
 	if (!modListFileInfo.exists())
+	{
+		logFile() << "Error: cannot find modlist.txt in " << modOrganizerProfileDir.absolutePath().toStdString() << std::endl;
 		return false;
+	}
 
 	QFile modListFile(modListFileInfo.absoluteFilePath());
 	if (!modListFile.open(QIODevice::ReadOnly))
+	{
+		logFile() << "Error: cannot open " << modListFileInfo.absoluteFilePath().toStdString() << std::endl;
 		return false;
+	}
 
 	using QStringPair = std::pair<QString, QString>;
 	std::vector<QStringPair> realPathsPairs;
@@ -213,6 +266,7 @@ bool ModsParserWrapper::findRealPaths(std::vector<std::string>& paths)
 			paths.push_back(it->second.toStdString());
 	}
 
+	logFile() << "Successfully found the mods in the ModOrganizer configuration" << std::endl;
 	return true;
 }
 

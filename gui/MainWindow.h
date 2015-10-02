@@ -57,6 +57,7 @@ protected:
 
 	void readSettings();
 	void writeSettings();
+	void configurationChanged();
 	
 	EffectsSelector *m_effectsSelector;
 	IngredientsSelector *m_ingredientsSelector;

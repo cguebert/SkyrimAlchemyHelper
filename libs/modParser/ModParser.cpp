@@ -49,7 +49,10 @@ Config ModParser::parseConfig()
 {
 	Config config;
 	for (const auto& modPath : m_modsList)
-		ConfigParser::parse(modPath, m_language, config);
+	{
+		try { ConfigParser::parse(modPath, m_language, config); }
+		catch (std::exception& e) { std::cerr << e.what() << std::endl; }
+	}
 	return config;
 }
 
@@ -112,7 +115,11 @@ modParser::Containers ModParser::getContainersInfo(const IdsList& ids)
 	vector<pair<uint32_t, string>> containerTypes;
 
 	for (int i = 0; i < nbMods; ++i)
-		ContainersParser::parse(m_modsList[i], m_language, modsNames, containers, containerTypes);
+	{
+		try { ContainersParser::parse(m_modsList[i], m_language, modsNames, containers, containerTypes); }
+		catch (std::exception& e) { std::cerr << e.what() << std::endl; }
+	}
+		
 
 	return containers;
 }

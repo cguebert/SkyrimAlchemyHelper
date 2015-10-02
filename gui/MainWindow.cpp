@@ -155,14 +155,7 @@ void MainWindow::editConfig()
 {
 	ConfigDialog dlg(this);
 	if (dlg.exec() && dlg.modified())
-	{
-		m_effectsSelector->updateList();
-		m_ingredientsSelector->updateList();
-		GameSave::instance().loadSaveFromConfig();
-		m_filtersWidget->clear();
-		PotionsList::instance().recomputeList();
-		m_potionsWidget->refreshList();
-	}
+		configurationChanged();
 }
 
 void MainWindow::afterLaunch()
@@ -171,9 +164,19 @@ void MainWindow::afterLaunch()
 	{
 		QMessageBox::information(this, tr("First launch"), tr("Please verify the configuration, then click \"Parse mods\"."));
 		ConfigDialog dlg(this, true);
-		if(dlg.exec())
-			GameSave::instance().loadSaveFromConfig();
+		if (dlg.exec())
+			configurationChanged();
 	}
+}
+
+void MainWindow::configurationChanged()
+{
+	m_effectsSelector->updateList();
+	m_ingredientsSelector->updateList();
+	GameSave::instance().loadSaveFromConfig();
+	m_filtersWidget->clear();
+	PotionsList::instance().recomputeList();
+	m_potionsWidget->refreshList();
 }
 
 void MainWindow::showEvent(QShowEvent* event)
@@ -210,7 +213,7 @@ void MainWindow::discoverEffects()
 void MainWindow::about()
 {
 	QMessageBox::about(this, tr("About"),
-		tr("<h2>Skyrim Alchemy Helper 1.0.1</h2>"
+		tr("<h2>Skyrim Alchemy Helper 1.0.2</h2>"
 		"<p>Copyright &copy; 2015 Christophe Guebert"
 		"<p>Using zlib 1.2.8 and Qt 5.5"));
 }

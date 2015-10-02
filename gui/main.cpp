@@ -24,6 +24,7 @@
 ******************************************************************************/
 #include "MainWindow.h"
 #include <QApplication>
+#include <QDir>
 
 #include "Config.h"
 #include "GameSave.h"
@@ -33,6 +34,10 @@ int main(int argc, char *argv[])
 	QApplication app(argc, argv);
 	app.setOrganizationName("Christophe Guebert");
 	app.setApplicationName("SkyrimAlchemyHelper");
+
+	// Making sure the data folder exists
+	QDir dir;
+	dir.mkdir("data");
 
 	// The order is important
 	Config::main().load();

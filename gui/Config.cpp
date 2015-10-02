@@ -191,8 +191,6 @@ void Config::loadIngredients()
 
 void Config::save() const
 {
-	QDir dir;
-	dir.mkdir("data");
 	savePlugins();
 	saveEffects();
 	saveIngredients();

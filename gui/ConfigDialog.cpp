@@ -243,6 +243,8 @@ void ConfigDialog::saveConfig()
 	settings.modOrganizerPath = m_modOrganizerPathEdit->text();
 	settings.language = m_languageComboBox->currentText();
 
+	settings.clearEmptyFlag();
+
 	Config::main() = m_config;
 	m_config.save();
 }

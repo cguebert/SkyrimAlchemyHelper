@@ -49,10 +49,7 @@ Mod::Mod(const string& fileName, const std::string& language)
 {
 	ifstream stream(fileName, ios::binary | ios::in);
 	if (!stream.is_open())
-	{
-		cerr << "Cannot open " << fileName << endl;
-		return;
-	}
+		throw std::ios_base::failure("Cannot open " + fileName);
 
 	in.setStream(move(stream));
 

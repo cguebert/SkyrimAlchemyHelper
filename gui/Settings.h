@@ -51,6 +51,8 @@ public:
 		minTotalIngredientsCount = 25; // When parsing a save, ignore containers that have less than this total number of ingredients
 
 	bool isEmpty();
+	void clearEmptyFlag();
+
 	void load();
 	void save();
 
