@@ -300,7 +300,14 @@ bool PotionsList::defaultFilters(const Potion& potion)
 
 		case FilterType::AvailableIngredients:
 		{
-			const auto& ingredientsCount = GameSave::instance().ingredientsCount();
+			const auto& save = GameSave::instance();
+			if (!save.isLoaded())
+				break;
+
+			const auto& ingredientsCount = save.ingredientsCount();
+			if (ingredientsCount.empty())
+				break;
+
 			for (int i = 0; i < maxIngredientsPerPotion; ++i)
 				if (potion.ingredients[i] != -1 && !ingredientsCount[potion.ingredients[i]])
 					return false;

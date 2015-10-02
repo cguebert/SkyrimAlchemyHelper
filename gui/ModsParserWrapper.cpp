@@ -102,7 +102,7 @@ bool ModsParserWrapper::getModsPaths(std::vector<std::string>& modsPathList)
 			modsPathList.emplace_back("Skyrim.esm");
 	}
 
-	// Loading the "config.plugins.txt" file
+	// Loading the "plugins.txt" file
 	std::ifstream inFile(m_pluginsListPath.toStdString());
 	std::string modName;
 	while (std::getline(inFile, modName))
