@@ -22,6 +22,8 @@ More information on [its page on nexusmods](http://www.nexusmods.com/skyrim/mods
 
 ![Main window](http://s4.postimg.org/4l28b58jh/Main_Window.jpg)
 ![Game save information](http://s3.postimg.org/o2azo6hhf/Game_Save.jpg)
+![Known ingredients](http://i.imgsafe.org/3d1c5a5.jpg)
+![Configuration](http://i.imgsafe.org/4c6d0ea.jpg)
 
 ## Code
 
