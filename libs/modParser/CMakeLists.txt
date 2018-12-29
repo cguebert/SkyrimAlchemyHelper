@@ -1,7 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
-set(PROJECT_NAME "ModParser")
-project(${PROJECT_NAME})
+find_package(ZLIB REQUIRED)
+
+set(target "ModParser")
+project(${target})
 
 set(HEADER_FILES
 	BSAFile.h
@@ -22,14 +24,15 @@ set(SOURCE_FILES
 	StringsTable.cpp
 )
 
-add_library(${PROJECT_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES})
+add_library(${target} STATIC ${HEADER_FILES} ${SOURCE_FILES})
+add_library(${META_PROJECT_NAME}::${target} ALIAS ${target})  # Create namespaced alias
 
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Libraries")
+set_target_properties(${target} PROPERTIES FOLDER "Libraries")
+target_include_directories(${target} PRIVATE ${CMAKE_SOURCE_DIR}/libs)
 
-target_link_libraries(${PROJECT_NAME} "Parser")
+target_link_libraries(${target} ${META_PROJECT_NAME}::Parser ZLIB::ZLIB)
 
-include_directories(${EXTLIB_INCLUDE_DIR})
-
-add_library("ZLib" STATIC IMPORTED)
-set_target_properties("ZLib" PROPERTIES IMPORTED_LOCATION "${EXTLIB_BINARIES_DIR}/zlibstatic.lib")
-target_link_libraries(${PROJECT_NAME} "ZLib")
+set_target_properties(${target} PROPERTIES ${DEFAULT_PROJECT_OPTIONS})
+target_compile_definitions(${target} PUBLIC ${DEFAULT_COMPILE_DEFINITIONS})
+target_compile_options(${target} PUBLIC ${DEFAULT_COMPILE_OPTIONS})
+target_link_libraries(${target} PUBLIC ${DEFAULT_LINKER_OPTIONS})

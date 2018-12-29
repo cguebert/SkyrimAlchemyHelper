@@ -1,15 +1,16 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
-set(PROJECT_NAME "SkyrimAlchemyHelper")
-project(${PROJECT_NAME})
+find_package(ZLIB REQUIRED)
 
-set(QT_BASE_DIR "" CACHE PATH "Qt5 install prefix") # C:/Qt/5/msvc2015/
-list(APPEND CMAKE_PREFIX_PATH ${QT_BASE_DIR})
+set(target "SkyrimAlchemyHelper")
+project(${target})
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOMOC ON) # Instruct CMake to run moc automatically when needed.
+set(CMAKE_AUTOUIC ON) # Instruct CMake to run uic automatically when needed.
+set(CMAKE_AUTORCC ON) # Instruct CMake to run rcc automatically when needed.
 
-add_definitions(-D_SCL_SECURE_NO_WARNINGS)
+# External dependencies
+find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 
 set(HEADER_FILES
 	Config.h
@@ -58,41 +59,37 @@ set(SOURCE_FILES
 
 set(RESSOURCE_FILES SAH.qrc SAH.rc)
 
-find_package(Qt5Widgets)
-find_package(Qt5OpenGL)
+add_executable(${target} WIN32 ${HEADER_FILES} ${SOURCE_FILES} ${RESSOURCE_FILES})
 
-add_executable(${PROJECT_NAME} WIN32 ${HEADER_FILES} ${SOURCE_FILES} ${RESSOURCE_FILES})
+set_target_properties(${target} PROPERTIES FOLDER "Applications")
 
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Applications")
+target_link_libraries(${target}
+	Qt5::Widgets
+	${META_PROJECT_NAME}::SaveParser
+	${META_PROJECT_NAME}::ModParser
+)
+target_include_directories(${target} PRIVATE ${CMAKE_SOURCE_DIR}/libs)
 
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets SaveParser ModParser)
+set_target_properties(${target} PROPERTIES ${DEFAULT_PROJECT_OPTIONS})
+target_compile_definitions(${target} PUBLIC ${DEFAULT_COMPILE_DEFINITIONS})
+target_compile_options(${target} PUBLIC ${DEFAULT_COMPILE_OPTIONS})
+target_link_libraries(${target} PUBLIC ${DEFAULT_LINKER_OPTIONS})
 
-install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${TARGET_DIR})
+# 
+# Deployment
+# 
 
-# Install Qt files
-set(QT_LIBS Qt5Core Qt5Gui Qt5Widgets)
-set(qtLibsRelease)
-set(qtLibsDebug)
+# Executable
+install(TARGETS ${target} RUNTIME DESTINATION debug CONFIGURATIONS Debug)
+install(TARGETS ${target} RUNTIME DESTINATION release CONFIGURATIONS Release)
 
-foreach(libName ${QT_LIBS})
-	list(APPEND qtLibsRelease	"${QT_BASE_DIR}/bin/${libName}.dll")
-	list(APPEND qtLibsDebug		"${QT_BASE_DIR}/bin/${libName}d.dll")
-endforeach(libName)
+# Copy the dependencies dlls
+foreach(export_lib Qt5::Widgets Qt5::Core Qt5::Gui ZLIB::ZLIB)
+	InstallDependency(${export_lib})
+endforeach()
 
-install(FILES ${qtLibsRelease} CONFIGURATIONS Release RelWithDebInfo DESTINATION ${TARGET_DIR})
-install(FILES ${qtLibsDebug} CONFIGURATIONS Debug DESTINATION ${TARGET_DIR})
+InstallDependency(Qt5::QWindowsIntegrationPlugin "/platforms")
 
-set(QT_PLUGINS qdds qgif qicns qico qjp2 qjpeg qmng qsvg qtga qtiff qwbmp qwebp)
-set(qtPluginsRelease)
-set(qtPluginsDebug)
-
-foreach(libName ${QT_PLUGINS})
-	list(APPEND qtPluginsRelease	"${QT_BASE_DIR}/plugins/imageformats/${libName}.dll")
-	list(APPEND qtPluginsDebug		"${QT_BASE_DIR}/plugins/imageformats/${libName}d.dll")
-endforeach(libName)
-
-install(FILES ${qtPluginsRelease} CONFIGURATIONS Release RelWithDebInfo DESTINATION "${TARGET_DIR}/imageformats")
-install(FILES ${qtPluginsDebug} CONFIGURATIONS Debug DESTINATION "${TARGET_DIR}/imageformats")
-
-install(FILES "${QT_BASE_DIR}/plugins/platforms/qwindows.dll" CONFIGURATIONS Release RelWithDebInfo DESTINATION "${TARGET_DIR}/platforms")
-install(FILES "${QT_BASE_DIR}/plugins/platforms/qwindowsd.dll" CONFIGURATIONS Debug DESTINATION "${TARGET_DIR}/platforms")
+# Copy the VC runtime
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION release CONFIGURATIONS Release)
+include(InstallRequiredSystemLibraries)

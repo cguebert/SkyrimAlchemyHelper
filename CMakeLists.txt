@@ -1,22 +1,19 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
-set(PROJECT_NAME "Skyrim Alchemy Helper")
-project(${PROJECT_NAME})
+# Include cmake modules
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set(EXTLIB_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extlibs)
-set(EXTLIB_INCLUDE_DIR ${EXTLIB_BASE_DIR}/include)
-set(EXTLIB_BINARIES_DIR ${EXTLIB_BASE_DIR}/lib)
+set(META_PROJECT_NAME "SkyrimAlchemyHelper")
+project(${META_PROJECT_NAME})
 
+option(BUILD_SHARED_LIBS "Build shared libraries." ON)
+
+# Generate folders for IDE targets (e.g., VisualStudio solutions)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(TARGET_DIR ${CMAKE_INSTALL_PREFIX}/\${BUILD_TYPE})
-
-# Multiprocessor build on Visual C++
-if(MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-endif()
-
-include_directories("libs")
+# Compiler settings and options
+include(cmake/CompileOptions.cmake)
+include(cmake/Custom.cmake) # Some useful functions
 
 add_subdirectory("libs/parser")
 add_subdirectory("libs/saveParser")

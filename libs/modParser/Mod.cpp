@@ -23,7 +23,7 @@
 *                  Contact: christophe.guebert+SAH@gmail.com                  *
 ******************************************************************************/
 #include "Mod.h"
-#include "zlib/zlib.h"
+#include "zlib.h"
 
 #include <iostream>
 #include <fstream>

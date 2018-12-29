@@ -30,3 +30,12 @@ More information on [its page on nexusmods](http://www.nexusmods.com/skyrim/mods
 C++11 for parsing mods and game saves.  
 Qt C++ for the GUI.  
 Uses zlib for decompressing part of the files.
+
+## Compilation
+
+I use VCPG to build zlib and lz4, and have Qt5 installed using their installer. Using CMake to build the project:
+(replace with the correct paths for vcpkg & qt)
+```
+cmake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_INSTALL_PREFIX="../install" -DCMAKE_TOOLCHAIN_FILE="{path-to-VCPKG}\scripts\buildsystems\vcpkg.cmake" -DCMAKE_PREFIX_PATH={path-to-qt}\msvc2017_64 -DVCPKG_TARGET_TRIPLET="x64-windows"
+cmake --build . --config Release --target Install
+```
