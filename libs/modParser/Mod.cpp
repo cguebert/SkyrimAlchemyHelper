@@ -285,7 +285,7 @@ std::string Mod::getMaster(uint32_t id)
 {
 	uint8_t modId = id >> 24;
 
-	unsigned int nbMasters = m_masters.size();
+	size_t nbMasters = m_masters.size();
 	if (modId == nbMasters) // Introduced by this mod
 		return m_modName;
 	else if (modId < nbMasters)

@@ -44,10 +44,10 @@ public:
 
 	struct Effect
 	{
-		quint32 code = 0, flags = 0;
+		uint32_t code = 0, flags = 0;
 		float baseCost = 0;
 		QString name, description, tooltip;
-		std::vector<int> ingredients;
+		std::vector<size_t> ingredients;
 	};
 	using Effects = std::vector<Effect>;
 
@@ -62,7 +62,7 @@ public:
 	struct Ingredient
 	{
 		int pluginId = 0;
-		quint32 code = 0;
+		uint32_t code = 0;
 		QString name, tooltip;
 		EffectData effects[nbEffectsPerIngredient],
 			sortedEffects[nbEffectsPerIngredient];
@@ -81,8 +81,8 @@ public:
 	void save() const;
 
 	int indexOfPlugin(QString name) const;
-	int indexOfEffect(quint32 id) const;
-	int indexOfIngredient(quint32 pluginId, quint32 ingredientId) const;
+	int indexOfEffect(uint32_t id) const;
+	int indexOfIngredient(uint32_t pluginId, uint32_t ingredientId) const;
 
 protected:
 	void loadPlugins();
@@ -104,7 +104,7 @@ public:
 
 	struct Container
 	{
-		quint32 code = 0, cellCode = 0;
+		uint32_t code = 0, cellCode = 0;
 		bool interior = true;
 		QString name, location;
 	};

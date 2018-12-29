@@ -52,7 +52,7 @@ void ContainersWidget::refreshList()
 	const auto& ingredients = Config::main().ingredients;
 	const auto& containers = m_gameSave.containers();
 	const auto& containersState = m_gameSave.containersState();
-	int nbContainers = containers.size();
+	size_t nbContainers = containers.size();
 
 	m_containersWidgets.clear();
 	
@@ -67,7 +67,7 @@ void ContainersWidget::refreshList()
 	auto label = new QLabel(containersCountText);
 	vLayout->addWidget(label);
 
-	for (int i = 0; i < nbContainers; ++i)
+	for (size_t i = 0; i < nbContainers; ++i)
 	{
 		const auto& container = containers[i];
 		auto containerWidget = new QFrame;
@@ -76,14 +76,14 @@ void ContainersWidget::refreshList()
 		auto idLabel = new QLabel(QString::number(container.id, 16).toUpper());
 		idLabel->setMinimumWidth(60);
 
-		int nbIng = 0;
+		size_t nbIng = 0;
 		for (const auto& item : container.inventory)
 			nbIng += item.second;
 
 		auto nbIngredientsLabel = new QLabel(tr("%1 ingredients").arg(nbIng));
 		nbIngredientsLabel->setMinimumWidth(80);
 		auto inventoryWidget = new InventoryWidget(container.inventory);
-		inventoryWidget->setMinimumHeight(std::min(25 + nbIng * 30, 250));
+		inventoryWidget->setMinimumHeight(std::min<int>(25 + static_cast<int>(nbIng) * 30, 250));
 		inventoryWidget->layout()->setContentsMargins(0, 0, 0, 0);
 		inventoryWidget->hide();
 
@@ -155,7 +155,7 @@ void ContainersWidget::toggleInventoryWidget()
 	}
 }
 
-QString ContainersWidget::getContainerLabel(quint32 id)
+QString ContainersWidget::getContainerLabel(size_t id)
 {
 	if (id == 0x14)
 		return tr("Player");
@@ -181,7 +181,7 @@ void ContainersWidget::updateIdLabels()
 void ContainersWidget::updateCheckBoxes()
 {
 	const auto& containersState = m_gameSave.containersState();
-	for (int i = 0, nb = m_containersWidgets.size(); i < nb; ++i)
+	for (size_t i = 0, nb = m_containersWidgets.size(); i < nb; ++i)
 	{
 		QSignalBlocker blocker(m_containersWidgets[i].activeCheckBox);
 		m_containersWidgets[i].activeCheckBox->setChecked(containersState[i] ? Qt::Checked : Qt::Unchecked);

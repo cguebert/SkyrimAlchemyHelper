@@ -32,7 +32,7 @@ class QTableView;
 class InventoryModel : public QAbstractTableModel
 {
 public:
-	InventoryModel(const std::vector<std::pair<int, int>>& inventory, QObject* parent = nullptr);
+	InventoryModel(const std::vector<std::pair<size_t, size_t>>& inventory, QObject* parent = nullptr);
 
 	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -43,7 +43,7 @@ public:
 	void endReset();
 
 protected:
-	const std::vector<std::pair<int, int>>& m_inventory;
+	const std::vector<std::pair<size_t, size_t>>& m_inventory;
 };
 
 //****************************************************************************//
@@ -52,7 +52,7 @@ class InventoryWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit InventoryWidget(const std::vector<std::pair<int, int>>& inventory, QWidget* parent = nullptr);
+	explicit InventoryWidget(const std::vector<std::pair<size_t, size_t>>& inventory, QWidget* parent = nullptr);
 
 public slots:
 	void beginReset();

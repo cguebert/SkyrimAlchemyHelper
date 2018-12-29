@@ -67,7 +67,7 @@ protected:
 
 	int m_currentId = -1;
 	FieldParsers m_cellNameParser;
-	std::vector<std::pair<uint32_t, int>> m_containersIds; // id - index; only for those that can be in this current mod
+	std::vector<std::pair<uint32_t, uint32_t>> m_containersIds; // id - index; only for those that can be in this current mod
 };
 
 } // namespace modParser

@@ -42,8 +42,8 @@ protected:
 	void updateMagicalEffects();
 
 	bool m_parsedMGEF = false;
-	int m_nbIngrAdded = 0, m_nbIngrModified = 0,
-		m_nbEffAdded = 0, m_nbEffModified = 0;
+	size_t m_nbIngrAdded = 0, m_nbIngrModified = 0,
+		   m_nbEffAdded = 0, m_nbEffModified = 0;
 
 	Ingredient m_currentIngredient;
 	MagicalEffect m_currentMagicalEffect;

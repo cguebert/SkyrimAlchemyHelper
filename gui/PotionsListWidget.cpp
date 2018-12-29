@@ -42,7 +42,7 @@ PotionsListWidget::PotionsListWidget(QWidget* parent)
 	refreshList();
 }
 
-void PotionsListWidget::nbCraftable(int id, QString& text, QString& tooltip)
+void PotionsListWidget::nbCraftable(size_t id, QString& text, QString& tooltip)
 {
 	const auto& potionsList = PotionsList::instance();
 	const auto& ingredients = Config::main().ingredients;
@@ -51,14 +51,14 @@ void PotionsListWidget::nbCraftable(int id, QString& text, QString& tooltip)
 	const auto& ingredientsCount = potionsList.additionalData()[id].ingredientsCount;
 
 	const auto& potion = potions[potionsId[id]];
-	int ing0 = potion.ingredients[0], ing1 = potion.ingredients[1], ing2 = potion.ingredients[2];
-	int nb0 = ingredientsCount[0], nb1 = ingredientsCount[1];
-	int minNb = std::min(nb0, nb1);
+	size_t ing0 = potion.ingredients[0], ing1 = potion.ingredients[1], ing2 = potion.ingredients[2];
+	size_t nb0 = ingredientsCount[0], nb1 = ingredientsCount[1];
+	size_t minNb = std::min(nb0, nb1);
 	tooltip = QString("%1 - %2\n%3 - %4").arg(ingredients[ing0].name).arg(nb0)
 		.arg(ingredients[ing1].name).arg(nb1);
 	if (ing2 != -1)
 	{
-		int nb2 = ingredientsCount[2];
+		size_t nb2 = ingredientsCount[2];
 		minNb = std::min(minNb, nb2);
 		tooltip += QString("\n%1 - %2").arg(ingredients[ing2].name).arg(nb2);
 	}
@@ -68,7 +68,7 @@ void PotionsListWidget::nbCraftable(int id, QString& text, QString& tooltip)
 	else					text = tr("Can craft %1 potions").arg(minNb);
 }
 
-void PotionsListWidget::nbDiscoveredEffects(int id, QString& text, QString& tooltip)
+void PotionsListWidget::nbDiscoveredEffects(size_t id, QString& text, QString& tooltip)
 {
 	const auto& ingredients = Config::main().ingredients;
 	const auto& effects = Config::main().effects;
@@ -97,8 +97,8 @@ void PotionsListWidget::refreshList()
 	const auto& potionsId = PotionsList::instance().sortedPotions();
 	const auto& ingredientsCount = GameSave::instance().ingredientsCount();
 	const auto& knownIngredients = GameSave::instance().knownIngredients();
-	int nbPotions = potionsId.size();
-	const int showNbPotions = 50;
+	size_t nbPotions = potionsId.size();
+	const size_t showNbPotions = 50;
 
 	QVBoxLayout* vLayout = new QVBoxLayout;
 	QString potionsCountText;
@@ -111,7 +111,7 @@ void PotionsListWidget::refreshList()
 	auto label = new QLabel(potionsCountText);
 	vLayout->addWidget(label);
 
-	for (int i = 0, nb = std::min(showNbPotions, nbPotions); i < nb; ++i)
+	for (size_t i = 0, nb = std::min(showNbPotions, nbPotions); i < nb; ++i)
 	{
 		const auto potionId = potionsId[i];
 		const auto& potion = potions[potionId];

@@ -68,7 +68,7 @@ void GameSave::load(QString fileName)
 	const auto& config = Config::main();
 	const auto& plugins = config.plugins;
 	const auto& ingredients = config.ingredients;
-	const int nbIngredients = ingredients.size();
+	const size_t nbIngredients = ingredients.size();
 
 	saveParser::Save::Ingredients possibleIngredients;
 	for (const auto& ing : ingredients)
@@ -193,10 +193,10 @@ void GameSave::computeIngredientsCount()
 {
 	const auto& config = Config::main();
 	const auto& ingredients = config.ingredients;
-	const int nbIngredients = ingredients.size();
+	const size_t nbIngredients = ingredients.size();
 
 	m_ingredientsCount.assign(nbIngredients, 0);
-	for (int i = 0, nb = m_containers.size(); i < nb; ++i)
+	for (size_t i = 0, nb = m_containers.size(); i < nb; ++i)
 	{
 		const auto& container = m_containers[i];
 		if (m_containersState[i])
@@ -208,7 +208,7 @@ void GameSave::computeIngredientsCount()
 
 	// Compute inventory (remove ingredients with a count of zero)
 	m_inventory.clear();
-	for (int i = 0; i < nbIngredients; ++i)
+	for (size_t i = 0; i < nbIngredients; ++i)
 	{
 		if (m_ingredientsCount[i])
 			m_inventory.emplace_back(i, m_ingredientsCount[i]);
@@ -221,7 +221,7 @@ void GameSave::filterContainers()
 	{
 		const auto& containersInfo = ContainersCache::instance().containers;
 		const auto cellId = m_header.locationId;
-		for (int i = 0, nb = m_containers.size(); i < nb; ++i)
+		for (size_t i = 0, nb = m_containers.size(); i < nb; ++i)
 		{
 			const auto& container = m_containers[i];
 			auto id = container.id;

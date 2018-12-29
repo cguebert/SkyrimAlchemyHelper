@@ -27,7 +27,7 @@
 #include "InventoryWidget.h"
 #include "Config.h"
 
-InventoryModel::InventoryModel(const std::vector<std::pair<int, int>>& inventory, QObject* parent)
+InventoryModel::InventoryModel(const std::vector<std::pair<size_t, size_t>>& inventory, QObject* parent)
 	: QAbstractTableModel(parent)
 	, m_inventory(inventory)
 {
@@ -35,7 +35,7 @@ InventoryModel::InventoryModel(const std::vector<std::pair<int, int>>& inventory
 
 int InventoryModel::rowCount(const QModelIndex& /*parent*/) const
 {
-	return m_inventory.size();
+	return static_cast<int>(m_inventory.size());
 }
 
 int InventoryModel::columnCount(const QModelIndex& /*parent*/) const
@@ -83,7 +83,7 @@ void InventoryModel::endReset()
 
 //****************************************************************************//
 
-InventoryWidget::InventoryWidget(const std::vector<std::pair<int, int>>& inventory, QWidget* parent)
+InventoryWidget::InventoryWidget(const std::vector<std::pair<size_t, size_t>>& inventory, QWidget* parent)
 	: QWidget(parent)
 {
 	QVBoxLayout* vLayout = new QVBoxLayout;

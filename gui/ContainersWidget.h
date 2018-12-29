@@ -49,13 +49,13 @@ public slots:
 	void toggleContainerStatus();
 
 protected:
-	QString getContainerLabel(quint32 id);
+	QString getContainerLabel(size_t id);
 
 	GameSave& m_gameSave;
 
 	struct ContainerWidgets
 	{
-		quint32 id;
+		size_t id;
 		QCheckBox* activeCheckBox;
 		QPushButton* toggleButton;
 		QLabel* idLabel;

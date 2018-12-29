@@ -35,7 +35,7 @@ IngredientsListModel::IngredientsListModel(Config& config, QObject* parent)
 
 int IngredientsListModel::rowCount(const QModelIndex& /*parent*/) const
 {
-	return m_config.ingredients.size();
+	return static_cast<int>(m_config.ingredients.size());
 }
 
 int IngredientsListModel::columnCount(const QModelIndex& /*parent*/) const

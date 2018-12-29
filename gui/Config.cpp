@@ -171,7 +171,7 @@ void Config::loadIngredients()
 	});
 
 	// Create the tooltips of the effects (with the sorted list of ingredients)
-	for (int i = 0, nb = ingredients.size(); i < nb; ++i)
+	for (size_t i = 0, nb = ingredients.size(); i < nb; ++i)
 	{
 		auto& ingredient = ingredients[i];
 		for (auto effectData : ingredient.sortedEffects)
@@ -259,7 +259,7 @@ int Config::indexOfPlugin(QString name) const
 	return -1;
 }
 
-int Config::indexOfEffect(quint32 id) const
+int Config::indexOfEffect(uint32_t id) const
 {
 	auto it = std::find_if(effects.begin(), effects.end(), [&id](const Config::Effect& effect){
 		return effect.code == id;
@@ -269,7 +269,7 @@ int Config::indexOfEffect(quint32 id) const
 	return -1;
 }
 
-int Config::indexOfIngredient(quint32 pluginId, quint32 ingredientId) const
+int Config::indexOfIngredient(uint32_t pluginId, uint32_t ingredientId) const
 {
 	auto it = find_if(ingredients.begin(), ingredients.end(), [pluginId, ingredientId](const Ingredient& ingredient){
 		return ingredient.pluginId == pluginId && ingredient.code == ingredientId;

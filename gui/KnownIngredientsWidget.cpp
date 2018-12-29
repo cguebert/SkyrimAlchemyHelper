@@ -37,7 +37,7 @@ KnownIngredientsModel::KnownIngredientsModel(GameSave& gamesave, QObject* parent
 
 int KnownIngredientsModel::rowCount(const QModelIndex& /*parent*/) const
 {
-	return m_gameSave.knownIngredients().size();
+	return static_cast<int>(m_gameSave.knownIngredients().size());
 }
 
 int KnownIngredientsModel::columnCount(const QModelIndex& /*parent*/) const

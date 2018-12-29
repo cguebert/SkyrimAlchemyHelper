@@ -59,7 +59,7 @@ public:
 	struct Header
 	{
 		int saveNumber = 0, playerLevel = 0;
-		quint32 locationId = 0;
+		uint32_t locationId = 0;
 		QString playerName, playerLocation;
 	};
 
@@ -68,13 +68,13 @@ public:
 	using KnownIngredients = std::vector<std::array<bool, 4>>;
 	const KnownIngredients& knownIngredients() const; // Bool for each magical effect
 
-	using InventoryItem = std::pair<int, int>; // Ingredient index in IngredientsList, number of ingredients
+	using InventoryItem = std::pair<size_t, size_t>; // Ingredient index in IngredientsList, number of ingredients
 	using Inventory = std::vector<InventoryItem>;
 	const Inventory& inventory() const; // Total of all containers
 
 	struct Container
 	{
-		quint32 id;
+		uint32_t id;
 		Inventory inventory;
 	};
 	using Containers = std::vector<Container>;
@@ -82,7 +82,7 @@ public:
 
 	std::vector<bool>& containersState();
 
-	using IngredientsCount = std::vector<int>;
+	using IngredientsCount = std::vector<size_t>;
 	const IngredientsCount& ingredientsCount() const; // Same as inventory, but more direct and with the 0-count ingredients
 
 protected:
@@ -94,7 +94,7 @@ protected:
 	KnownIngredients m_knownIngredients;
 	Inventory m_inventory;
 	Containers m_containers;
-	std::vector<int> m_ingredientsCount;
+	std::vector<size_t> m_ingredientsCount;
 	int m_maxValidIngredientCount = 1000, m_minValidNbIngredients = 5, m_minTotalIngredientsCount = 50;
 	bool m_playerOnly = false, m_sameCellAsPlayer = false, m_interiorCellsOnly = false;
 	std::vector<bool> m_containersState;
@@ -117,7 +117,7 @@ inline const GameSave::KnownIngredients& GameSave::knownIngredients() const
 inline const GameSave::Inventory& GameSave::inventory() const
 { return m_inventory; }
 
-inline const std::vector<int>& GameSave::ingredientsCount() const
+inline const std::vector<size_t>& GameSave::ingredientsCount() const
 { return m_ingredientsCount; }
 
 inline void GameSave::setMaxValidIngredientCount(int count)

@@ -227,29 +227,34 @@ void SaveDialog::refreshInformation()
 	{
 		bool known = false;
 		for (int i = 0; i < 4; ++i)
+		{
 			if (ing[i])
 			{
 				++knownEffects;
 				known = true;
 			}
+		}
 
 		if (known)
 			++knownIngredients;
 	}
 
-	int nbIng = knownIng.size();
+	size_t nbIng = knownIng.size();
 	auto ingLabel = new QLabel(QString(tr("%1 known ingredients, with %2% of discovered effects"))
 		.arg(knownIngredients).arg(knownIngredients ? knownEffects * 25 / knownIngredients : 0));
 	layout->addWidget(ingLabel);
 
 	// Information about the inventory
-	int total = 0;
+	size_t total = 0;
 	for (auto ing : m_gameSave.ingredientsCount())
 		total += ing;
-	int nbActiveContainers = 0;
+	size_t nbActiveContainers = 0;
 	for (const auto status : m_gameSave.containersState())
+	{
 		if (status)
 			++nbActiveContainers;
+	}
+
 	layout->addWidget(new QLabel(QString(tr("%1 total ingredients in %2 containers"))
 		.arg(total).arg(nbActiveContainers)));
 }

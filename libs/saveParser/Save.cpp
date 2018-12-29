@@ -236,7 +236,7 @@ Save::Inventory Save::searchForIngredients(const ChangeForm& form)
 	}
 
 	// The problem is that we can have some values that should not have been interpreted as ingredients
-	int nb = inventory.size();
+	size_t nb = inventory.size();
 
 	if (m_minValidNbIngredients > 0 && nb < m_minValidNbIngredients)
 		return Inventory();
@@ -267,13 +267,13 @@ uint32_t Save::getFormID(const RefID& refID)
 }
 
 template <class C, class V>
-int indexOf(const C& container, const V& value)
+uint32_t indexOf(const C& container, const V& value)
 {
 	auto b = begin(container), e = end(container);
 	auto it = find(b, e, value);
 	if (it == e)
 		return -1;
-	return it - b;
+	return static_cast<uint32_t>(it - b);
 }
 
 Save::RefID Save::getRefID(uint32_t formID)
@@ -436,11 +436,13 @@ void Save::SearchHelper::setup(const RefIDs& refIDs)
 	}
 
 	// Size necessary for data
-	int dataSize = 1;
+	size_t dataSize = 1;
 	for (int i = 0; i < 256; ++i)
 	{
-		if (!l1In[i].empty()) dataSize += 1 + l1In[i].size() * 2;
-		if (l2Nb[i]) dataSize += 1 + l2Nb[i] * 2;
+		if (!l1In[i].empty()) 
+			dataSize += 1 + l1In[i].size() * 2;
+		if (l2Nb[i]) 
+			dataSize += 1 + l2Nb[i] * 2;
 	}
 
 	memset(levels, 0, 2 * 3 * 256);
@@ -453,7 +455,7 @@ void Save::SearchHelper::setup(const RefIDs& refIDs)
 	{
 		if (l1In[i].empty())
 			continue;
-		int16_t nb = l1In[i].size();
+		int16_t nb = static_cast<int16_t>(l1In[i].size());
 		levels[1][i] = pos;
 		data[pos] = nb;
 		pos += 1 + nb * 2;
@@ -475,7 +477,7 @@ void Save::SearchHelper::setup(const RefIDs& refIDs)
 
 	// For each RefID, build our way backward and add the necessary information in data
 	int16_t maxId = 0;
-	for (int itRef = 0, nbRefs = refIDs.size(); itRef < nbRefs; ++itRef)
+	for (size_t itRef = 0, nbRefs = refIDs.size(); itRef < nbRefs; ++itRef)
 	{
 		const auto& refID = refIDs[itRef];
 		uint16_t id = 0, r0 = refID[0], r1 = refID[1], r2 = refID[2];
@@ -514,7 +516,7 @@ void Save::SearchHelper::setup(const RefIDs& refIDs)
 			}
 			
 			*p++ = id;
-			*p = itRef; // Write the value that we want to return from the search (index into refIDs)
+			*p = static_cast<uint16_t>(itRef); // Write the value that we want to return from the search (index into refIDs)
 			break;
 		}
 	}
@@ -522,7 +524,7 @@ void Save::SearchHelper::setup(const RefIDs& refIDs)
 
 int Save::SearchHelper::search(const Buffer& buffer, int& pos)
 {
-	int bufSize = buffer.size() - 2;
+	size_t bufSize = buffer.size() - 2;
 	for (; pos < bufSize; ++pos)
 	{
 		// First verify that each level has something for these bytes

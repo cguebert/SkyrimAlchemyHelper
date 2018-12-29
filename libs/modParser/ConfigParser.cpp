@@ -102,7 +102,7 @@ ConfigParser::ConfigParser(const std::string& fileName, const std::string& langu
 
 	m_groupParsers.emplace_back("INGR", RecordParsers({ ingRecord } ));
 
-// Magical effects
+	// Magical effects
 	// We don't parse every effects yet, we will filter later for only the alchemy ones
 	RecordParsers mgefParsers = { { "MGEF", {}, [this](uint32_t id, uint32_t dataSize, uint32_t /*flags*/) {
 		m_magicalEffectsOffsets.emplace_back(id, dataSize, in.tellg());
@@ -201,9 +201,9 @@ void ConfigParser::updateMagicalEffects()
 	});
 
 	// Compute the number of effects added or modified
-	int oldSize = m_config.magicalEffectsList.size();
-	int updateSize = updatedEffects.size();
-	int newSize = outputList.size();
+	size_t oldSize = m_config.magicalEffectsList.size();
+	size_t updateSize = updatedEffects.size();
+	size_t newSize = outputList.size();
 	m_nbEffAdded = newSize - oldSize;
 	m_nbEffModified = updateSize - m_nbEffAdded;
 

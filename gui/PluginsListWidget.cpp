@@ -35,7 +35,7 @@ PluginsListModel::PluginsListModel(Config& config, QObject* parent)
 
 int PluginsListModel::rowCount(const QModelIndex& /*parent*/) const
 {
-	return m_config.plugins.size();
+	return static_cast<int>(m_config.plugins.size());
 }
 
 int PluginsListModel::columnCount(const QModelIndex& /*parent*/) const

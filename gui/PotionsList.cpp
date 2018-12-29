@@ -43,7 +43,7 @@ PotionsList::PotionsList()
 		recomputeList();
 }
 
-int matTo1d(int x, int y, int N)
+size_t matTo1d(size_t x, size_t y, size_t N)
 {
 	if (x <= y)
 		return x * N - (x - 1) * x / 2 + y - x;
@@ -58,19 +58,19 @@ void PotionsList::recomputeList()
 	const auto& ingredients = Config::main().ingredients;
 	const auto& effects = Config::main().effects;
 
-	const int nbIng = ingredients.size();
-	const int nbEff = effects.size();
+	const size_t nbIng = ingredients.size();
+	const size_t nbEff = effects.size();
 	const int maxInt = INT_MAX; // std::numeric_limits<int>::max()
 
 	// Naive implementation
 	// First create potions with only 2 ingredients
-	std::vector<int> potionsId_2Ing(nbIng * (nbIng + 1) / 2, -1); // Store the results for later
-	int potId = 0;
+	std::vector<size_t> potionsId_2Ing(nbIng * (nbIng + 1) / 2, -1); // Store the results for later
+	size_t potId = 0;
 	
-	for (int id1 = 0; id1 < nbIng; ++id1)
+	for (size_t id1 = 0; id1 < nbIng; ++id1)
 	{
 		const auto& ing1 = ingredients[id1];
-		for (int id2 = id1 + 1; id2 < nbIng; ++id2)
+		for (size_t id2 = id1 + 1; id2 < nbIng; ++id2)
 		{
 			const auto& ing2 = ingredients[id2];
 			Potion potion;
@@ -96,22 +96,22 @@ void PotionsList::recomputeList()
 		}
 	}
 
-	int emptyEffects[maxEffectsPerPotion];
+	size_t emptyEffects[maxEffectsPerPotion];
 	for (int i = 0; i < maxEffectsPerPotion; ++i) emptyEffects[i] = -1;
 
 	// Then create combinaisons of these potions
-	for (int id1 = 0; id1 < nbIng; ++id1)
+	for (size_t id1 = 0; id1 < nbIng; ++id1)
 	{
-		for (int id2 = id1 + 1; id2 < nbIng; ++id2)
+		for (size_t id2 = id1 + 1; id2 < nbIng; ++id2)
 		{
-			int pot12Id = potionsId_2Ing[matTo1d(id1, id2, nbIng)];
+			size_t pot12Id = potionsId_2Ing[matTo1d(id1, id2, nbIng)];
 			if (pot12Id == -1)
 				continue;
 
-			for (int id3 = id2 + 1; id3 < nbIng; ++id3)
+			for (size_t id3 = id2 + 1; id3 < nbIng; ++id3)
 			{
-				int pot13Id = potionsId_2Ing[matTo1d(id1, id3, nbIng)];
-				int pot23Id = potionsId_2Ing[matTo1d(id2, id3, nbIng)];
+				size_t pot13Id = potionsId_2Ing[matTo1d(id1, id3, nbIng)];
+				size_t pot23Id = potionsId_2Ing[matTo1d(id2, id3, nbIng)];
 
 				if (pot13Id == -1 && pot23Id == -1)
 					continue;
@@ -125,10 +125,10 @@ void PotionsList::recomputeList()
 				potion.ingredients[1] = id2;
 				potion.ingredients[2] = id3;
 
-				int nbEffects = 0, p1 = 0, p2 = 0, p3 = 0;
+				size_t nbEffects = 0, p1 = 0, p2 = 0, p3 = 0;
 				while (true)
 				{
-					int e1 = eff1[p1], e2 = eff2[p2], e3 = eff3[p3];
+					size_t e1 = eff1[p1], e2 = eff2[p2], e3 = eff3[p3];
 					if (e1 == -1 && e2 == -1 && e3 == -1)
 						break;
 
@@ -136,8 +136,8 @@ void PotionsList::recomputeList()
 					if (e2 == -1) e2 = maxInt;
 					if (e3 == -1) e3 = maxInt;
 					
-					int eMin = std::min({ e1, e2, e3 });
-					int nb = 0;
+					size_t eMin = std::min({e1, e2, e3});
+					size_t nb = 0;
 					if (eMin == e1) { ++nb; ++p1; }
 					if (eMin == e2) { ++nb; ++p2; }
 					if (eMin == e3) { ++nb; ++p3; }
@@ -180,11 +180,11 @@ void PotionsList::setFilters(const Filters& filters)
 
 void PotionsList::applyFilters()
 {
-	int nb = m_allPotions.size();
+	size_t nb = m_allPotions.size();
 	m_filteredPotions.clear();
 	m_filteredPotions.reserve(nb);
 
-	for (int i = 0; i < nb; ++i)
+	for (size_t i = 0; i < nb; ++i)
 	{
 		const auto& potion = m_allPotions[i];
 		if (!defaultFilters(potion))
@@ -225,7 +225,7 @@ void PotionsList::sortPotions()
 				scores[id] = scores[id] * factor + func(m_allPotions[id]);
 	}
 
-	std::sort(m_sortedPotions.begin(), m_sortedPotions.end(), [&scores](int lhs, int rhs){
+	std::sort(m_sortedPotions.begin(), m_sortedPotions.end(), [&scores](size_t lhs, size_t rhs) {
 		return scores[lhs] > scores[rhs];
 	});
 
@@ -422,10 +422,10 @@ void PotionsList::computePotionsStrength()
 void PotionsList::updateEffectsToxicity()
 {
 	const auto& effects = Config::main().effects;
-	int nb = effects.size();
+	size_t nb = effects.size();
 	m_toxicity.resize(nb);
 
-	for (int i = 0; i < nb; ++i)
+	for (size_t i = 0; i < nb; ++i)
 	{
 		const auto& effect = effects[i];
 		m_toxicity[i] = ((effect.flags & EffectFlags::Hostile) != 0);
@@ -500,7 +500,7 @@ void PotionsList::computePotionsData()
 
 		for (int j = 0; j < maxIngredientsPerPotion; ++j)
 		{
-			int ingId = potion.ingredients[j];
+			size_t ingId = potion.ingredients[j];
 			addData.ingredientsCount[j] = (ingId != -1 ? ingredientsCount[ingId] : 0);
 
 			if (ingId == -1)

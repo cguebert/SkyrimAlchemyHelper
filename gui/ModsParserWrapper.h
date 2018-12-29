@@ -65,13 +65,13 @@ protected:
 //****************************************************************************//
 
 inline int ModsParserWrapper::nbPlugins() const
-{ return m_config.modsList.size(); }
+{ return static_cast<int>(m_config.modsList.size()); }
 
 inline int ModsParserWrapper::nbIngredients() const
-{ return m_config.ingredientsList.size(); }
+{ return static_cast<int>(m_config.ingredientsList.size()); }
 
 inline int ModsParserWrapper::nbEffects() const
-{ return m_config.magicalEffectsList.size(); }
+{ return static_cast<int>(m_config.magicalEffectsList.size()); }
 
 inline const ContainersCache::Containers& ModsParserWrapper::containers() const
 { return m_containers; }

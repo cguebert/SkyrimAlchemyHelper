@@ -346,7 +346,7 @@ void ModsParserWrapper::copyToConfig(Config& config) const
 	});
 
 	// Create the tooltips of the effects (with the sorted list of ingredients)
-	for (int i = 0, nb = config.ingredients.size(); i < nb; ++i)
+	for (size_t i = 0, nb = config.ingredients.size(); i < nb; ++i)
 	{
 		auto& ingredient = config.ingredients[i];
 		for (auto effectData : ingredient.sortedEffects)

@@ -144,7 +144,7 @@ void DiscoverEffects::setSortingFunction()
 			}
 
 			// Prefer ingredients that have an higher count
-			score += std::min(20, m_ingredientsCount[ingId]) / 20.0;
+			score += std::min<size_t>(20, m_ingredientsCount[ingId]) / 20.0;
 		}
 
 		// Prefer 2 ingredients potions if they have the same score
@@ -164,7 +164,7 @@ bool DiscoverEffects::selectOnePotion()
 	if (sorted.empty())
 		return false;
 
-	int selection = sorted.front();
+	size_t selection = sorted.front();
 	m_selectedPotions.push_back(selection);
 
 	// Modify the lists as if the player has created this potion

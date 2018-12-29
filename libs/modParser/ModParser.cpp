@@ -100,21 +100,21 @@ void ModParser::exportConfig(const Config& config)
 modParser::Containers ModParser::getContainersInfo(const IdsList& ids)
 {
 	// Create a list of all mods names
-	int nbMods = m_modsList.size();
+	size_t nbMods = m_modsList.size();
 	StringsList modsNames;
 	for (const auto& path : m_modsList)
 		modsNames.push_back(Mod::getModName(path));
 
 	// Ask the information for each container and put it in this list
-	int nbIds = ids.size();
+	size_t nbIds = ids.size();
 	modParser::Containers containers;
 	containers.resize(nbIds);
-	for (int i = 0; i < nbIds; ++i)
+	for (size_t i = 0; i < nbIds; ++i)
 		containers[i].id = ids[i];
 
 	vector<pair<uint32_t, string>> containerTypes;
 
-	for (int i = 0; i < nbMods; ++i)
+	for (size_t i = 0; i < nbMods; ++i)
 	{
 		try { ContainersParser::parse(m_modsList[i], m_language, modsNames, containers, containerTypes); }
 		catch (std::exception& e) { std::cerr << e.what() << std::endl; }

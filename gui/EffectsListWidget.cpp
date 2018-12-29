@@ -35,7 +35,7 @@ EffectsListModel::EffectsListModel(Config& config, QObject* parent)
 
 int EffectsListModel::rowCount(const QModelIndex& /*parent*/) const
 {
-	return m_config.effects.size();
+	return static_cast<int>(m_config.effects.size());
 }
 
 int EffectsListModel::columnCount(const QModelIndex& /*parent*/) const

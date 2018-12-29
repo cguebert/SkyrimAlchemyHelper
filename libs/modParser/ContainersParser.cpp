@@ -51,30 +51,31 @@ ContainersParser::ContainersParser(const std::string& fileName,
 	parsePluginInformation();
 
 	// Compute the id of the masters in the whole mods list
-	int nbMasters = m_masters.size();
+	uint8_t nbMasters = static_cast<uint8_t>(m_masters.size());
 	m_mastersIds.assign(nbMasters + 1, -1);
-	for (int i = 0; i < nbMasters; ++i)
+	for (uint8_t i = 0; i < nbMasters; ++i)
 	{
 		auto it = find(m_modsNames.begin(), m_modsNames.end(), m_masters[i]);
 		if (it != m_modsNames.end())
-			m_mastersIds[i] = it - m_modsNames.begin();
+			m_mastersIds[i] = static_cast<uint8_t>(it - m_modsNames.begin());
 	}
 
 	auto it = find(m_modsNames.begin(), m_modsNames.end(), m_modName);
 	if (it != m_modsNames.end())
-		m_mastersIds[nbMasters] = it - m_modsNames.begin();
+		m_mastersIds[nbMasters] = static_cast<uint8_t>(it - m_modsNames.begin());
 
 	// Mod id to master id
 	std::vector<int> modToMaster;
 	modToMaster.assign(m_modsNames.size(), -1);
-	for (int i = 0; i <= nbMasters; ++i)
+	for (uint8_t i = 0; i <= nbMasters; ++i)
 	{
 		if (m_mastersIds[i] != -1)
 			modToMaster[m_mastersIds[i]] = i;
 	}
 
 	// Extract the containers that can be in this mod
-	for (int i = 0, nbContainers = containers.size(); i < nbContainers; ++i)
+	uint32_t nbContainers = static_cast<uint32_t>(containers.size());
+	for (uint32_t i = 0; i < nbContainers; ++i)
 	{
 		auto& container = containers[i];
 		int modId = container.id >> 24;

@@ -59,23 +59,22 @@ public:
 			for (int i = 0; i < maxEffectsPerPotion; ++i) { effects[i] = -1; magnitudes[i] = durations[i] = 0; }
 		}
 
-		int potionId = -1;
-		int ingredients[maxIngredientsPerPotion];
-		int effects[maxEffectsPerPotion];
+		size_t ingredients[maxIngredientsPerPotion];
+		size_t effects[maxEffectsPerPotion];
 		float magnitudes[maxEffectsPerPotion];
 		float durations[maxEffectsPerPotion];
 		float goldCost = 0;
 	};
 	using Potions = std::vector<Potion>;
-	using PotionsId = std::vector<int>;
+	using PotionsId = std::vector<size_t>;
 
 	const Potions& allPotions() const;
 	const PotionsId& sortedPotions() const;
 
 	struct PotionAdditionalData
 	{
-		int ingredientsCount[maxIngredientsPerPotion];
-		using DiscoveredEffect = std::pair<int, int>; // Ingredient id, effect id
+		size_t ingredientsCount[maxIngredientsPerPotion];
+		using DiscoveredEffect = std::pair<size_t, size_t>; // Ingredient id, effect id
 		std::vector<DiscoveredEffect> discoveredEffects;
 	};
 	using PotionAdditionalDataList = std::vector<PotionAdditionalData>;

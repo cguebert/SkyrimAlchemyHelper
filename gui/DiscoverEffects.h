@@ -45,7 +45,7 @@ protected:
 	void cleanup();
 
 	int m_nbPotions;
-	std::vector<int> m_ingredientsCount;
+	std::vector<size_t> m_ingredientsCount;
 	std::vector<std::array<bool, 4>> m_knownIngredients;
 	PotionsList::PotionsId m_selectedPotions;
 	PotionsList::PotionAdditionalDataList m_additionalData;
