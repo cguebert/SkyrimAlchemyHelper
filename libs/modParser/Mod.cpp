@@ -90,33 +90,33 @@ void Mod::parseGroup()
 	bool parsedGroup = false;
 	for (auto& group : m_groupParsers)
 	{
-		if (group.type == groupType)
-		{
-			while (in.tellg() - start < groupSize)
-			{
-				string recordType = readType();
-				if (recordType == "GRUP")
-					parseSubGroup(group);
-				else
-				{
-					bool parsed = false;
-					for (auto& record : group.records)
-					{
-						if (record.type == recordType)
-						{
-							parseRecord(record);
-							parsed = true;
-							break;
-						}
-					}
-					if (!parsed)
-						ignoreRecord();
-				}
-			}
+		if (group.type != groupType)
+			continue;
 
-			parsedGroup = true;
-			break;
+		while (in.tellg() - start < groupSize)
+		{
+			string recordType = readType();
+			if (recordType == "GRUP")
+				parseSubGroup(group);
+			else
+			{
+				bool parsed = false;
+				for (auto& record : group.records)
+				{
+					if (record.type == recordType)
+					{
+						parseRecord(record);
+						parsed = true;
+						break;
+					}
+				}
+				if (!parsed)
+					ignoreRecord();
+			}
 		}
+
+		parsedGroup = true;
+		break;
 	}
 
 	if (!parsedGroup)
@@ -164,7 +164,10 @@ void Mod::parseRecord(const RecordParser& recordParser)
 {
 	uint32_t dataSize, flags, id;
 	in >> dataSize >> flags >> id;
-	in.jump(8);
+	in.jump(4);
+	uint16_t version;
+	in >> version;
+	in.jump(2);
 
 	if (recordParser.beginFunction)
 	{
@@ -263,7 +266,10 @@ void Mod::parsePluginInformation()
 
 	uint32_t dataSize, flags;
 	in >> dataSize >> flags;
-	in.jump(12);
+	in.jump(8);
+
+	in >> m_version;
+	in.jump(2);
 
 	m_useStringsTable = (flags & 0x80) != 0;
 

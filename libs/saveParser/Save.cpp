@@ -23,7 +23,8 @@
 *                  Contact: christophe.guebert+SAH@gmail.com                  *
 ******************************************************************************/
 #include "Save.h"
-#include "zlib.h"
+#include <zlib.h>
+#include <lz4.h>
 
 #include <iostream>
 #include <iomanip>
@@ -32,7 +33,6 @@
 
 namespace saveParser
 {
-
 using namespace std;
 
 bool Save::parse(const std::string& fileName)
@@ -40,11 +40,16 @@ bool Save::parse(const std::string& fileName)
 	ifstream stream(fileName, ios::binary | ios::in);
 	if (!stream.is_open())
 	{
-		cout << "Cannot open " << fileName << endl;
+		cerr << "Cannot open " << fileName << endl;
 		return false;
 	}
 
 	in.setStream(std::move(stream));
+	if (in.readString(13) != "TESV_SAVEGAME")
+	{
+		cerr << "Not a Skyrim save\n";
+		return false;
+	}
 
 	doParse();
 	return true;
@@ -61,10 +66,12 @@ void Save::doParse()
 
 void Save::parseHeader()
 {
-	std::array<char, 13> magic;
-	in >> magic;
+	uint32_t headerSize;
+	in >> headerSize >> m_header.saveVersion;
 
-	in.jump(8); // headerSize + saveNumber
+	if (m_header.saveVersion == 0x0C)
+		m_header.skyrimSE = true;
+
 	in >> m_header.saveNumber;
 
 	m_header.playerName = in.readWString();
@@ -72,16 +79,42 @@ void Save::parseHeader()
 	m_header.playerLocation = in.readWString();
 
 	uint16_t stringSize;
-	in >> stringSize; in.jump(stringSize); // gameDate
-	in >> stringSize; in.jump(stringSize); // playerRaceEditorId
+	in >> stringSize;
+	in.jump(stringSize); // gameDate
+	in >> stringSize;
+	in.jump(stringSize); // playerRaceEditorId
 
 	in.jump(18); // playerSex + playerCurExp + playerLvlUpExp + filetime
 	in >> m_header.ssWidth >> m_header.ssHeight;
-	m_header.ssData.resize(3 * m_header.ssWidth * m_header.ssHeight);
+	if (m_header.skyrimSE)
+	{
+		uint16_t compression = 0;
+		in >> compression;
+		m_header.compressionMethod = static_cast<CompressionMethod>(compression);
+	}
+
+	if (m_header.skyrimSE)
+		m_header.ssData.resize(4 * m_header.ssWidth * m_header.ssHeight);
+	else
+		m_header.ssData.resize(3 * m_header.ssWidth * m_header.ssHeight);
 	in >> m_header.ssData;
 
-	uint8_t formVersion;
-	in >> formVersion;
+	uint32_t uncompressedSize = 0, compressedSize = 0, compressedStart = 0;
+	if (m_header.skyrimSE)
+	{
+		in >> uncompressedSize >> compressedSize;
+		compressedStart = static_cast<uint32_t>(in.tellg());
+
+		std::string compressedBuffer = in.readString(compressedSize);
+		std::string uncompressedBuffer;
+		uncompressedBuffer.resize(uncompressedSize);
+
+		LZ4_decompress_safe(compressedBuffer.data(), &uncompressedBuffer[0], compressedSize, uncompressedSize);
+		std::istringstream stream(uncompressedBuffer);
+		in.setStream(std::move(stream));
+	}
+
+	in >> m_header.formVersion;
 
 	uint32_t pluginInfoSize;
 	in >> pluginInfoSize;
@@ -92,10 +125,13 @@ void Save::parseHeader()
 		m_plugins.push_back(in.readWString());
 
 	in >> m_formIDArrayCountOffset;
+	m_formIDArrayCountOffset -= compressedStart;
 	in.jump(4);
 	in >> m_globalDataTable1Offset;
+	m_globalDataTable1Offset -= compressedStart;
 	in.jump(4);
 	in >> m_changeFormsOffset;
+	m_changeFormsOffset -= compressedStart;
 	in.jump(4);
 	in >> m_globalDataTable1Count;
 	in.jump(8);
@@ -110,12 +146,24 @@ void Save::parseChangeForms()
 	for (uint32_t i = 0; i < m_changeFormCount; ++i)
 	{
 		ChangeForm form(in);
+		if (!form.ok)
+		{
+			form.ignore();
+			continue;
+		}
+
 		form.formID = getFormID(form.refID);
-		
+		if (!form.formID)
+		{
+			form.ignore();
+			continue;
+		}
+
 		if (form.formType == 0 && !m_playerOnly) // Container
 		{
 			form.loadData();
-			parseContainer(form);
+			if (form.data.size() > 2)
+				parseContainer(form);
 		}
 		else if (form.formType == 1) // Actor
 		{
@@ -254,7 +302,11 @@ uint32_t Save::getFormID(const RefID& refID)
 		if (!value)
 			return 0;
 		else
+		{
+			if (value >= m_formIDArray.size())
+				return 0;
 			return m_formIDArray[value - 1];
+		}
 	case 1:
 		return value;
 	case 2:
@@ -351,11 +403,13 @@ Save::ChangeForm::ChangeForm(parser::Parser& parser)
 	formType = type & 0x3F;
 	lengthSize = type >> 6;
 
-	if (version != 74)
+/*	if (version != 64 && version != 74)
 	{
 		cerr << "Error in parsing change forms: wrong version" << endl;
 		return;
 	}
+	*/
+	ok = true;
 
 	switch (lengthSize)
 	{
@@ -439,9 +493,9 @@ void Save::SearchHelper::setup(const RefIDs& refIDs)
 	size_t dataSize = 1;
 	for (int i = 0; i < 256; ++i)
 	{
-		if (!l1In[i].empty()) 
+		if (!l1In[i].empty())
 			dataSize += 1 + l1In[i].size() * 2;
-		if (l2Nb[i]) 
+		if (l2Nb[i])
 			dataSize += 1 + l2Nb[i] * 2;
 	}
 
@@ -450,7 +504,7 @@ void Save::SearchHelper::setup(const RefIDs& refIDs)
 	data.resize(dataSize, 0);
 
 	// Compute the offsets in the data of each value at each level
-	int16_t pos = 1; // We start at 1 (0 is always an invalid index)
+	int16_t pos = 1;              // We start at 1 (0 is always an invalid index)
 	for (int i = 0; i < 256; ++i) // Second level offsets
 	{
 		if (l1In[i].empty())
@@ -493,7 +547,7 @@ void Save::SearchHelper::setup(const RefIDs& refIDs)
 				p += 2;
 				continue;
 			}
-		
+
 			id = *(p + 1);
 			if (!id) // Add a new id if necessary
 			{
@@ -514,7 +568,7 @@ void Save::SearchHelper::setup(const RefIDs& refIDs)
 				p += 2;
 				continue;
 			}
-			
+
 			*p++ = id;
 			*p = static_cast<uint16_t>(itRef); // Write the value that we want to return from the search (index into refIDs)
 			break;
@@ -524,6 +578,9 @@ void Save::SearchHelper::setup(const RefIDs& refIDs)
 
 int Save::SearchHelper::search(const Buffer& buffer, int& pos)
 {
+	if (buffer.size() < 2)
+		return -1;
+
 	size_t bufSize = buffer.size() - 2;
 	for (; pos < bufSize; ++pos)
 	{

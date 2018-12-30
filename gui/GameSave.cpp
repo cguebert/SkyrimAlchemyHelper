@@ -90,9 +90,10 @@ void GameSave::load(QString fileName)
 		return;
 
 	// Convert screenshot
-	auto header = save.header();
-	auto img = QImage(header.ssData.data(), header.ssWidth, header.ssHeight, QImage::Format_RGB888);
-	m_screenshot.convertFromImage(img);
+	auto& header = save.header();
+	auto ssFormat = header.skyrimSE ? QImage::Format_RGBA8888 : QImage::Format_RGB888;
+	auto img = QImage(header.ssData.data(), header.ssWidth, header.ssHeight, ssFormat);
+	m_screenshot.convertFromImage(img, Qt::ImageConversionFlag::ColorOnly);
 
 	// Copy the header
 	m_header.playerLocation = convert(header.playerLocation);

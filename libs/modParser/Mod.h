@@ -87,7 +87,6 @@ protected:
 	void parseRecord(const RecordParser& recordParser);
 	void ignoreRecord();
 	void parseFields(const FieldParsers& fieldParsers, uint32_t dataSize, uint32_t flags = 0);
-	void ignoreField();
 
 	void parsePluginInformation();
 
@@ -95,6 +94,7 @@ protected:
 	std::string readLStringField(uint16_t dataSize);
 	std::string readType();
 
+	uint16_t m_version = 0;
 	std::streamoff m_dataOffset = 0; // After the header
 	std::vector<std::string> m_masters;
 	bool m_useStringsTable = false, m_stringsTableLoaded = false;

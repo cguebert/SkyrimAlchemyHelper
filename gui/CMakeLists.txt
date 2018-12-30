@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 find_package(ZLIB REQUIRED)
+find_package(LZ4 REQUIRED)
 
 set(target "SkyrimAlchemyHelper")
 project(${target})
@@ -84,7 +85,7 @@ install(TARGETS ${target} RUNTIME DESTINATION debug CONFIGURATIONS Debug)
 install(TARGETS ${target} RUNTIME DESTINATION release CONFIGURATIONS Release)
 
 # Copy the dependencies dlls
-foreach(export_lib Qt5::Widgets Qt5::Core Qt5::Gui ZLIB::ZLIB)
+foreach(export_lib Qt5::Widgets Qt5::Core Qt5::Gui ZLIB::ZLIB LZ4)
 	InstallDependency(${export_lib})
 endforeach()
 
