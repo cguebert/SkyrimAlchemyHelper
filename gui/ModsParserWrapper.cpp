@@ -33,11 +33,6 @@
 
 namespace
 {
-QString convert(const std::string& text)
-{
-	return QString::fromLatin1(text.c_str());
-}
-
 std::ostream& logFile()
 {
 	static std::ofstream file;
@@ -54,24 +49,28 @@ std::ostream& logFile()
 
 ModsParserWrapper::ModsParserWrapper()
 {
-	const auto& settings = Settings::instance();
-	m_useModOrganizer = settings.useModOrganizer;
-	m_dataFolder = settings.dataFolder;
-	m_pluginsListPath = settings.pluginsListPath;
-	m_modOrganizerPath = settings.modOrganizerPath;
+	auto& settings = Settings::instance();
+	const auto& currentGame = settings.currentGame();
+	m_useModOrganizer = currentGame.useModOrganizer;
+	m_dataFolder = currentGame.dataFolder;
+	m_pluginsListPath = currentGame.pluginsListPath;
+	m_modOrganizerPath = currentGame.modOrganizerPath;
 	m_language = settings.language;
+	m_convertStringMode = getConvertStringMode(settings.gameName);
 }
 
 ModsParserWrapper::ModsParserWrapper(bool useModOrganizer,
 									 QString dataFolder,
 									 QString pluginsListPath,
 									 QString modOrganizerPath,
-									 QString language)
+									 QString language,
+									 QString gameName)
 	: m_useModOrganizer(useModOrganizer)
 	, m_dataFolder(dataFolder)
 	, m_pluginsListPath(pluginsListPath)
 	, m_modOrganizerPath(modOrganizerPath)
 	, m_language(language)
+	, m_convertStringMode(getConvertStringMode(gameName))
 {
 }
 
@@ -110,7 +109,7 @@ bool ModsParserWrapper::getModsPaths(std::vector<std::string>& modsPathList)
 	QString path = m_useModOrganizer
 					   ? QFileInfo(m_pluginsListPath).canonicalPath() + "/loadorder.txt" // Load "loadorder.txt" instead if using ModOrganizer
 					   : m_pluginsListPath;
-	
+
 	std::ifstream inFile(path.toStdString());
 	std::string modName;
 	while (std::getline(inFile, modName))
@@ -369,4 +368,23 @@ ModsParserWrapper::Result ModsParserWrapper::updateContainers(const std::vector<
 		return Result::Error_ModsParsing;
 
 	return Result::Success;
+}
+
+ModsParserWrapper::ConvertStringMode ModsParserWrapper::getConvertStringMode(QString gameName)
+{
+	if (gameName == "Skyrim VR")
+		return ConvertStringMode::utf8;
+	return ConvertStringMode::latin1;
+}
+
+QString ModsParserWrapper::convert(const std::string& text) const
+{
+	switch (m_convertStringMode)
+	{
+	default:
+	case ConvertStringMode::latin1:
+		return QString::fromLatin1(text.c_str());
+	case ConvertStringMode::utf8:
+		return QString::fromStdString(text.c_str());
+	}
 }

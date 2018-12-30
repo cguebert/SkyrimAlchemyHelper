@@ -34,12 +34,18 @@ class ModsParserWrapper
 public:
 	ModsParserWrapper(); // Using Settings values
 	ModsParserWrapper(bool useModOrganizer,
-		QString dataFolder,
-		QString pluginsListPath,
-		QString modOrganizerPath,
-		QString language);
+					  QString dataFolder,
+					  QString pluginsListPath,
+					  QString modOrganizerPath,
+					  QString language,
+					  QString gameName);
 
-	enum class Result { Success, Error_ModOrganizer, Error_ModsParsing };
+	enum class Result
+	{
+		Success,
+		Error_ModOrganizer,
+		Error_ModsParsing
+	};
 	Result parseConfig();
 	void copyToConfig(Config& config) const;
 
@@ -51,6 +57,14 @@ public:
 	int nbEffects() const;
 
 protected:
+	enum class ConvertStringMode
+	{
+		latin1,
+		utf8
+	};
+	ConvertStringMode getConvertStringMode(QString gameName);
+	QString convert(const std::string& text) const;
+
 	bool getModsPaths(std::vector<std::string>& paths);
 	bool findRealPaths(std::vector<std::string>& paths);
 
@@ -60,6 +74,8 @@ protected:
 	modParser::ModParser m_parser;
 	modParser::Config m_config;
 	ContainersCache::Containers m_containers;
+
+	ConvertStringMode m_convertStringMode = ConvertStringMode::latin1;
 };
 
 //****************************************************************************//

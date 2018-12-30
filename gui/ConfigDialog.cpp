@@ -484,8 +484,11 @@ bool ConfigDialog::testConfig()
 void ConfigDialog::parseMods()
 {
 	ModsParserWrapper modsParser(m_useModOrganizerCheckBox->checkState() == Qt::Checked,
-								 m_dataFolderEdit->text(), m_pluginsListPathEdit->text(), m_modOrganizerPathEdit->text(),
-								 m_languageComboBox->currentText());
+								 m_dataFolderEdit->text(),
+								 m_pluginsListPathEdit->text(),
+								 m_modOrganizerPathEdit->text(),
+								 m_languageComboBox->currentText(),
+								 m_gameNameComboBox->currentText());
 
 	auto result = modsParser.parseConfig();
 
