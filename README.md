@@ -20,10 +20,10 @@ More information on [its page on nexusmods](http://www.nexusmods.com/skyrim/mods
 
 ## Screenshots
 
-![Main window](https://raw.githubusercontent.com/cguebert/SkyrimAlchemyHelper/master/Main_Window.jpg)
-![Game save information](https://raw.githubusercontent.com/cguebert/SkyrimAlchemyHelper/master/Game_Save.jpg)
-![Known ingredients](https://raw.githubusercontent.com/cguebert/SkyrimAlchemyHelper/master/KnownIngredients.jpg)
-![Configuration](https://raw.githubusercontent.com/cguebert/SkyrimAlchemyHelper/master/Configuration.jpg)
+![Main window](https://raw.githubusercontent.com/cguebert/SkyrimAlchemyHelper/master/doc/MainWindow.jpg)
+![Game save information](https://raw.githubusercontent.com/cguebert/SkyrimAlchemyHelper/master/doc/GameSave.jpg)
+![Known ingredients](https://raw.githubusercontent.com/cguebert/SkyrimAlchemyHelper/master/doc/KnownIngredients.jpg)
+![Configuration](https://raw.githubusercontent.com/cguebert/SkyrimAlchemyHelper/master/doc/Configuration.jpg)
 
 ## Code
 
