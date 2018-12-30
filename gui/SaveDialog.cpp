@@ -39,9 +39,9 @@ SaveDialog::SaveDialog(QWidget *parent)
 	m_gameSave = GameSave::instance();
 	m_savesList = m_gameSave.savesList();
 
-	const auto& settings = Settings::instance();
+	auto& settings = Settings::instance();
 	m_loadMostRecent = settings.loadMostRecentSave;
-	m_selectedSavePath = settings.selectedSavePath;
+	m_selectedSavePath = settings.currentGame().selectedSavePath;
 
 	setWindowTitle(tr("Skyrim Alchemy Helper - Save information"));
 
@@ -264,7 +264,7 @@ void SaveDialog::copySave()
 	GameSave::instance() = m_gameSave;
 	auto& settings = Settings::instance();
 	settings.loadMostRecentSave = m_loadMostRecent;
-	settings.selectedSavePath = m_selectedSavePath;
+	settings.currentGame().selectedSavePath = m_selectedSavePath;
 	settings.maxValidIngredientCount = m_maxValidIngredientCountEdit->text().toInt();
 	settings.minValidNbIngredients = m_minValidNbIngredientsEdit->text().toInt();
 	settings.minTotalIngredientsCount = m_minTotalIngredientsCountEdit->text().toInt();

@@ -116,9 +116,8 @@ QString gameExecutable(QString gameName)
 
 } // namespace
 
-ConfigDialog::ConfigDialog(QWidget* parent, bool firstLaunch)
+ConfigDialog::ConfigDialog(QWidget* parent)
 	: QDialog(parent)
-	, m_firstLaunch(firstLaunch)
 {
 	// Copy main lists
 	m_config = Config::main();
@@ -176,9 +175,9 @@ QWidget* ConfigDialog::createConfigPane()
 								 << "Skyrim"
 								 << "Skyrim Special Edition"
 								 << "Skyrim VR");
-	m_gameNameComboBox->setCurrentIndex(0);
 	gridLayout->addWidget(gameNameLabel, 0, 0);
 	gridLayout->addWidget(m_gameNameComboBox, 0, 1);
+	connect(m_gameNameComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(gameChanged(QString)));
 
 	auto dataLabel = new QLabel(tr("Skyrim Data folder"));
 	m_dataFolderEdit = new QLineEdit;
@@ -282,33 +281,25 @@ void ConfigDialog::onOk()
 
 void ConfigDialog::loadConfig()
 {
-	auto& settings = Settings::instance();
+	const auto& settings = Settings::instance();
 	if (settings.isEmpty())
 	{
-		defaultConfig();
+		defaultConfig(true);
 		return;
 	}
 
-	m_useModOrganizerCheckBox->setCheckState(settings.useModOrganizer ? Qt::Checked : Qt::Unchecked);
-	m_modOrganizerPathEdit->setEnabled(settings.useModOrganizer);
-	m_modOrganizerPathButton->setEnabled(settings.useModOrganizer);
-
-	m_dataFolderEdit->setText(settings.dataFolder);
-	m_pluginsListPathEdit->setText(settings.pluginsListPath);
-	m_savesFolderEdit->setText(settings.savesFolder);
-	m_modOrganizerPathEdit->setText(settings.modOrganizerPath);
 	m_languageComboBox->setCurrentText(settings.language);
+	m_gameNameComboBox->setCurrentText(settings.gameName);
 }
 
 void ConfigDialog::saveConfig()
 {
 	auto& settings = Settings::instance();
-	settings.useModOrganizer = m_useModOrganizerCheckBox->checkState() == Qt::Checked;
-	settings.dataFolder = m_dataFolderEdit->text();
-	settings.pluginsListPath = m_pluginsListPathEdit->text();
-	settings.savesFolder = m_savesFolderEdit->text();
-	settings.modOrganizerPath = m_modOrganizerPathEdit->text();
+	const QString gameName = m_gameNameComboBox->currentText();
+
+	settings.gameName = gameName;
 	settings.language = m_languageComboBox->currentText();
+	saveSettings(gameName);
 
 	settings.clearEmptyFlag();
 
@@ -316,14 +307,43 @@ void ConfigDialog::saveConfig()
 	m_config.save();
 }
 
-void ConfigDialog::defaultConfig()
+void ConfigDialog::saveSettings(QString gameName)
 {
-	const QString gameName = m_firstLaunch
+	auto& settings = Settings::instance();
+	auto& specific = settings.gameSpecific[gameName];
+	specific.useModOrganizer = m_useModOrganizerCheckBox->checkState() == Qt::Checked;
+	specific.dataFolder = m_dataFolderEdit->text();
+	specific.pluginsListPath = m_pluginsListPathEdit->text();
+	specific.savesFolder = m_savesFolderEdit->text();
+	specific.modOrganizerPath = m_modOrganizerPathEdit->text();
+}
+
+void ConfigDialog::loadSettings(QString gameName)
+{
+	auto& settings = Settings::instance();
+	const auto& specific = settings.gameSpecific[gameName];
+	m_dataFolderEdit->setText(specific.dataFolder);
+	m_pluginsListPathEdit->setText(specific.pluginsListPath);
+	m_savesFolderEdit->setText(specific.savesFolder);
+	m_modOrganizerPathEdit->setText(specific.modOrganizerPath);
+	m_useModOrganizerCheckBox->setCheckState(specific.useModOrganizer ? Qt::Checked : Qt::Unchecked);
+	m_modOrganizerPathEdit->setEnabled(specific.useModOrganizer);
+	m_modOrganizerPathButton->setEnabled(specific.useModOrganizer);
+}
+
+void ConfigDialog::defaultConfig(bool firstLaunch)
+{
+	const QString gameName = firstLaunch
 								 ? mostRecentGameUsed() // Select the game name based on the most recent save
 								 : m_gameNameComboBox->currentText();
 
-	if (m_firstLaunch)
+	if (firstLaunch)
+	{
+		QSignalBlocker block(m_gameNameComboBox);
 		m_gameNameComboBox->setCurrentText(gameName);
+	}
+
+	bool canSetModOrganizer = m_dataFolderEdit->text().isEmpty();
 
 	// Skyrim Data folder
 	m_dataFolderEdit->setText("");
@@ -382,10 +402,10 @@ void ConfigDialog::defaultConfig()
 		if (!moIniPath.isEmpty())
 			m_modOrganizerPathEdit->setText(moIniPath);
 
-		// If at the first launch of the program we find Mod Organizer, we try to use it
+		// If when creating the configuration we find Mod Organizer, we try to use it
 		if (QFileInfo::exists(m_modOrganizerPathEdit->text()))
 		{
-			if (m_firstLaunch)
+			if (canSetModOrganizer)
 				m_useModOrganizerCheckBox->setCheckState(Qt::Checked);
 		}
 		else
@@ -430,8 +450,6 @@ void ConfigDialog::defaultConfig()
 	QString savesFolder = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "My Games/" + gameName + "/Saves", QStandardPaths::LocateDirectory);
 	if (!savesFolder.isEmpty())
 		m_savesFolderEdit->setText(savesFolder);
-
-	m_firstLaunch = false;
 }
 
 bool ConfigDialog::testConfig()
@@ -526,4 +544,13 @@ void ConfigDialog::useModOrganizerChanged(int state)
 {
 	m_modOrganizerPathEdit->setEnabled(state == Qt::Checked);
 	m_modOrganizerPathButton->setEnabled(state == Qt::Checked);
+}
+
+void ConfigDialog::gameChanged(QString gameName)
+{
+	if (!m_currentGame.isEmpty())
+		saveSettings(m_currentGame);
+
+	loadSettings(gameName);
+	m_currentGame = gameName;
 }

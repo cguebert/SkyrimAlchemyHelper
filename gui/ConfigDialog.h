@@ -40,7 +40,7 @@ class ConfigDialog : public QDialog
 	Q_OBJECT
 
 public:
-	ConfigDialog(QWidget* parent = nullptr, bool firstLaunch = false);
+	ConfigDialog(QWidget* parent = nullptr);
 
 	QSize sizeHint() const;
 	bool modified() const;
@@ -53,7 +53,8 @@ public slots:
 	void editModOrganizerPath();
 	void useModOrganizerChanged(int);
 	void parseMods();
-	void defaultConfig();
+	void defaultConfig(bool firstLaunch = false);
+	void gameChanged(QString gameName);
 
 signals:
 	void startModsParse();
@@ -65,7 +66,9 @@ protected:
 	void saveConfig();
 	void loadConfig();
 
-	bool m_firstLaunch;
+	void saveSettings(QString gameName);
+	void loadSettings(QString gameName);
+
 	QLineEdit *m_dataFolderEdit,
 		*m_pluginsListPathEdit,
 		*m_savesFolderEdit,
@@ -74,6 +77,7 @@ protected:
 		*m_languageComboBox;
 	QCheckBox* m_useModOrganizerCheckBox;
 	QPushButton* m_modOrganizerPathButton;
+	QString m_currentGame;
 	bool m_modified = false;
 
 	Config m_config;

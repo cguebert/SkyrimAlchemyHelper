@@ -26,6 +26,21 @@
 
 #include <QSettings>
 
+namespace
+{
+QStringList gameNames()
+{
+	return QStringList() << "Skyrim"
+						 << "Skyrim Special Edition"
+						 << "Skyrim VR";
+}
+
+QString noSpace(QString str)
+{
+	return str.replace(" ", "");
+}
+} // namespace
+
 Settings& Settings::instance()
 {
 	static Settings effects;
@@ -37,7 +52,7 @@ Settings::Settings()
 	load();
 }
 
-bool Settings::isEmpty()
+bool Settings::isEmpty() const
 {
 	return m_isEmpty;
 }
@@ -51,16 +66,29 @@ void Settings::load()
 {
 	QSettings settings("SAH.ini", QSettings::IniFormat);
 
-	m_isEmpty = !settings.contains("useModOrganizer");
+	m_isEmpty = !settings.contains("game");
 
-	dataFolder = settings.value("skyrimDataFolder").toString();
-	savesFolder = settings.value("savesFolder").toString();
-	pluginsListPath = settings.value("pluginsListFile").toString();
-	modOrganizerPath = settings.value("modOrganizerPath").toString();
-	selectedSavePath = settings.value("selectedSavePath").toString();
+	gameName = settings.value("game", "Skyrim").toString();
 	language = settings.value("language", "english").toString();
 
-	useModOrganizer = settings.value("useModOrganizer").toBool();
+	const QStringList groups = settings.childGroups();
+	for (const auto name : gameNames())
+	{
+		const QString groupName = noSpace(name);
+		if (!groups.contains(groupName))
+			continue;
+
+		auto& specific = gameSpecific[name];
+		settings.beginGroup(groupName);
+		specific.dataFolder = settings.value("skyrimDataFolder").toString();
+		specific.savesFolder = settings.value("savesFolder").toString();
+		specific.pluginsListPath = settings.value("pluginsListFile").toString();
+		specific.modOrganizerPath = settings.value("modOrganizerPath").toString();
+		specific.selectedSavePath = settings.value("selectedSavePath").toString();
+		specific.useModOrganizer = settings.value("useModOrganizer").toBool();
+		settings.endGroup();
+	}
+
 	loadMostRecentSave = settings.value("loadMostRecentSave", true).toBool();
 	playerOnly = settings.value("playerOnly", false).toBool();
 	getContainersInfo = settings.value("getContainersInfo", true).toBool();
@@ -72,18 +100,29 @@ void Settings::load()
 	minTotalIngredientsCount = settings.value("minTotalIngredientsCount", 25).toInt();
 }
 
-void Settings::save()
+void Settings::save() const
 {
 	QSettings settings("SAH.ini", QSettings::IniFormat);
 
-	settings.setValue("skyrimDataFolder", dataFolder);
-	settings.setValue("savesFolder", savesFolder);
-	settings.setValue("pluginsListFile", pluginsListPath);
-	settings.setValue("modOrganizerPath", modOrganizerPath);
-	settings.setValue("selectedSavePath", selectedSavePath);
+	settings.setValue("game", gameName);
 	settings.setValue("language", language);
 
-	settings.setValue("useModOrganizer", useModOrganizer);
+	for (const auto name : gameNames())
+	{
+		if (!gameSpecific.count(name))
+			continue;
+
+		const auto& specific = gameSpecific.at(name);
+		settings.beginGroup(noSpace(name));
+		settings.setValue("skyrimDataFolder", specific.dataFolder);
+		settings.setValue("savesFolder", specific.savesFolder);
+		settings.setValue("pluginsListFile", specific.pluginsListPath);
+		settings.setValue("modOrganizerPath", specific.modOrganizerPath);
+		settings.setValue("selectedSavePath", specific.selectedSavePath);
+		settings.setValue("useModOrganizer", specific.useModOrganizer);
+		settings.endGroup();
+	}
+
 	settings.setValue("loadMostRecentSave", loadMostRecentSave);
 	settings.setValue("playerOnly", playerOnly);
 	settings.setValue("getContainersInfo", getContainersInfo);
@@ -93,4 +132,9 @@ void Settings::save()
 	settings.setValue("maxValidIngredientCount", maxValidIngredientCount);
 	settings.setValue("minValidNbIngredients", minValidNbIngredients);
 	settings.setValue("minTotalIngredientsCount", minTotalIngredientsCount);
+}
+
+Settings::GameSpecific& Settings::currentGame()
+{
+	return gameSpecific[gameName];
 }

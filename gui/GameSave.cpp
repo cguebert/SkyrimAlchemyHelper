@@ -147,16 +147,17 @@ void GameSave::loadSaveFromConfig()
 	clear();
 
 	auto& settings = Settings::instance();
-	if (settings.savesFolder.isEmpty())
+	const auto& currentGame = settings.currentGame();
+	if (currentGame.savesFolder.isEmpty())
 		return;
 
-	if (!settings.loadMostRecentSave && !settings.selectedSavePath.isEmpty() && QFileInfo::exists(settings.selectedSavePath))
+	if (!settings.loadMostRecentSave && !currentGame.selectedSavePath.isEmpty() && QFileInfo::exists(currentGame.selectedSavePath))
 	{
-		load(settings.selectedSavePath);
+		load(currentGame.selectedSavePath);
 		return;
 	}
 
-	QDir dir(settings.savesFolder);
+	QDir dir(currentGame.savesFolder);
 	QStringList filters;
 	filters << "*.ess";
 	auto saves = dir.entryInfoList(filters, QDir::Files, QDir::Time);
@@ -180,10 +181,10 @@ void GameSave::clear()
 QFileInfoList GameSave::savesList()
 {
 	auto& settings = Settings::instance();
-	if (settings.savesFolder.isEmpty())
+	if (settings.currentGame().savesFolder.isEmpty())
 		return QFileInfoList();
 
-	QDir dir(settings.savesFolder);
+	QDir dir(settings.currentGame().savesFolder);
 	QStringList filters;
 	filters << "*.ess";
 	return dir.entryInfoList(filters, QDir::Files, QDir::Time);
