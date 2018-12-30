@@ -40,7 +40,7 @@ class ConfigDialog : public QDialog
 	Q_OBJECT
 
 public:
-	ConfigDialog(QWidget *parent = nullptr, bool firstLaunch = false);
+	ConfigDialog(QWidget* parent = nullptr, bool firstLaunch = false);
 
 	QSize sizeHint() const;
 	bool modified() const;
@@ -70,9 +70,10 @@ protected:
 		*m_pluginsListPathEdit,
 		*m_savesFolderEdit,
 		*m_modOrganizerPathEdit;
-	QComboBox *m_languageComboBox;
-	QCheckBox *m_useModOrganizerCheckBox;
-	QPushButton *m_modOrganizerPathButton;
+	QComboBox *m_gameNameComboBox,
+		*m_languageComboBox;
+	QCheckBox* m_useModOrganizerCheckBox;
+	QPushButton* m_modOrganizerPathButton;
 	bool m_modified = false;
 
 	Config m_config;

@@ -37,7 +37,6 @@
 
 namespace
 {
-
 std::string loadFile(const std::string& fileName)
 {
 	std::ifstream file(fileName);
@@ -52,7 +51,8 @@ std::string loadFile(const std::string& fileName)
 void replaceAll(std::string& text, const std::string& from, const std::string& to)
 {
 	size_t lenFrom = from.size(), lenTo = to.size();
-	if (!lenFrom) return;
+	if (!lenFrom)
+		return;
 	size_t pos = 0;
 	while ((pos = text.find(from, pos)) != std::string::npos)
 	{
@@ -61,9 +61,62 @@ void replaceAll(std::string& text, const std::string& from, const std::string& t
 	}
 }
 
+QString mostRecentGameUsed()
+{
+	QStringList names;
+	names << "Skyrim"
+		  << "Skyrim Special Edition"
+		  << "Skyrim VR";
+
+	QDateTime lastModified;
+	QString gameName = "Skyrim";
+	for (const auto name : names)
+	{
+		QString folder = QString("My Games/%1/Saves").arg(name);
+		QString savesFolder = QStandardPaths::locate(QStandardPaths::DocumentsLocation, folder, QStandardPaths::LocateDirectory);
+		if (savesFolder.isEmpty())
+			continue;
+
+		QDir dir(savesFolder);
+		QFileInfoList entries = dir.entryInfoList(QDir::Filter::Files, QDir::SortFlag::Time);
+		if (!entries.empty() && entries.front().lastModified() > lastModified)
+		{
+			gameName = name;
+			lastModified = entries.front().lastModified();
+		}
+	}
+
+	return gameName;
 }
 
-ConfigDialog::ConfigDialog(QWidget *parent, bool firstLaunch)
+QString gameNameForModOrganizer(QString gameName)
+{
+	if (gameName == "Skyrim Special Edition")
+		return "SkyrimSE";
+	if (gameName == "Skyrim VR")
+		return "SkyrimVR";
+	return "Skyrim";
+}
+
+QString gameNameForSteam(QString gameName)
+{
+	if (gameName == "Skyrim VR")
+		return "SkyrimVR";
+	return gameName;
+}
+
+QString gameExecutable(QString gameName)
+{
+	if (gameName == "Skyrim Special Edition")
+		return "SkyrimSE";
+	if (gameName == "Skyrim VR")
+		return "SkyrimVR";
+	return "TESV";
+}
+
+} // namespace
+
+ConfigDialog::ConfigDialog(QWidget* parent, bool firstLaunch)
 	: QDialog(parent)
 	, m_firstLaunch(firstLaunch)
 {
@@ -117,51 +170,65 @@ QWidget* ConfigDialog::createConfigPane()
 	auto configPane = new QWidget;
 	auto gridLayout = new QGridLayout;
 
+	auto gameNameLabel = new QLabel(tr("Game name"));
+	m_gameNameComboBox = new QComboBox;
+	m_gameNameComboBox->addItems(QStringList()
+								 << "Skyrim"
+								 << "Skyrim Special Edition"
+								 << "Skyrim VR");
+	m_gameNameComboBox->setCurrentIndex(0);
+	gridLayout->addWidget(gameNameLabel, 0, 0);
+	gridLayout->addWidget(m_gameNameComboBox, 0, 1);
+
 	auto dataLabel = new QLabel(tr("Skyrim Data folder"));
 	m_dataFolderEdit = new QLineEdit;
 	auto dataButton = new QPushButton("...");
 	connect(dataButton, SIGNAL(clicked()), this, SLOT(editDataPath()));
-	gridLayout->addWidget(dataLabel, 0, 0);
-	gridLayout->addWidget(m_dataFolderEdit, 0, 1);
-	gridLayout->addWidget(dataButton, 0, 2);
+	gridLayout->addWidget(dataLabel, 1, 0);
+	gridLayout->addWidget(m_dataFolderEdit, 1, 1);
+	gridLayout->addWidget(dataButton, 1, 2);
 
 	auto pluginsListLabel = new QLabel(tr("Plugins list file"));
 	m_pluginsListPathEdit = new QLineEdit;
 	auto pluginListButton = new QPushButton("...");
 	connect(pluginListButton, SIGNAL(clicked()), this, SLOT(editPluginsPath()));
-	gridLayout->addWidget(pluginsListLabel, 1, 0);
-	gridLayout->addWidget(m_pluginsListPathEdit, 1, 1);
-	gridLayout->addWidget(pluginListButton, 1, 2);
+	gridLayout->addWidget(pluginsListLabel, 2, 0);
+	gridLayout->addWidget(m_pluginsListPathEdit, 2, 1);
+	gridLayout->addWidget(pluginListButton, 2, 2);
 
 	auto savesLabel = new QLabel(tr("Saves folder"));
 	m_savesFolderEdit = new QLineEdit;
 	auto savesButton = new QPushButton("...");
 	connect(savesButton, SIGNAL(clicked()), this, SLOT(editSavesPath()));
-	gridLayout->addWidget(savesLabel, 2, 0);
-	gridLayout->addWidget(m_savesFolderEdit, 2, 1);
-	gridLayout->addWidget(savesButton, 2, 2);
+	gridLayout->addWidget(savesLabel, 3, 0);
+	gridLayout->addWidget(m_savesFolderEdit, 3, 1);
+	gridLayout->addWidget(savesButton, 3, 2);
 
 	m_useModOrganizerCheckBox = new QCheckBox(tr("Use Mod Organizer"));
 	connect(m_useModOrganizerCheckBox, SIGNAL(stateChanged(int)), this, SLOT(useModOrganizerChanged(int)));
-	gridLayout->addWidget(m_useModOrganizerCheckBox, 3, 0, 1, 3);
+	gridLayout->addWidget(m_useModOrganizerCheckBox, 4, 0, 1, 3);
 
-	auto modOrganizerLabel = new QLabel(tr("Mod Organizer"));
+	auto modOrganizerLabel = new QLabel(tr("Mod Organizer configuration"));
 	m_modOrganizerPathEdit = new QLineEdit;
 	m_modOrganizerPathButton = new QPushButton("...");
 	connect(m_modOrganizerPathButton, SIGNAL(clicked()), this, SLOT(editModOrganizerPath()));
 	m_modOrganizerPathEdit->setEnabled(false);
 	m_modOrganizerPathButton->setEnabled(false);
-	gridLayout->addWidget(modOrganizerLabel, 4, 0);
-	gridLayout->addWidget(m_modOrganizerPathEdit, 4, 1);
-	gridLayout->addWidget(m_modOrganizerPathButton, 4, 2);
+	gridLayout->addWidget(modOrganizerLabel, 5, 0);
+	gridLayout->addWidget(m_modOrganizerPathEdit, 5, 1);
+	gridLayout->addWidget(m_modOrganizerPathButton, 5, 2);
 
 	auto languageLabel = new QLabel(tr("Language"));
 	m_languageComboBox = new QComboBox;
 	QStringList languages;
-	languages << "english" << "french" << "german" << "italian" << "spanish";
+	languages << "english"
+			  << "french"
+			  << "german"
+			  << "italian"
+			  << "spanish";
 	m_languageComboBox->addItems(languages);
-	gridLayout->addWidget(languageLabel, 5, 0);
-	gridLayout->addWidget(m_languageComboBox, 5, 1);
+	gridLayout->addWidget(languageLabel, 6, 0);
+	gridLayout->addWidget(m_languageComboBox, 6, 1);
 
 	auto buttonsLayout = new QHBoxLayout;
 	auto parseModsButton = new QPushButton(tr("Parse mods"));
@@ -171,11 +238,11 @@ QWidget* ConfigDialog::createConfigPane()
 	buttonsLayout->addWidget(parseModsButton);
 	buttonsLayout->addWidget(defaultConfigButton);
 	buttonsLayout->addStretch();
-	gridLayout->addLayout(buttonsLayout, 6, 0, 1, 3);
+	gridLayout->addLayout(buttonsLayout, 7, 0, 1, 3);
 
 	auto stretchLayout = new QVBoxLayout;
 	stretchLayout->addStretch();
-	gridLayout->addLayout(stretchLayout, 7, 0);
+	gridLayout->addLayout(stretchLayout, 8, 0);
 
 	configPane->setLayout(gridLayout);
 	return configPane;
@@ -201,8 +268,8 @@ void ConfigDialog::onOk()
 	else
 	{
 		auto button = QMessageBox::question(this, tr("Invalid configuration"),
-			tr("The current configuration is not valid, save it anyway?"),
-			QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+											tr("The current configuration is not valid, save it anyway?"),
+											QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 		if (button == QMessageBox::Yes)
 		{
 			saveConfig();
@@ -251,23 +318,34 @@ void ConfigDialog::saveConfig()
 
 void ConfigDialog::defaultConfig()
 {
+	const QString gameName = m_firstLaunch
+								 ? mostRecentGameUsed() // Select the game name based on the most recent save
+								 : m_gameNameComboBox->currentText();
+
+	if (m_firstLaunch)
+		m_gameNameComboBox->setCurrentText(gameName);
+
 	// Skyrim Data folder
 	m_dataFolderEdit->setText("");
-	//   Steam folder
+	// Steam folder
 	QSettings settings("HKEY_CURRENT_USER\\SOFTWARE\\Valve\\Steam", QSettings::NativeFormat);
 	QString steamFolder = settings.value("SteamPath").toString();
 	if (!steamFolder.isEmpty())
 	{
-		//   Is Skyrim installed in the same folder as Steam?
-		if (QFileInfo::exists(steamFolder + "/steamapps/common/Skyrim/TESV.exe"))
-			m_dataFolderEdit->setText(steamFolder + "/steamapps/common/Skyrim/Data");
+		const QString steamGameName = gameNameForSteam(gameName);
+		const QString exeName = gameExecutable(gameName);
+		QString exePath = QString("%1/steamapps/common/%2/%3.exe").arg(steamFolder).arg(steamGameName).arg(exeName);
+
+		// Is Skyrim installed in the same folder as Steam?
+		if (QFileInfo::exists(exePath))
+			m_dataFolderEdit->setText(steamFolder + "/steamapps/common/" + steamGameName + "/Data");
 		else
 		{
-			//   Parse "config.vdf"
+			// Parse "config.vdf"
 			auto content = loadFile(steamFolder.toStdString() + "/config/config.vdf");
 			if (!content.empty())
 			{
-				//   Get additionnal steam games folders
+				// Get additionnal steam games folders
 				size_t pos = 0;
 				while (true)
 				{
@@ -275,17 +353,18 @@ void ConfigDialog::defaultConfig()
 					if (pos == std::string::npos)
 						break;
 
-					pos = content.find("\"", pos + 1); // end of "BaseInstallFolder_xxx"
+					pos = content.find("\"", pos + 1);        // end of "BaseInstallFolder_xxx"
 					auto start = content.find("\"", pos + 1); // start of folder name
 					auto end = content.find("\"", start + 1); // end of folder name
 					auto folder = content.substr(start + 1, end - start - 1);
 					replaceAll(folder, "\\\\", "/");
 
-					//   Find Skyrim
+					// Find Skyrim
 					steamFolder = QString::fromLatin1(folder.c_str());
-					if (QFileInfo::exists(steamFolder + "/steamapps/common/Skyrim/TESV.exe"))
+					exePath = QString("%1/steamapps/common/%2/%3.exe").arg(steamFolder).arg(steamGameName).arg(exeName);
+					if (QFileInfo::exists(exePath))
 					{
-						m_dataFolderEdit->setText(steamFolder + "/steamapps/common/Skyrim/Data");
+						m_dataFolderEdit->setText(steamFolder + "/steamapps/common/" + steamGameName + "/Data");
 						break;
 					}
 				}
@@ -296,31 +375,21 @@ void ConfigDialog::defaultConfig()
 	// Trying to find Mod Organizer
 	if (m_modOrganizerPathEdit->text().isEmpty())
 	{
-		// First try at the standard location
-		auto standardPath = "C:/Program Files (x86)/Mod Organizer/ModOrganizer.exe";
-		if (QFileInfo::exists(standardPath))
-			m_modOrganizerPathEdit->setText(standardPath);
-		else // Maybe Mod Organizer has been set as the handler of nxm web links
-		{
-			QSettings settings("HKEY_CURRENT_USER\\SOFTWARE\\Classes", QSettings::NativeFormat);
-			QString command = settings.value("nxm/shell/open/command/.").toString();
-			if (command.contains("nxmhandler.exe"))
-			{
-				auto pos = command.lastIndexOf("\\");
-				if (pos != -1)
-				{
-					QString dir = command.left(pos);
-					dir.replace("\\", "/");
-					QString path = dir + "/ModOrganizer.exe";
-					if (QFileInfo::exists(path))
-						m_modOrganizerPathEdit->setText(path);
-				}
-			}
-		}
+		// Is there Mod Organizer in the user directory ?
+		QString moIniPath = QStandardPaths::locate(QStandardPaths::GenericConfigLocation,
+												   QString("ModOrganizer/%1/ModOrganizer.ini").arg(gameNameForModOrganizer(gameName)),
+												   QStandardPaths::LocateFile);
+		if (!moIniPath.isEmpty())
+			m_modOrganizerPathEdit->setText(moIniPath);
 
 		// If at the first launch of the program we find Mod Organizer, we try to use it
-		if (m_firstLaunch && !m_modOrganizerPathEdit->text().isEmpty())
-			m_useModOrganizerCheckBox->setCheckState(Qt::Checked);
+		if (QFileInfo::exists(m_modOrganizerPathEdit->text()))
+		{
+			if (m_firstLaunch)
+				m_useModOrganizerCheckBox->setCheckState(Qt::Checked);
+		}
+		else
+			m_useModOrganizerCheckBox->setCheckState(Qt::Unchecked);
 	}
 
 	m_pluginsListPathEdit->setText("");
@@ -329,44 +398,38 @@ void ConfigDialog::defaultConfig()
 	bool useModOrganizer = (m_useModOrganizerCheckBox->checkState() == Qt::Checked);
 	if (useModOrganizer)
 	{
-		QString modOrganizerPath = m_modOrganizerPathEdit->text();
-		if (!modOrganizerPath.isEmpty())
+		QFileInfo modOrganizerIni(m_modOrganizerPathEdit->text());
+		if (modOrganizerIni.exists())
 		{
-			QDir modOrganizerDir = QFileInfo(modOrganizerPath).absoluteDir();
-			QFileInfo modOrganizerIni(modOrganizerDir, "ModOrganizer.ini"); // We read the settings to get the current profile
-			if (modOrganizerIni.exists())
+			QSettings modOrganizerSettings(modOrganizerIni.absoluteFilePath(), QSettings::IniFormat);
+			QString profile = modOrganizerSettings.value("selected_profile").toString();
+			QString profilesDirStr = modOrganizerSettings.value("Settings/profiles_directory", "%BASE_DIR%/profiles").toString();
+			profilesDirStr.replace("%BASE_DIR%", modOrganizerIni.canonicalPath());
+
+			if (!profile.isEmpty())
 			{
-				QSettings modOrganizerSettings(modOrganizerIni.absoluteFilePath(), QSettings::IniFormat);
-				QString profile = modOrganizerSettings.value("selected_profile").toString();
-				if (!profile.isEmpty())
-				{
-					modOrganizerDir.cd("profiles");
-					modOrganizerDir.cd(profile);
-					if (modOrganizerDir.exists())
-					{
-						m_pluginsListPathEdit->setText(modOrganizerDir.absolutePath() + "/plugins.txt");
-						m_savesFolderEdit->setText(modOrganizerDir.absolutePath() + "/saves");
-					}
-				}
+				QFileInfo profileDir(profilesDirStr + "/" + profile);
+				if (profileDir.exists() && profileDir.isDir())
+					m_pluginsListPathEdit->setText(profileDir.canonicalFilePath() + "/plugins.txt");
 			}
-			else
-			{
-				m_useModOrganizerCheckBox->setCheckState(Qt::Unchecked);
-				useModOrganizer = false;
-			}
+		}
+		else
+		{
+			m_useModOrganizerCheckBox->setCheckState(Qt::Unchecked);
+			useModOrganizer = false;
 		}
 	}
 
 	if (!useModOrganizer) // Can be changed if the ModOrganizer configuration cannot be read
 	{
-		QString pluginsListPath = QStandardPaths::locate(QStandardPaths::GenericDataLocation, "Skyrim/plugins.txt", QStandardPaths::LocateFile);
+		QString pluginsListPath = QStandardPaths::locate(QStandardPaths::GenericDataLocation, gameName + "/plugins.txt", QStandardPaths::LocateFile);
 		if (!pluginsListPath.isEmpty())
 			m_pluginsListPathEdit->setText(pluginsListPath);
-
-		QString savesFolder = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "My Games/Skyrim/Saves", QStandardPaths::LocateDirectory);
-		if (!savesFolder.isEmpty())
-			m_savesFolderEdit->setText(savesFolder);
 	}
+
+	QString savesFolder = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "My Games/" + gameName + "/Saves", QStandardPaths::LocateDirectory);
+	if (!savesFolder.isEmpty())
+		m_savesFolderEdit->setText(savesFolder);
 
 	m_firstLaunch = false;
 }
@@ -388,9 +451,12 @@ bool ConfigDialog::testConfig()
 	if (m_useModOrganizerCheckBox->checkState() == Qt::Checked)
 	{
 		QFileInfo info(m_modOrganizerPathEdit->text());
-		if (!info.exists())
+		if (info.fileName() != "ModOrganizer.ini")
 			return false;
-		if (!info.isExecutable())
+
+		QSettings modOrganizerSettings(info.absoluteFilePath(), QSettings::IniFormat);
+		QString game = modOrganizerSettings.value("gameName").toString();
+		if (!game.startsWith("Skyrim"))
 			return false;
 	}
 
@@ -400,8 +466,8 @@ bool ConfigDialog::testConfig()
 void ConfigDialog::parseMods()
 {
 	ModsParserWrapper modsParser(m_useModOrganizerCheckBox->checkState() == Qt::Checked,
-		m_dataFolderEdit->text(), m_pluginsListPathEdit->text(), m_modOrganizerPathEdit->text(),
-		m_languageComboBox->currentText());
+								 m_dataFolderEdit->text(), m_pluginsListPathEdit->text(), m_modOrganizerPathEdit->text(),
+								 m_languageComboBox->currentText());
 
 	auto result = modsParser.parseConfig();
 
@@ -424,8 +490,7 @@ void ConfigDialog::parseMods()
 		std::lock_guard<std::mutex> lock(ContainersCache::instance().containersMutex);
 		ContainersCache::instance().containers.clear();
 
-		QMessageBox::information(this, tr("Loading finished"), tr("%1 ingredients found in %2 mods")
-			.arg(modsParser.nbIngredients()).arg(modsParser.nbPlugins()));
+		QMessageBox::information(this, tr("Loading finished"), tr("%1 ingredients found in %2 mods").arg(modsParser.nbIngredients()).arg(modsParser.nbPlugins()));
 	}
 }
 
@@ -452,7 +517,7 @@ void ConfigDialog::editSavesPath()
 
 void ConfigDialog::editModOrganizerPath()
 {
-	auto path = QFileDialog::getOpenFileName(this, tr("Mod Organizer path"), m_modOrganizerPathEdit->text(), tr("Mod Organizer (ModOrganizer.exe)"));
+	auto path = QFileDialog::getOpenFileName(this, tr("Mod Organizer configuration path"), m_modOrganizerPathEdit->text(), tr("Mod Organizer configuration (ModOrganizer.ini)"));
 	if (!path.isNull())
 		m_modOrganizerPathEdit->setText(path);
 }

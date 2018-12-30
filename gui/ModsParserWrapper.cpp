@@ -33,21 +33,9 @@
 
 namespace
 {
-
-QString convert(const std::string& text) 
-{ 
-	return QString::fromLatin1(text.c_str()); 
-}
-
-std::string loadFile(const std::string& fileName)
+QString convert(const std::string& text)
 {
-	std::ifstream file(fileName);
-	if (!file.is_open())
-		return "";
-	std::stringstream stream;
-	stream << file.rdbuf();
-	file.close();
-	return stream.str();
+	return QString::fromLatin1(text.c_str());
 }
 
 std::ostream& logFile()
@@ -62,7 +50,7 @@ std::ostream& logFile()
 	return file;
 }
 
-}
+} // namespace
 
 ModsParserWrapper::ModsParserWrapper()
 {
@@ -75,10 +63,10 @@ ModsParserWrapper::ModsParserWrapper()
 }
 
 ModsParserWrapper::ModsParserWrapper(bool useModOrganizer,
-	QString dataFolder,
-	QString pluginsListPath,
-	QString modOrganizerPath,
-	QString language)
+									 QString dataFolder,
+									 QString pluginsListPath,
+									 QString modOrganizerPath,
+									 QString language)
 	: m_useModOrganizer(useModOrganizer)
 	, m_dataFolder(dataFolder)
 	, m_pluginsListPath(pluginsListPath)
@@ -94,7 +82,8 @@ ModsParserWrapper::Result ModsParserWrapper::parseConfig()
 	std::vector<std::string> modsPathList;
 	if (!getModsPaths(modsPathList))
 	{
-		logFile() << "Could not get all necessary information from ModOrganizer configuration" << std::endl << std::endl;
+		logFile() << "Could not get all necessary information from ModOrganizer configuration" << std::endl
+				  << std::endl;
 		return Result::Error_ModOrganizer;
 	}
 
@@ -105,36 +94,32 @@ ModsParserWrapper::Result ModsParserWrapper::parseConfig()
 
 	if (m_config.ingredientsList.empty())
 	{
-		logFile() << "Error: parsing found no ingredients" << std::endl << std::endl;
+		logFile() << "Error: parsing found no ingredients" << std::endl
+				  << std::endl;
 		return Result::Error_ModsParsing;
 	}
 
-	logFile() << "Parsing successful" << std::endl << std::endl;
+	logFile() << "Parsing successful" << std::endl
+			  << std::endl;
 
 	return Result::Success;
 }
 
 bool ModsParserWrapper::getModsPaths(std::vector<std::string>& modsPathList)
 {
-	// Add "Skyrim.esm" if not using Mod Organizer
-	if (!m_useModOrganizer)
-	{
-		std::string inList = loadFile(m_pluginsListPath.toStdString());
-		std::transform(inList.begin(), inList.end(), inList.begin(), ::tolower);
-		if (inList.find("skyrim.esm") == std::string::npos)
-		{
-			modsPathList.emplace_back("Skyrim.esm");
-			logFile() << "Adding Skyrim.esm wich was not in the mods list" << std::endl;
-		}
-	}
-
-	// Loading the "plugins.txt" file
-	std::ifstream inFile(m_pluginsListPath.toStdString());
+	QString path = m_useModOrganizer
+					   ? QFileInfo(m_pluginsListPath).canonicalPath() + "/loadorder.txt" // Load "loadorder.txt" instead if using ModOrganizer
+					   : m_pluginsListPath;
+	
+	std::ifstream inFile(path.toStdString());
 	std::string modName;
 	while (std::getline(inFile, modName))
 	{
 		if (modName[0] == '#')
 			continue;
+
+		if (modName[0] == '*')
+			modName = modName.substr(1);
 
 		modsPathList.emplace_back(modName);
 	}
@@ -158,10 +143,15 @@ bool ModsParserWrapper::getModsPaths(std::vector<std::string>& modsPathList)
 
 bool ModsParserWrapper::findRealPaths(std::vector<std::string>& paths)
 {
-	QString modsDirPath;
+	// Convert to a QStringList
+	QStringList pathsList;
+	for (const auto& path : paths)
+		pathsList.push_back(convert(path));
+	paths.clear();
+
 	if (m_modOrganizerPath.isEmpty())
 	{
-		logFile() << "Error: path to ModOrganizer is empty" << std::endl;
+		logFile() << "Error: path to the ModOrganizer configuration is empty" << std::endl;
 		return false;
 	}
 
@@ -171,40 +161,24 @@ bool ModsParserWrapper::findRealPaths(std::vector<std::string>& paths)
 		return false;
 	}
 
-	// Convert to a QStringList
-	QStringList pathsList;
-	for (const auto& path : paths)
-		pathsList.push_back(convert(path));
-	paths.clear();
+	QFileInfo modOrganizerIni(m_modOrganizerPath);
 
 	// Get the current profile
-	QDir modOrganizerDir = QFileInfo(m_modOrganizerPath).absoluteDir();
-	QFileInfo modOrganizerIni(modOrganizerDir, "ModOrganizer.ini"); 
 	if (!modOrganizerIni.exists())
 	{
-		logFile() << "Error: cannot find " << modOrganizerIni.absoluteFilePath().toStdString() << std::endl;
+		logFile() << "Error: cannot find the ModOrganizer configuration" << std::endl;
 		return false;
 	}
 
 	// Get the mod directory
 	QSettings modOrganizerSettings(modOrganizerIni.absoluteFilePath(), QSettings::IniFormat);
-	modsDirPath = modOrganizerSettings.value("Settings/mod_directory").toString();
-	if (modsDirPath.isEmpty())
-	{
-		logFile() << "Warning: mod_directory setting not found, looking into \"mods\" directory" << std::endl;
-		QDir modsDir(modOrganizerDir);
-		if (!modsDir.cd("mods"))
-		{
-			logFile() << "Error: cannot find where the mods are installed with ModOrganizer" << std::endl;
-			return false;
-		}
-		modsDirPath = modsDir.absolutePath();
-	}
+	QString modsDirStr = modOrganizerSettings.value("Settings/mod_directory", "%BASE_DIR%/mods").toString();
+	modsDirStr.replace("%BASE_DIR%", modOrganizerIni.canonicalPath());
 
-	QDir modsDir(modsDirPath);
+	QDir modsDir(modsDirStr);
 	if (!modsDir.exists())
 	{
-		logFile() << "Error: failed to find mods in " << modsDirPath.toStdString() << std::endl;
+		logFile() << "Error: failed to find mods in " << modsDirStr.toStdString() << std::endl;
 		return false;
 	}
 
@@ -227,7 +201,8 @@ bool ModsParserWrapper::findRealPaths(std::vector<std::string>& paths)
 	using QStringPair = std::pair<QString, QString>;
 	std::vector<QStringPair> realPathsPairs;
 	QStringList filters;
-	filters << "*.esm" << "*.esp";
+	filters << "*.esm"
+			<< "*.esp";
 	QTextStream modListStream(&modListFile);
 	while (!modListStream.atEnd())
 	{
@@ -259,7 +234,7 @@ bool ModsParserWrapper::findRealPaths(std::vector<std::string>& paths)
 
 	for (const auto& path : pathsList)
 	{
-		auto it = std::find_if(realPathsPairs.begin(), realPathsPairs.end(), [&path](const QStringPair& p){
+		auto it = std::find_if(realPathsPairs.begin(), realPathsPairs.end(), [&path](const QStringPair& p) {
 			return p.first == path;
 		});
 		if (it != realPathsPairs.end())
@@ -281,7 +256,7 @@ void ModsParserWrapper::copyToConfig(Config& config) const
 		config.plugins.emplace_back(convert(inMod));
 
 	// Sort the plugins list by name
-	std::sort(config.plugins.begin(), config.plugins.end(), [](const Config::Plugin& lhs, const Config::Plugin& rhs){
+	std::sort(config.plugins.begin(), config.plugins.end(), [](const Config::Plugin& lhs, const Config::Plugin& rhs) {
 		return lhs.name < rhs.name;
 	});
 
@@ -298,7 +273,7 @@ void ModsParserWrapper::copyToConfig(Config& config) const
 	}
 
 	// Sort the effects list by name
-	std::sort(config.effects.begin(), config.effects.end(), [](const Config::Effect& lhs, const Config::Effect& rhs){
+	std::sort(config.effects.begin(), config.effects.end(), [](const Config::Effect& lhs, const Config::Effect& rhs) {
 		return lhs.name < rhs.name;
 	});
 
@@ -333,15 +308,13 @@ void ModsParserWrapper::copyToConfig(Config& config) const
 		//  but keep the original ones as they are for the known ingredients loaded for each save
 		std::copy(std::begin(ingredient.effects), std::end(ingredient.effects), std::begin(ingredient.sortedEffects));
 		std::sort(std::begin(ingredient.sortedEffects), std::end(ingredient.sortedEffects),
-			[](const Config::EffectData& lhs, const Config::EffectData& rhs)
-		{ return lhs.effectId < rhs.effectId; }
-		);
+				  [](const Config::EffectData& lhs, const Config::EffectData& rhs) { return lhs.effectId < rhs.effectId; });
 
 		config.ingredients.push_back(ingredient);
 	}
 
 	// Sort the ingredients list by name
-	std::sort(config.ingredients.begin(), config.ingredients.end(), [](const Config::Ingredient& lhs, const Config::Ingredient& rhs){
+	std::sort(config.ingredients.begin(), config.ingredients.end(), [](const Config::Ingredient& lhs, const Config::Ingredient& rhs) {
 		return lhs.name < rhs.name;
 	});
 
@@ -373,7 +346,7 @@ ModsParserWrapper::Result ModsParserWrapper::updateContainers(const std::vector<
 	modParser::ModParser modParser;
 	modParser.setModsList(modsPathList);
 	modParser.setLanguage(m_language.toStdString());
-	
+
 	auto containers = modParser.getContainersInfo(ids);
 	m_containers.clear();
 	m_containers.reserve(containers.size());
