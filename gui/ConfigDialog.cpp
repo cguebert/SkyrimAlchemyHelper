@@ -290,6 +290,9 @@ void ConfigDialog::loadConfig()
 
 	m_languageComboBox->setCurrentText(settings.language);
 	m_gameNameComboBox->setCurrentText(settings.gameName);
+
+	loadSettings(settings.gameName);
+	m_currentGame = settings.gameName;
 }
 
 void ConfigDialog::saveConfig()
@@ -473,8 +476,8 @@ bool ConfigDialog::testConfig()
 			return false;
 
 		QSettings modOrganizerSettings(info.absoluteFilePath(), QSettings::IniFormat);
-		QString game = modOrganizerSettings.value("gameName").toString();
-		if (!game.startsWith("Skyrim"))
+		QString gamePath = modOrganizerSettings.value("gamePath").toString();
+		if (!gamePath.contains("Skyrim"))
 			return false;
 	}
 

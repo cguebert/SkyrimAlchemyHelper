@@ -28,8 +28,51 @@
 #include "DiscoverEffects.h"
 
 #include <algorithm>
+#include <chrono>
 #include <iterator>
+#include <iostream>
 #include <limits>
+
+namespace
+{
+class Timer
+{
+public:
+	Timer(const std::string& label)
+		: m_label(label)
+		, m_start(std::chrono::high_resolution_clock::now())
+	{
+	}
+
+	~Timer()
+	{
+		auto end = std::chrono::high_resolution_clock::now();
+		std::chrono::nanoseconds duration = end - m_start;
+
+		std::cout << m_label << ' ';
+		auto oldPrecision = std::cout.precision();
+		std::cout.precision(1);
+
+		auto nb = duration.count();
+		if (nb >= 1e9)
+			std::cout << std::fixed << nb / 1e9 << " s";
+		else if (nb >= 1e6)
+			std::cout << std::fixed << nb / 1e6 << " ms";
+		else if (nb >= 1e3)
+			std::cout << std::fixed << nb / 1e3 << " us";
+		else
+			std::cout << nb << " ns";
+
+		std::cout.precision(oldPrecision);
+		std::cout << std::endl;
+	}
+
+private:
+	std::string m_label;
+	std::chrono::high_resolution_clock::time_point m_start;
+};
+
+} // namespace
 
 PotionsList& PotionsList::instance()
 {
@@ -53,6 +96,42 @@ size_t matTo1d(size_t x, size_t y, size_t N)
 
 void PotionsList::recomputeList()
 {
+	{
+		Timer timer("computeCombinations");
+		computeCombinations();
+	}
+
+	{
+		Timer timer("computePotionsStrength");
+		computePotionsStrength();
+	}
+
+	{
+		Timer timer("updateEffectsToxicity");
+		updateEffectsToxicity();
+	}
+
+	saveList();
+
+	m_currentFilters.clear();
+	{
+		Timer timer("applyFilters");
+		applyFilters();
+	}
+
+	{
+		Timer timer("prepareDefaultSortFunctions");
+		prepareDefaultSortFunctions();
+	}
+
+	{
+		Timer timer("sortPotions");
+		sortPotions();
+	}
+}
+
+void PotionsList::computeCombinations()
+{
 	m_allPotions.clear();
 
 	const auto& ingredients = Config::main().ingredients;
@@ -66,7 +145,7 @@ void PotionsList::recomputeList()
 	// First create potions with only 2 ingredients
 	std::vector<size_t> potionsId_2Ing(nbIng * (nbIng + 1) / 2, -1); // Store the results for later
 	size_t potId = 0;
-	
+
 	for (size_t id1 = 0; id1 < nbIng; ++id1)
 	{
 		const auto& ing1 = ingredients[id1];
@@ -97,7 +176,8 @@ void PotionsList::recomputeList()
 	}
 
 	size_t emptyEffects[maxEffectsPerPotion];
-	for (int i = 0; i < maxEffectsPerPotion; ++i) emptyEffects[i] = -1;
+	for (int i = 0; i < maxEffectsPerPotion; ++i)
+		emptyEffects[i] = -1;
 
 	// Then create combinaisons of these potions
 	for (size_t id1 = 0; id1 < nbIng; ++id1)
@@ -132,15 +212,30 @@ void PotionsList::recomputeList()
 					if (e1 == -1 && e2 == -1 && e3 == -1)
 						break;
 
-					if (e1 == -1) e1 = maxInt; 
-					if (e2 == -1) e2 = maxInt;
-					if (e3 == -1) e3 = maxInt;
-					
+					if (e1 == -1)
+						e1 = maxInt;
+					if (e2 == -1)
+						e2 = maxInt;
+					if (e3 == -1)
+						e3 = maxInt;
+
 					size_t eMin = std::min({e1, e2, e3});
 					size_t nb = 0;
-					if (eMin == e1) { ++nb; ++p1; }
-					if (eMin == e2) { ++nb; ++p2; }
-					if (eMin == e3) { ++nb; ++p3; }
+					if (eMin == e1)
+					{
+						++nb;
+						++p1;
+					}
+					if (eMin == e2)
+					{
+						++nb;
+						++p2;
+					}
+					if (eMin == e3)
+					{
+						++nb;
+						++p3;
+					}
 
 					if (nb)
 						potion.effects[nbEffects++] = eMin;
@@ -150,16 +245,6 @@ void PotionsList::recomputeList()
 			}
 		}
 	}
-	
-	computePotionsStrength();
-	updateEffectsToxicity();
-	saveList();
-
-	m_currentFilters.clear();
-	applyFilters();
-
-	prepareDefaultSortFunctions();
-	sortPotions();
 }
 
 bool PotionsList::loadList()
@@ -169,7 +254,6 @@ bool PotionsList::loadList()
 
 void PotionsList::saveList()
 {
-
 }
 
 void PotionsList::setFilters(const Filters& filters)
@@ -239,7 +323,6 @@ bool PotionsList::defaultFilters(const Potion& potion)
 	{
 		switch (filter.type)
 		{
-
 		case FilterType::HasIngredient:
 		{
 			bool contains = false;
@@ -443,13 +526,13 @@ void PotionsList::prepareDefaultSortFunctions()
 		if (filter.type == Filter::FilterType::HasEffect)
 		{
 			int effectId = filter.data;
-			
+
 			// Sorting by magnitude
 			if (effects[effectId].flags & EffectFlags::PowerAffectsMagnitude)
 			{
 				float maxMag = maxEffectMagnitude[effectId];
 				if (maxMag > 0)
-					m_defaultSortFunctions.push_back([maxMag, effectId](const Potion& potion){
+					m_defaultSortFunctions.push_back([maxMag, effectId](const Potion& potion) {
 						for (int i = 0; i < maxEffectsPerPotion; ++i)
 							if (potion.effects[i] == effectId)
 								return potion.magnitudes[i] / maxMag;
@@ -461,8 +544,8 @@ void PotionsList::prepareDefaultSortFunctions()
 			if (effects[effectId].flags & EffectFlags::PowerAffectsDuration)
 			{
 				float maxDur = maxEffectDuration[effectId];
-				if(maxDur > 0)
-					m_defaultSortFunctions.push_back([maxDur, effectId](const Potion& potion){
+				if (maxDur > 0)
+					m_defaultSortFunctions.push_back([maxDur, effectId](const Potion& potion) {
 						for (int i = 0; i < maxEffectsPerPotion; ++i)
 							if (potion.effects[i] == effectId)
 								return potion.durations[i] / maxDur;
@@ -474,7 +557,7 @@ void PotionsList::prepareDefaultSortFunctions()
 
 	// Last, sort by gold cost
 	auto maxGold = m_maxGoldPotion;
-	m_defaultSortFunctions.push_back([maxGold](const Potion& potion){
+	m_defaultSortFunctions.push_back([maxGold](const Potion& potion) {
 		return potion.goldCost / maxGold;
 	});
 }

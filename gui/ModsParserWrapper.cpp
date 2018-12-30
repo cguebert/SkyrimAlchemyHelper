@@ -31,22 +31,6 @@
 #include "ModsParserWrapper.h"
 #include "Settings.h"
 
-namespace
-{
-std::ostream& logFile()
-{
-	static std::ofstream file;
-	if (!file.is_open())
-	{
-		file.open("data/log.txt", std::ios_base::trunc);
-		std::cout.rdbuf(file.rdbuf());
-		std::cerr.rdbuf(file.rdbuf());
-	}
-	return file;
-}
-
-} // namespace
-
 ModsParserWrapper::ModsParserWrapper()
 {
 	auto& settings = Settings::instance();
@@ -76,12 +60,12 @@ ModsParserWrapper::ModsParserWrapper(bool useModOrganizer,
 
 ModsParserWrapper::Result ModsParserWrapper::parseConfig()
 {
-	logFile() << "*** Parse Config ***" << std::endl;
+	std::cout << "*** Parse Config ***" << std::endl;
 
 	std::vector<std::string> modsPathList;
 	if (!getModsPaths(modsPathList))
 	{
-		logFile() << "Could not get all necessary information from ModOrganizer configuration" << std::endl
+		std::cout << "Could not get all necessary information from ModOrganizer configuration" << std::endl
 				  << std::endl;
 		return Result::Error_ModOrganizer;
 	}
@@ -93,12 +77,12 @@ ModsParserWrapper::Result ModsParserWrapper::parseConfig()
 
 	if (m_config.ingredientsList.empty())
 	{
-		logFile() << "Error: parsing found no ingredients" << std::endl
+		std::cout << "Error: parsing found no ingredients" << std::endl
 				  << std::endl;
 		return Result::Error_ModsParsing;
 	}
 
-	logFile() << "Parsing successful" << std::endl
+	std::cout << "Parsing successful" << std::endl
 			  << std::endl;
 
 	return Result::Success;
@@ -123,7 +107,7 @@ bool ModsParserWrapper::getModsPaths(std::vector<std::string>& modsPathList)
 		modsPathList.emplace_back(modName);
 	}
 
-	logFile() << modsPathList.size() << " mods found in " << m_pluginsListPath.toStdString() << std::endl;
+	std::cout << modsPathList.size() << " mods found in " << m_pluginsListPath.toStdString() << std::endl;
 
 	if (m_useModOrganizer)
 	{
@@ -150,13 +134,13 @@ bool ModsParserWrapper::findRealPaths(std::vector<std::string>& paths)
 
 	if (m_modOrganizerPath.isEmpty())
 	{
-		logFile() << "Error: path to the ModOrganizer configuration is empty" << std::endl;
+		std::cout << "Error: path to the ModOrganizer configuration is empty" << std::endl;
 		return false;
 	}
 
 	if (m_pluginsListPath.isEmpty())
 	{
-		logFile() << "Error: path to the plugins list file is empty" << std::endl;
+		std::cout << "Error: path to the plugins list file is empty" << std::endl;
 		return false;
 	}
 
@@ -165,7 +149,7 @@ bool ModsParserWrapper::findRealPaths(std::vector<std::string>& paths)
 	// Get the current profile
 	if (!modOrganizerIni.exists())
 	{
-		logFile() << "Error: cannot find the ModOrganizer configuration" << std::endl;
+		std::cout << "Error: cannot find the ModOrganizer configuration" << std::endl;
 		return false;
 	}
 
@@ -177,7 +161,7 @@ bool ModsParserWrapper::findRealPaths(std::vector<std::string>& paths)
 	QDir modsDir(modsDirStr);
 	if (!modsDir.exists())
 	{
-		logFile() << "Error: failed to find mods in " << modsDirStr.toStdString() << std::endl;
+		std::cout << "Error: failed to find mods in " << modsDirStr.toStdString() << std::endl;
 		return false;
 	}
 
@@ -186,14 +170,14 @@ bool ModsParserWrapper::findRealPaths(std::vector<std::string>& paths)
 	QFileInfo modListFileInfo(modOrganizerProfileDir, "modlist.txt");
 	if (!modListFileInfo.exists())
 	{
-		logFile() << "Error: cannot find modlist.txt in " << modOrganizerProfileDir.absolutePath().toStdString() << std::endl;
+		std::cout << "Error: cannot find modlist.txt in " << modOrganizerProfileDir.absolutePath().toStdString() << std::endl;
 		return false;
 	}
 
 	QFile modListFile(modListFileInfo.absoluteFilePath());
 	if (!modListFile.open(QIODevice::ReadOnly))
 	{
-		logFile() << "Error: cannot open " << modListFileInfo.absoluteFilePath().toStdString() << std::endl;
+		std::cout << "Error: cannot open " << modListFileInfo.absoluteFilePath().toStdString() << std::endl;
 		return false;
 	}
 
@@ -240,7 +224,7 @@ bool ModsParserWrapper::findRealPaths(std::vector<std::string>& paths)
 			paths.push_back(it->second.toStdString());
 	}
 
-	logFile() << "Successfully found the mods in the ModOrganizer configuration" << std::endl;
+	std::cout << "Successfully found the mods in the ModOrganizer configuration" << std::endl;
 	return true;
 }
 

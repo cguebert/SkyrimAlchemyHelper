@@ -114,6 +114,7 @@ public:
 
 protected:
 	PotionsList();
+	void computeCombinations();
 	bool loadList();
 	void saveList();
 
