@@ -213,9 +213,9 @@ void MainWindow::discoverEffects()
 void MainWindow::about()
 {
 	QMessageBox::about(this, tr("About"),
-		tr("<h2>Skyrim Alchemy Helper 1.0.2</h2>"
-		"<p>Copyright &copy; 2015 Christophe Guebert"
-		"<p>Using zlib 1.2.8 and Qt 5.5"));
+		tr("<h2>Skyrim Alchemy Helper 1.1</h2>"
+		"<p>Copyright &copy; 2018 Christophe Guebert"
+		"<p>Using zlib 1.2.11, lz4 1.8.3 and Qt 5.11.1"));
 }
 
 void MainWindow::aboutQt()
